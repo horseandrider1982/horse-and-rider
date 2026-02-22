@@ -1,11 +1,12 @@
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export const Footer = () => (
   <footer className="bg-foreground text-background/90 py-12">
     <div className="container mx-auto px-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
-          <h3 className="font-heading text-xl font-bold text-background mb-4 italic">Horse & Rider</h3>
+          <img src={logo} alt="Horse & Rider Luhmühlen" className="h-10 w-auto brightness-0 invert mb-4" />
           <p className="text-sm text-background/70 leading-relaxed">
             Ihr kompetenter Partner rund um den Reitsport seit vielen Jahren in Luhmühlen.
           </p>
