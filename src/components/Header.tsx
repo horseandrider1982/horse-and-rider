@@ -1,16 +1,12 @@
 import { Link } from "react-router-dom";
 import { CartDrawer } from "./CartDrawer";
+import logo from "@/assets/logo.png";
 
 export const Header = () => (
   <header className="bg-background border-b border-border sticky top-0 z-50">
-    <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-      <Link to="/" className="flex flex-col items-start">
-        <span className="font-heading text-2xl md:text-3xl font-bold text-primary italic tracking-tight">
-          Horse & Rider
-        </span>
-        <span className="text-xs text-muted-foreground tracking-widest uppercase -mt-1">
-          Luhmühlen
-        </span>
+    <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <Link to="/">
+        <img src={logo} alt="Horse & Rider Luhmühlen" className="h-12 md:h-16 w-auto" />
       </Link>
 
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-foreground">
