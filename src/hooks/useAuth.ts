@@ -6,6 +6,7 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adminLoading, setAdminLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -35,11 +36,12 @@ export function useAuth() {
   useEffect(() => {
     if (!user) {
       setIsAdmin(false);
+      setAdminLoading(false);
       return;
     }
 
     const userId = user.id;
-    console.log('[useAuth] admin check starting for', userId);
+    setAdminLoading(true);
     
     let cancelled = false;
     supabase
@@ -49,9 +51,9 @@ export function useAuth() {
       .eq('role', 'admin')
       .maybeSingle()
       .then(({ data, error }) => {
-        console.log('[useAuth] admin check result:', { data, error, cancelled });
         if (!cancelled) {
           setIsAdmin(!error && !!data);
+          setAdminLoading(false);
         }
       });
 
@@ -62,5 +64,5 @@ export function useAuth() {
     await supabase.auth.signOut();
   };
 
-  return { user, session, loading, isAdmin, signOut };
+  return { user, session, loading, adminLoading, isAdmin, signOut };
 }

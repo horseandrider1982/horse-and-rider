@@ -11,15 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, BarChart3, Settings, Users, ArrowLeft } from "lucide-react";
 
 export default function Admin() {
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { user, loading: authLoading, adminLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [userCount, setUserCount] = useState(0);
 
   useEffect(() => {
-    if (!authLoading && (!user || !isAdmin)) {
+    if (!authLoading && !adminLoading && (!user || !isAdmin)) {
       navigate("/account");
     }
-  }, [user, authLoading, isAdmin, navigate]);
+  }, [user, authLoading, adminLoading, isAdmin, navigate]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -29,7 +29,7 @@ export default function Admin() {
     }
   }, [isAdmin]);
 
-  if (authLoading) {
+  if (authLoading || adminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
