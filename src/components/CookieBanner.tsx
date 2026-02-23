@@ -26,8 +26,8 @@ export const CookieBanner = () => {
           🍪 Wir verwenden Leckerlies (Cookies)
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-          Wir nutzen Cookies, um Ihnen die bestmögliche Erfahrung auf unserer Website zu bieten.
-          Weitere Informationen finden Sie in unserer{" "}
+          Wir haben nicht nur ganz viele Kekse für Dein Pferd, wir nutzen auch Cookies, um Dir die bestmögliche
+          Erfahrung auf unserer Website zu bieten. Weitere Informationen findest Du in unserer{" "}
           <Link to="/datenschutz" className="text-primary underline underline-offset-2 hover:text-primary/80">
             Datenschutzerklärung
           </Link>.
