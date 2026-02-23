@@ -9,6 +9,8 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    let initialSessionResolved = false;
+
     const checkAdmin = async (userId: string) => {
       const { data } = await supabase
         .from('user_roles')
@@ -29,11 +31,16 @@ export function useAuth() {
         } else {
           setIsAdmin(false);
         }
-        setLoading(false);
+
+        // Only set loading false from listener after initial session is resolved
+        if (initialSessionResolved) {
+          setLoading(false);
+        }
       }
     );
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      initialSessionResolved = true;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
