@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Search from "./pages/Search";
 import UnsereMarken from "./pages/UnsereMarken";
+import MarkenDetail from "./pages/MarkenDetail";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import AGB from "./pages/AGB";
@@ -37,6 +38,7 @@ const AppContent = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/search" element={<Search />} />
         <Route path="/unsere-marken" element={<UnsereMarken />} />
+        <Route path="/unsere-marken/:slug" element={<MarkenDetail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsDetail />} />
