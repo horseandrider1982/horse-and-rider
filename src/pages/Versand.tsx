@@ -134,7 +134,7 @@ const Versand = () => (
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
-                    Lieferzeit: {c.delivery}
+                    Lieferzeit: {c.delivery} (Bitte Lieferzeiten im Produkt beachten)
                   </div>
                   {c.note && (
                     <p className="text-xs text-muted-foreground">{c.note}</p>
