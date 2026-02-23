@@ -14,6 +14,7 @@ interface BrandRow {
   slug: string;
   logo_url: string | null;
   seo_text: string | null;
+  website_url: string | null;
   featured: boolean;
   is_active: boolean;
 }
@@ -58,13 +59,13 @@ export default function BrandManager() {
 
   const handleNew = () => {
     setIsNew(true);
-    setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, featured: false, is_active: true });
+    setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, website_url: null, featured: false, is_active: true });
   };
 
   const handleSave = async () => {
     if (!editing) return;
     const slug = editing.slug || slugify(editing.name);
-    const payload = { name: editing.name, slug, logo_url: editing.logo_url, seo_text: editing.seo_text, featured: editing.featured, is_active: editing.is_active };
+    const payload = { name: editing.name, slug, logo_url: editing.logo_url, seo_text: editing.seo_text, website_url: editing.website_url, featured: editing.featured, is_active: editing.is_active };
 
     if (isNew) {
       const { error } = await (supabase.from("brands" as any).insert(payload) as any);
@@ -108,6 +109,10 @@ export default function BrandManager() {
         <div>
           <Label>SEO-Text (HTML erlaubt)</Label>
           <Textarea rows={8} value={editing.seo_text || ""} onChange={(e) => setEditing({ ...editing, seo_text: e.target.value || null })} placeholder="<h3>Über die Marke...</h3><p>...</p>" />
+        </div>
+        <div>
+          <Label>URL Marke (wird nicht veröffentlicht)</Label>
+          <Input value={editing.website_url || ""} onChange={(e) => setEditing({ ...editing, website_url: e.target.value || null })} placeholder="https://www.marke.com" />
         </div>
         <div className="flex items-center gap-2">
           <Switch checked={editing.featured} onCheckedChange={(v) => setEditing({ ...editing, featured: v })} />
