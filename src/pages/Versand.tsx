@@ -64,16 +64,17 @@ const paymentMethods = [
   {
     name: "PayPal",
     description:
-      "PayPal, PayPal Rechnungskauf, Lastschrift und Kreditkarte über PayPal Plus. Für Lastschrift und Kreditkarte ist kein PayPal-Konto erforderlich.",
+      "Bezahlen Sie schnell und sicher mit Ihrem PayPal-Konto.",
   },
   {
-    name: "Klarna",
-    description: "Klarna Rechnungskauf und Klarna Ratenzahlung.",
-  },
-  {
-    name: "Amazon Pay",
+    name: "PayPal Rechnungskauf",
     description:
-      "Zahlung mit jeder in Ihrem Amazon-Kundenkonto hinterlegten Kredit- oder Debitkarte.",
+      "Kaufen Sie jetzt und zahlen Sie später – bequem auf Rechnung über PayPal.",
+  },
+  {
+    name: "PayPal Lastschrift",
+    description:
+      "Zahlung per Lastschrift über PayPal – kein PayPal-Konto erforderlich.",
   },
   {
     name: "Apple Pay",
@@ -83,26 +84,6 @@ const paymentMethods = [
   {
     name: "Kreditkarte",
     description: "Visa und Mastercard werden direkt akzeptiert.",
-  },
-  {
-    name: "Sofortüberweisung",
-    description:
-      "Online-Direktüberweisung über Ihr Bankkonto – sicher und sofort bestätigt.",
-  },
-  {
-    name: "Giropay",
-    description:
-      "Zahlen Sie mit Ihrem vertrauten Online-Banking per PIN und TAN – kein Vertippen bei IBAN oder BIC.",
-  },
-  {
-    name: "iDEAL",
-    description:
-      "Sichere Zahlungsmethode für Kunden mit einem niederländischen Bankkonto.",
-  },
-  {
-    name: "Nachnahme",
-    description:
-      "Bezahlen Sie Ihre Bestellung beim Erhalt an den Zusteller. Zusatzgebühr: 6,00 €.",
   },
   {
     name: "Vorkasse",
