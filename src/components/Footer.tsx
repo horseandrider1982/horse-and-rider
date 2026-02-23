@@ -105,6 +105,7 @@ export const Footer = () => {
             <h4 className="font-semibold text-background mb-4">Informationen</h4>
             <nav className="space-y-2 text-sm">
               <Link to="/news" className="block text-background/70 hover:text-background transition-colors">News & Aktuelles</Link>
+              <Link to="/unsere-marken" className="block text-background/70 hover:text-background transition-colors">Unsere Marken</Link>
               <Link to="/account" className="block text-background/70 hover:text-background transition-colors">Kundenkonto</Link>
               <a href="https://www.horse-and-rider.de" target="_blank" rel="noopener noreferrer" className="block text-background/70 hover:text-background transition-colors">Online shoppen</a>
               <Link to="/" className="block text-background/70 hover:text-background transition-colors">Versandinformationen</Link>
