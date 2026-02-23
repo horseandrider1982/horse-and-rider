@@ -1,7 +1,7 @@
 import { Truck, Clock, ThumbsUp, Phone } from "lucide-react";
 
 export const TopBar = () => (
-  <div className="bg-topbar text-topbar-foreground text-xs py-2">
+  <div className="hidden md:block bg-topbar text-topbar-foreground text-xs py-2">
     <div className="container mx-auto px-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
         <div className="flex items-center justify-center gap-1.5">
