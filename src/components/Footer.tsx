@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { storefrontApiRequest } from "@/lib/shopify";
 import logo from "@/assets/logo.png";
@@ -65,6 +68,49 @@ function usePaymentSettings() {
   });
 }
 
+function NewsletterSignup() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setStatus("loading");
+    // Simulate signup – replace with real API later
+    setTimeout(() => {
+      setStatus("success");
+      setEmail("");
+    }, 800);
+  };
+
+  if (status === "success") {
+    return (
+      <div className="mt-4 p-3 rounded bg-background/10 text-sm text-background">
+        ✓ Vielen Dank! Sie erhalten in Kürze eine Bestätigungs-E-Mail.
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-4">
+      <p className="text-xs text-background/60 mb-2">Newsletter abonnieren:</p>
+      <div className="flex gap-2">
+        <Input
+          type="email"
+          required
+          placeholder="Ihre E-Mail-Adresse"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="h-9 text-sm bg-background/10 border-background/20 text-background placeholder:text-background/40 flex-1"
+        />
+        <Button type="submit" size="sm" className="h-9 px-3" disabled={status === "loading"}>
+          {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 export const Footer = () => {
   const { data: paymentMethods } = usePaymentSettings();
 
@@ -108,7 +154,8 @@ export const Footer = () => {
               <Link to="/unsere-marken" className="block text-background/70 hover:text-background transition-colors">Unsere Marken</Link>
               <Link to="/account" className="block text-background/70 hover:text-background transition-colors">Kundenkonto</Link>
               <a href="https://www.horse-and-rider.de" target="_blank" rel="noopener noreferrer" className="block text-background/70 hover:text-background transition-colors">Online shoppen</a>
-              <Link to="/" className="block text-background/70 hover:text-background transition-colors">Versandinformationen</Link>
+              <Link to="/versand" className="block text-background/70 hover:text-background transition-colors">Versand & Zahlung</Link>
+              <Link to="/faq" className="block text-background/70 hover:text-background transition-colors">FAQ</Link>
               <Link to="/kontakt" className="block text-background/70 hover:text-background transition-colors">Kontakt</Link>
             </nav>
           </div>
@@ -138,6 +185,9 @@ export const Footer = () => {
               <Mail className="h-3.5 w-3.5 flex-shrink-0" />
               <a href="mailto:info@horse-and-rider.de" className="hover:text-background transition-colors">info@horse-and-rider.de</a>
             </div>
+
+            {/* Newsletter */}
+            <NewsletterSignup />
           </div>
         </div>
 

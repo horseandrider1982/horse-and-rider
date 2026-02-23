@@ -22,9 +22,12 @@ import Datenschutz from "./pages/Datenschutz";
 import AGB from "./pages/AGB";
 import Widerrufsrecht from "./pages/Widerrufsrecht";
 import Kontakt from "./pages/Kontakt";
+import Versand from "./pages/Versand";
+import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
+import { CookieBanner } from "./components/CookieBanner";
 
 const queryClient = new QueryClient();
 
@@ -53,8 +56,11 @@ const AppContent = () => {
         <Route path="/agb" element={<AGB />} />
         <Route path="/widerrufsrecht" element={<Widerrufsrecht />} />
         <Route path="/kontakt" element={<Kontakt />} />
+        <Route path="/versand" element={<Versand />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <CookieBanner />
     </BrowserRouter>
   );
 };
