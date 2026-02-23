@@ -30,7 +30,7 @@ export function useAuth() {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(() => checkAdmin(session.user.id), 0);
+          await checkAdmin(session.user.id);
         } else {
           setIsAdmin(false);
         }
