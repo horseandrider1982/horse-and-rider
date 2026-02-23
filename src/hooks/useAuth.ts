@@ -9,38 +9,37 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    let initialSessionResolved = false;
-
     const checkAdmin = async (userId: string) => {
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
-      setIsAdmin(!!data);
+      try {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .maybeSingle();
+        setIsAdmin(!!data);
+      } catch {
+        setIsAdmin(false);
+      }
     };
 
+    // Set up listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await checkAdmin(session.user.id);
+          setTimeout(() => checkAdmin(session.user.id), 0);
         } else {
           setIsAdmin(false);
         }
-
-        // Only set loading false from listener after initial session is resolved
-        if (initialSessionResolved) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     );
 
+    // Then get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      initialSessionResolved = true;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
