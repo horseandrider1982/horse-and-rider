@@ -38,22 +38,25 @@ export function useAuth() {
       return;
     }
 
+    const userId = user.id;
+    console.log('[useAuth] admin check starting for', userId);
+    
     let cancelled = false;
     supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('role', 'admin')
       .maybeSingle()
       .then(({ data, error }) => {
+        console.log('[useAuth] admin check result:', { data, error, cancelled });
         if (!cancelled) {
-          if (error) setIsAdmin(false);
-          else setIsAdmin(!!data);
+          setIsAdmin(!error && !!data);
         }
       });
 
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user?.id]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
