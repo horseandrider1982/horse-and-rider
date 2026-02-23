@@ -107,12 +107,7 @@ export const Footer = () => {
               <Link to="/account" className="block text-background/70 hover:text-background transition-colors">Kundenkonto</Link>
               <a href="https://www.horse-and-rider.de" target="_blank" rel="noopener noreferrer" className="block text-background/70 hover:text-background transition-colors">Online shoppen</a>
               <Link to="/" className="block text-background/70 hover:text-background transition-colors">Versandinformationen</Link>
-              <a href="mailto:info@horse-and-rider.de" className="block text-background/70 hover:text-background transition-colors">
-                <span className="flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5" />
-                  Kontakt
-                </span>
-              </a>
+              <Link to="/kontakt" className="block text-background/70 hover:text-background transition-colors">Kontakt</Link>
             </nav>
           </div>
 
