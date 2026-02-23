@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -89,6 +90,8 @@ export default function RedirectManager() {
   const [historyDialog, setHistoryDialog] = useState<string | null>(null);
   const [entityPaths, setEntityPaths] = useState<EntityPath[]>([]);
   const [importReport, setImportReport] = useState<{ success: number; notFound: string[]; conflicts: string[] } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchAll = useCallback(async () => {
@@ -310,6 +313,39 @@ export default function RedirectManager() {
     toast.success(status === "resolved" ? "Issue gelöst" : "Issue ignoriert");
   };
 
+  // Bulk actions
+  const toggleSelected = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkLoading(true);
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from("redirects").delete().in("id", ids);
+    setBulkLoading(false);
+    if (error) { toast.error("Bulk-Delete fehlgeschlagen"); return; }
+    setSelectedIds(new Set());
+    fetchAll();
+    toast.success(`${ids.length} Redirects gelöscht`);
+  };
+
+  const bulkDeactivate = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkLoading(true);
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from("redirects").update({ is_active: false }).in("id", ids);
+    setBulkLoading(false);
+    if (error) { toast.error("Bulk-Deactivate fehlgeschlagen"); return; }
+    setSelectedIds(new Set());
+    fetchAll();
+    toast.success(`${ids.length} Redirects deaktiviert`);
+  };
+
   // Filtering
   const filtered = redirects.filter(r => {
     if (sourceFilter !== "all" && r.source !== sourceFilter) return false;
@@ -321,8 +357,18 @@ export default function RedirectManager() {
       (r.canonical_key || "").toLowerCase().includes(s);
   });
 
+  const toggleAllFiltered = () => {
+    const allSelected = filtered.length > 0 && filtered.every(r => selectedIds.has(r.id));
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(r => r.id)));
+    }
+  };
+
   const activeCount = redirects.filter(r => r.is_active).length;
   const openIssuesCount = issues.length;
+  const allFilteredSelected = filtered.length > 0 && filtered.every(r => selectedIds.has(r.id));
 
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>;
 
@@ -456,11 +502,36 @@ export default function RedirectManager() {
         <Button onClick={addRow} size="icon"><Plus className="h-4 w-4" /></Button>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 bg-muted/50 rounded-lg px-4 py-2">
+          <span className="text-sm font-medium">{selectedIds.size} ausgewählt</span>
+          <Button size="sm" variant="destructive" onClick={bulkDelete} disabled={bulkLoading}>
+            {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Trash2 className="h-4 w-4 mr-1" />}
+            Löschen
+          </Button>
+          <Button size="sm" variant="outline" onClick={bulkDeactivate} disabled={bulkLoading}>
+            {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <X className="h-4 w-4 mr-1" />}
+            Deaktivieren
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+            Auswahl aufheben
+          </Button>
+        </div>
+      )}
+
       {/* Table */}
       <div className="border rounded-md">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allFilteredSelected}
+                  onCheckedChange={toggleAllFiltered}
+                  aria-label="Alle auswählen"
+                />
+              </TableHead>
               <TableHead>Alte URL</TableHead>
               <TableHead>Neue URL</TableHead>
               <TableHead className="w-24">SKU</TableHead>
@@ -472,13 +543,20 @@ export default function RedirectManager() {
           <TableBody>
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                   Keine Weiterleitungen gefunden.
                 </TableCell>
               </TableRow>
             )}
             {filtered.map(r => (
               <TableRow key={r.id} className={!r.is_active ? "opacity-50" : ""}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedIds.has(r.id)}
+                    onCheckedChange={() => toggleSelected(r.id)}
+                    aria-label={`Redirect ${r.old_url} auswählen`}
+                  />
+                </TableCell>
                 {editId === r.id ? (
                   <>
                     <TableCell><Input value={editData.old_url} onChange={e => setEditData(p => ({ ...p, old_url: e.target.value }))} /></TableCell>
