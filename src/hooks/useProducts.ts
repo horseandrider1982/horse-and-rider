@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { storefrontApiRequest, STOREFRONT_QUERY, PRODUCT_BY_HANDLE_QUERY, ShopifyProduct } from '@/lib/shopify';
 
-export function useProducts(first: number = 20) {
+export function useProducts(first: number = 20, query?: string) {
   return useQuery({
-    queryKey: ['shopify-products', first],
+    queryKey: ['shopify-products', first, query],
     queryFn: async () => {
-      const data = await storefrontApiRequest(STOREFRONT_QUERY, { first });
+      const variables: Record<string, unknown> = { first };
+      if (query) variables.query = query;
+      const data = await storefrontApiRequest(STOREFRONT_QUERY, variables);
       return (data?.data?.products?.edges || []) as ShopifyProduct[];
     },
   });
