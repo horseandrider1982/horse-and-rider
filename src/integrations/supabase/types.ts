@@ -309,6 +309,36 @@ export type Database = {
         }
         Relationships: []
       }
+      redirects: {
+        Row: {
+          article_number: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          new_url: string
+          old_url: string
+          updated_at: string
+        }
+        Insert: {
+          article_number?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          new_url: string
+          old_url: string
+          updated_at?: string
+        }
+        Update: {
+          article_number?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          new_url?: string
+          old_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
