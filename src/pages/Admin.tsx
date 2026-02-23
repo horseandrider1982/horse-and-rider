@@ -8,11 +8,12 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
 import NewsEditor from "@/pages/admin/NewsEditor";
+import BrandManager from "@/pages/admin/BrandManager";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 
 export default function Admin() {
@@ -60,9 +61,10 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="h-4 w-4 hidden md:block" />Dashboard</TabsTrigger>
             <TabsTrigger value="news" className="gap-2" onClick={() => setNewsView('list')}><Newspaper className="h-4 w-4 hidden md:block" />News</TabsTrigger>
+            <TabsTrigger value="brands" className="gap-2"><Tag className="h-4 w-4 hidden md:block" />Marken</TabsTrigger>
             <TabsTrigger value="users" className="gap-2"><Users className="h-4 w-4 hidden md:block" />Kunden</TabsTrigger>
             <TabsTrigger value="configurator" className="gap-2"><Settings className="h-4 w-4 hidden md:block" />Konfigurator</TabsTrigger>
           </TabsList>
@@ -114,6 +116,18 @@ export default function Admin() {
                 ) : (
                   <NewsEditor duplicateFrom={duplicateArticle} onBack={() => setNewsView('list')} />
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="brands">
+            <Card>
+              <CardHeader>
+                <CardTitle>Marken-Verwaltung</CardTitle>
+                <CardDescription>Logos, SEO-Texte und Einstellungen für Marken pflegen.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BrandManager />
               </CardContent>
             </Card>
           </TabsContent>

@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      brands: {
+        Row: {
+          created_at: string
+          featured: boolean
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          seo_text: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          featured?: boolean
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          seo_text?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          featured?: boolean
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          seo_text?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       configurator_group_values: {
         Row: {
           description: string | null

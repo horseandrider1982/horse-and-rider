@@ -12,6 +12,7 @@ import Account from "./pages/Account";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Search from "./pages/Search";
+import UnsereMarken from "./pages/UnsereMarken";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import AGB from "./pages/AGB";
@@ -35,6 +36,7 @@ const AppContent = () => {
         <Route path="/account" element={<Account />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/unsere-marken" element={<UnsereMarken />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsDetail />} />

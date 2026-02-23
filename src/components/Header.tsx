@@ -34,6 +34,7 @@ export const Header = () => {
 
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
             <Link to="/" className="hover:text-primary transition-colors">Startseite</Link>
+            <Link to="/unsere-marken" className="hover:text-primary transition-colors">Unsere Marken</Link>
             <Link to="/news" className="hover:text-primary transition-colors">News</Link>
             <a href="https://www.horse-and-rider.de/Vielseitigkeit" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Vielseitigkeit</a>
             <a href="https://www.horse-and-rider.de/Saettel" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Sättel</a>
