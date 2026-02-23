@@ -29,7 +29,7 @@ export const Header = () => {
       <header className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link to="/" className="flex-shrink-0">
-            <img src={logo} alt="Horse & Rider Luhmühlen" className="h-12 md:h-16 w-auto" />
+            <img src={logo} alt="Horse & Rider Luhmühlen" className="h-9 md:h-11 w-auto" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
