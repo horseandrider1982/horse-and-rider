@@ -23,7 +23,7 @@ export const CookieBanner = () => {
     <div className="fixed bottom-0 inset-x-0 z-[100] p-4 md:p-6">
       <div className="container mx-auto max-w-3xl bg-background border border-border rounded-lg shadow-lg p-5 md:p-6">
         <h3 className="font-semibold text-foreground text-sm mb-2">
-          🍪 Wir verwenden Cookies
+          🍪 Wir verwenden Leckerlies (Cookies)
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           Wir nutzen Cookies, um Ihnen die bestmögliche Erfahrung auf unserer Website zu bieten.
