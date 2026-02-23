@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 interface BrandRow {
@@ -29,6 +29,7 @@ function slugify(name: string): string {
 export default function BrandManager() {
   const [brands, setBrands] = useState<BrandRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [editing, setEditing] = useState<BrandRow | null>(null);
   const [isNew, setIsNew] = useState(false);
 
@@ -37,6 +38,20 @@ export default function BrandManager() {
     const { data } = await (supabase.from("brands" as any).select("*").order("name") as any);
     setBrands((data as BrandRow[]) || []);
     setLoading(false);
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-brands");
+      if (error) throw error;
+      toast.success(`Sync abgeschlossen: ${data?.inserted ?? 0} neue Marken hinzugefügt`);
+      fetchBrands();
+    } catch (e: any) {
+      toast.error("Sync fehlgeschlagen: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setSyncing(false);
+    }
   };
 
   useEffect(() => { fetchBrands(); }, []);
@@ -113,8 +128,14 @@ export default function BrandManager() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">{brands.length} Marken gepflegt</p>
-        <Button size="sm" onClick={handleNew}><Plus className="h-4 w-4 mr-1" />Neue Marke</Button>
+        <p className="text-sm text-muted-foreground">{brands.length} Marken gepflegt · Täglicher Auto-Sync um 03:00 Uhr</p>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleSync} disabled={syncing}>
+            <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Sync läuft…" : "Shopify-Sync"}
+          </Button>
+          <Button size="sm" onClick={handleNew}><Plus className="h-4 w-4 mr-1" />Neue Marke</Button>
+        </div>
       </div>
 
       {brands.length === 0 ? (
