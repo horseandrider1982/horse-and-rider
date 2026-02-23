@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { storefrontApiRequest } from "@/lib/shopify";
@@ -73,10 +75,19 @@ function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [showConsent, setShowConsent] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    setConsentChecked(false);
+    setShowConsent(true);
+  };
+
+  const handleConfirm = async () => {
+    if (!consentChecked) return;
+    setShowConsent(false);
     setStatus("loading");
     setErrorMsg("");
     try {
@@ -106,25 +117,65 @@ function NewsletterSignup() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4">
-      <p className="text-xs text-background/60 mb-2">Newsletter abonnieren:</p>
-      <div className="flex gap-2">
-        <Input
-          type="email"
-          required
-          placeholder="Ihre E-Mail-Adresse"
-          value={email}
-          onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
-          className="h-9 text-sm bg-background/10 border-background/20 text-background placeholder:text-background/40 flex-1"
-        />
-        <Button type="submit" size="sm" className="h-9 px-3" disabled={status === "loading"}>
-          {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-        </Button>
-      </div>
-      {status === "error" && (
-        <p className="text-xs text-red-400 mt-1">{errorMsg}</p>
-      )}
-    </form>
+    <>
+      <form onSubmit={handleFormSubmit} className="mt-4">
+        <p className="text-xs text-background/60 mb-2">Newsletter abonnieren:</p>
+        <div className="flex gap-2">
+          <Input
+            type="email"
+            required
+            placeholder="Ihre E-Mail-Adresse"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
+            className="h-9 text-sm bg-background/10 border-background/20 text-background placeholder:text-background/40 flex-1"
+          />
+          <Button type="submit" size="sm" className="h-9 px-3" disabled={status === "loading"}>
+            {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
+        {status === "error" && (
+          <p className="text-xs text-destructive mt-1">{errorMsg}</p>
+        )}
+      </form>
+
+      <Dialog open={showConsent} onOpenChange={setShowConsent}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Newsletter-Anmeldung</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed pt-2">
+              Mit der Anmeldung zum Newsletter erklären Sie sich damit einverstanden, dass wir Ihre E-Mail-Adresse
+              (<span className="font-medium text-foreground">{email}</span>) zum Versand von Informationen über
+              Angebote, Neuheiten und Aktionen von Horse&nbsp;&&nbsp;Rider nutzen dürfen.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-start gap-3 py-2">
+            <Checkbox
+              id="newsletter-consent"
+              checked={consentChecked}
+              onCheckedChange={(v) => setConsentChecked(v === true)}
+              className="mt-0.5"
+            />
+            <label htmlFor="newsletter-consent" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
+              Ich stimme der Verarbeitung meiner E-Mail-Adresse gemäß der{" "}
+              <Link to="/datenschutz" className="text-primary underline underline-offset-2 hover:text-primary/80" target="_blank">
+                Datenschutzerklärung
+              </Link>{" "}
+              zu. Ich kann meine Einwilligung jederzeit widerrufen.
+            </label>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowConsent(false)}>
+              Abbrechen
+            </Button>
+            <Button onClick={handleConfirm} disabled={!consentChecked}>
+              Anmelden
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
