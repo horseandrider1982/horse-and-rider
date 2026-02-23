@@ -130,7 +130,7 @@ export default function UnsereMarken() {
                         <img
                           src={brand.logoUrl}
                           alt={`${brand.name} Logo`}
-                          className="h-14 w-auto object-contain"
+                          className="h-14 w-auto object-contain brightness-0"
                           loading="lazy"
                         />
                       ) : (
