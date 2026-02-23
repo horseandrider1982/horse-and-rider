@@ -445,6 +445,7 @@ export type Database = {
       redirect_issues: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           payload: Json | null
           resolved_at: string | null
@@ -454,6 +455,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           payload?: Json | null
           resolved_at?: string | null
@@ -463,6 +465,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           payload?: Json | null
           resolved_at?: string | null
@@ -477,6 +480,7 @@ export type Database = {
           article_number: string | null
           canonical_key: string | null
           created_at: string
+          created_by: string | null
           entity_id: string | null
           entity_type:
             | Database["public"]["Enums"]["redirect_entity_type"]
@@ -496,6 +500,7 @@ export type Database = {
           article_number?: string | null
           canonical_key?: string | null
           created_at?: string
+          created_by?: string | null
           entity_id?: string | null
           entity_type?:
             | Database["public"]["Enums"]["redirect_entity_type"]
@@ -515,6 +520,7 @@ export type Database = {
           article_number?: string | null
           canonical_key?: string | null
           created_at?: string
+          created_by?: string | null
           entity_id?: string | null
           entity_type?:
             | Database["public"]["Enums"]["redirect_entity_type"]
