@@ -11,14 +11,17 @@ export function useAuth() {
   useEffect(() => {
     const checkAdmin = async (userId: string) => {
       try {
-        const { data } = await supabase
+        console.log('[useAuth] checkAdmin start for', userId);
+        const { data, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', userId)
           .eq('role', 'admin')
           .maybeSingle();
+        console.log('[useAuth] checkAdmin result:', data, 'error:', error);
         setIsAdmin(!!data);
-      } catch {
+      } catch (e) {
+        console.error('[useAuth] checkAdmin exception:', e);
         setIsAdmin(false);
       }
     };
@@ -26,6 +29,7 @@ export function useAuth() {
     // Set up listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log('[useAuth] onAuthStateChange event:', _event, 'user:', session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -34,17 +38,21 @@ export function useAuth() {
         } else {
           setIsAdmin(false);
         }
+        console.log('[useAuth] setting loading=false (from listener)');
         setLoading(false);
       }
     );
 
     // Then get initial session
+    console.log('[useAuth] calling getSession...');
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('[useAuth] getSession result, user:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         await checkAdmin(session.user.id);
       }
+      console.log('[useAuth] setting loading=false (from getSession)');
       setLoading(false);
     });
 
