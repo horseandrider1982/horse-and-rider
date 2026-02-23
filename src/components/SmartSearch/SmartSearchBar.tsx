@@ -6,7 +6,7 @@ import { SmartSearchDropdown } from "./SmartSearchDropdown";
 import type { SearchItem } from "@/types/search";
 import { cn } from "@/lib/utils";
 
-export const SmartSearchBar: React.FC<{ className?: string }> = ({ className }) => {
+export const SmartSearchBar: React.FC<{ className?: string; autoFocus?: boolean }> = ({ className, autoFocus }) => {
   const navigate = useNavigate();
   const { query, results, isLoading, isOpen, handleQueryChange, close, open } =
     useSmartSearch();
@@ -120,6 +120,7 @@ export const SmartSearchBar: React.FC<{ className?: string }> = ({ className }) 
           onChange={(e) => handleQueryChange(e.target.value)}
           onFocus={open}
           onKeyDown={handleKeyDown}
+          autoFocus={autoFocus}
           className="w-full h-9 pl-9 pr-8 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
         />
         {query && (
