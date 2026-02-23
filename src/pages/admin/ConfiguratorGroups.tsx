@@ -87,18 +87,27 @@ export default function ConfiguratorGroups() {
 
 function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorGroup | null; open: boolean; onOpenChange: (o: boolean) => void }) {
   const saveGroup = useSaveGroup();
+  const [currentGroup, setCurrentGroup] = useState<ConfiguratorGroup | null>(group);
   const [name, setName] = useState(group?.name || "");
   const [description, setDescription] = useState(group?.description || "");
   const [fieldType, setFieldType] = useState<ConfiguratorFieldType>(group?.field_type || "dropdown_single");
   const [isRequired, setIsRequired] = useState(group?.is_required ?? true);
   const [sortOrder, setSortOrder] = useState(group?.sort_order ?? 0);
 
+  const isNew = !currentGroup;
+  const needsValues = fieldType !== 'text_input';
+
   const handleSave = async () => {
     if (!name.trim()) { toast.error("Name ist erforderlich"); return; }
     try {
-      await saveGroup.mutateAsync({ id: group?.id, name, description: description || null, field_type: fieldType, is_required: isRequired, sort_order: sortOrder });
-      toast.success(group ? "Gruppe aktualisiert" : "Gruppe erstellt");
-      onOpenChange(false);
+      const saved = await saveGroup.mutateAsync({ id: currentGroup?.id, name, description: description || null, field_type: fieldType, is_required: isRequired, sort_order: sortOrder });
+      toast.success(currentGroup ? "Gruppe aktualisiert" : "Gruppe erstellt");
+      if (!currentGroup && saved && needsValues) {
+        // Stay open in edit mode so values can be added immediately
+        setCurrentGroup(saved as ConfiguratorGroup);
+      } else {
+        onOpenChange(false);
+      }
     } catch { toast.error("Fehler beim Speichern"); }
   };
 
@@ -106,7 +115,7 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{group ? "Gruppe bearbeiten" : "Neue Gruppe"}</DialogTitle>
+          <DialogTitle>{currentGroup ? "Gruppe bearbeiten" : "Neue Gruppe"}</DialogTitle>
           <DialogDescription>Konfiguriere die Gruppeneinstellungen und verwalte die Werte.</DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto space-y-4 min-h-0">
@@ -142,13 +151,27 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
             </div>
           </div>
 
-          {group && fieldType !== 'text_input' && (
-            <ValuesSection groupId={group.id} fieldType={fieldType} />
+          {/* Values section */}
+          {fieldType === 'text_input' ? (
+            <div className="border-t pt-4">
+              <p className="text-sm text-muted-foreground">Für Texteingabefelder werden keine Werte benötigt. Der Kunde kann frei Text eingeben.</p>
+            </div>
+          ) : currentGroup ? (
+            <ValuesSection groupId={currentGroup.id} fieldType={fieldType} />
+          ) : (
+            <div className="border-t pt-4">
+              <Label className="text-base font-semibold">Werte</Label>
+              <p className="text-sm text-muted-foreground mt-1">Speichere die Gruppe zuerst, um Werte hinzuzufügen.</p>
+            </div>
           )}
         </div>
         <DialogFooter>
+          {currentGroup && !isNew && (
+            <Button onClick={() => onOpenChange(false)} variant="outline">Schließen</Button>
+          )}
           <Button onClick={handleSave} disabled={saveGroup.isPending}>
-            {saveGroup.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Speichern
+            {saveGroup.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {isNew && needsValues ? 'Speichern & Werte hinzufügen' : 'Speichern'}
           </Button>
         </DialogFooter>
       </DialogContent>
