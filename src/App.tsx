@@ -11,6 +11,10 @@ import Account from "./pages/Account";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Search from "./pages/Search";
+import Impressum from "./pages/Impressum";
+import Datenschutz from "./pages/Datenschutz";
+import AGB from "./pages/AGB";
+import Widerrufsrecht from "./pages/Widerrufsrecht";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +31,10 @@ const AppContent = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/search" element={<Search />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/impressum" element={<Impressum />} />
+        <Route path="/datenschutz" element={<Datenschutz />} />
+        <Route path="/agb" element={<AGB />} />
+        <Route path="/widerrufsrecht" element={<Widerrufsrecht />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

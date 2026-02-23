@@ -1,10 +1,11 @@
+import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const Footer = () => (
   <footer className="bg-foreground text-background/90 py-12">
     <div className="container mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <img src={logo} alt="Horse & Rider Luhmühlen" className="h-10 w-auto brightness-0 invert mb-4" />
           <p className="text-sm text-background/70 leading-relaxed">
@@ -39,6 +40,15 @@ export const Footer = () => (
               <Clock className="h-4 w-4 flex-shrink-0" />
               <span>Sa: 9:00 - 14:00 Uhr</span>
             </div>
+          </div>
+        </div>
+        <div>
+          <h4 className="font-semibold text-background mb-4">Rechtliches</h4>
+          <div className="space-y-2 text-sm">
+            <Link to="/impressum" className="block hover:text-background transition-colors">Impressum</Link>
+            <Link to="/datenschutz" className="block hover:text-background transition-colors">Datenschutz</Link>
+            <Link to="/agb" className="block hover:text-background transition-colors">AGB</Link>
+            <Link to="/widerrufsrecht" className="block hover:text-background transition-colors">Widerrufsrecht</Link>
           </div>
         </div>
       </div>
