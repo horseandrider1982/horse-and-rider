@@ -2,3 +2,9 @@ project_id = "ehiemefjuylqfkrkfqgs"
 
 [functions.search-predictive]
 verify_jwt = false
+
+[functions.redirect-proxy]
+verify_jwt = false
+
+[functions.shopify-webhook]
+verify_jwt = false
