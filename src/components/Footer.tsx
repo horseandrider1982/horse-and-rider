@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { storefrontApiRequest } from "@/lib/shopify";
 import logo from "@/assets/logo.png";
@@ -70,17 +71,30 @@ function usePaymentSettings() {
 
 function NewsletterSignup() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setStatus("loading");
-    // Simulate signup – replace with real API later
-    setTimeout(() => {
-      setStatus("success");
-      setEmail("");
-    }, 800);
+    setErrorMsg("");
+    try {
+      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
+        body: { email: email.trim() },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        setStatus("success");
+        setEmail("");
+      } else {
+        throw new Error(data?.error || "Anmeldung fehlgeschlagen");
+      }
+    } catch (err) {
+      console.error("Newsletter error:", err);
+      setErrorMsg("Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.");
+      setStatus("error");
+    }
   };
 
   if (status === "success") {
@@ -100,13 +114,16 @@ function NewsletterSignup() {
           required
           placeholder="Ihre E-Mail-Adresse"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
           className="h-9 text-sm bg-background/10 border-background/20 text-background placeholder:text-background/40 flex-1"
         />
         <Button type="submit" size="sm" className="h-9 px-3" disabled={status === "loading"}>
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
         </Button>
       </div>
+      {status === "error" && (
+        <p className="text-xs text-red-400 mt-1">{errorMsg}</p>
+      )}
     </form>
   );
 }
