@@ -163,6 +163,89 @@ export type Database = {
         }
         Relationships: []
       }
+      news_article_products: {
+        Row: {
+          article_id: string
+          id: string
+          shopify_handle: string
+          sort_order: number
+        }
+        Insert: {
+          article_id: string
+          id?: string
+          shopify_handle: string
+          sort_order?: number
+        }
+        Update: {
+          article_id?: string
+          id?: string
+          shopify_handle?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_article_products_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "news_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_articles: {
+        Row: {
+          category: Database["public"]["Enums"]["news_category"]
+          content: string
+          cover_image_alt: string | null
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          og_image_url: string | null
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          status: Database["public"]["Enums"]["news_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["news_category"]
+          content?: string
+          cover_image_alt?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          og_image_url?: string | null
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["news_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["news_category"]
+          content?: string
+          cover_image_alt?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          og_image_url?: string | null
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["news_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -231,6 +314,8 @@ export type Database = {
         | "image_multi"
         | "checkbox"
         | "radio"
+      news_category: "horse_rider_news" | "produktnews" | "events"
+      news_status: "draft" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -368,6 +453,8 @@ export const Constants = {
         "checkbox",
         "radio",
       ],
+      news_category: ["horse_rider_news", "produktnews", "events"],
+      news_status: ["draft", "published"],
     },
   },
 } as const
