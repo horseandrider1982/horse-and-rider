@@ -2,8 +2,21 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const SHOPIFY_STORE_DOMAIN = "bpjvam-c1.myshopify.com";
+const SHOPIFY_API_VERSION = "2025-07";
+const STOREFRONT_URL = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
+
+const CUSTOMER_CREATE_MUTATION = `
+  mutation customerCreate($input: CustomerCreateInput!) {
+    customerCreate(input: $input) {
+      customer { id email }
+      customerUserErrors { field message code }
+    }
+  }
+`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,9 +24,9 @@ serve(async (req) => {
   }
 
   try {
-    const SHOPIFY_ACCESS_TOKEN = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
-    if (!SHOPIFY_ACCESS_TOKEN) {
-      throw new Error("SHOPIFY_ACCESS_TOKEN is not configured");
+    const STOREFRONT_TOKEN = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+    if (!STOREFRONT_TOKEN) {
+      throw new Error("SHOPIFY_STOREFRONT_ACCESS_TOKEN is not configured");
     }
 
     const { email } = await req.json();
@@ -24,69 +37,33 @@ serve(async (req) => {
       );
     }
 
-    const shopDomain = "bpjvam-c1.myshopify.com";
-    const adminUrl = `https://${shopDomain}/admin/api/2025-01/customers.json`;
-
-    // Try to create customer with marketing consent
-    const createRes = await fetch(adminUrl, {
+    const res = await fetch(STOREFRONT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
+        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN,
       },
       body: JSON.stringify({
-        customer: {
-          email: email.trim().toLowerCase(),
-          accepts_marketing: true,
-          marketing_opt_in_level: "single_opt_in",
+        query: CUSTOMER_CREATE_MUTATION,
+        variables: {
+          input: {
+            email: email.trim().toLowerCase(),
+            acceptsMarketing: true,
+          },
         },
       }),
     });
 
-    const data = await createRes.json();
+    const data = await res.json();
+    const errors = data?.data?.customerCreate?.customerUserErrors || [];
 
-    // If customer already exists, try to update their marketing consent
-    if (!createRes.ok && data.errors?.email?.[0]?.includes("has already been taken")) {
-      // Search for existing customer
-      const searchUrl = `https://${shopDomain}/admin/api/2025-01/customers/search.json?query=email:${encodeURIComponent(email.trim().toLowerCase())}`;
-      const searchRes = await fetch(searchUrl, {
-        headers: { "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN },
-      });
-      const searchData = await searchRes.json();
-      const existingCustomer = searchData.customers?.[0];
-
-      if (existingCustomer) {
-        const updateUrl = `https://${shopDomain}/admin/api/2025-01/customers/${existingCustomer.id}.json`;
-        const updateRes = await fetch(updateUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
-          },
-          body: JSON.stringify({
-            customer: {
-              id: existingCustomer.id,
-              accepts_marketing: true,
-            },
-          }),
-        });
-
-        if (!updateRes.ok) {
-          const updateData = await updateRes.json();
-          console.error("Failed to update customer marketing:", updateData);
-          throw new Error("Kunde konnte nicht aktualisiert werden");
-        }
-      }
-
+    // "TAKEN" means customer already exists – that's fine, they're already subscribed
+    if (errors.length > 0 && errors[0]?.code !== "TAKEN") {
+      console.error("Shopify customerCreate errors:", errors);
       return new Response(
-        JSON.stringify({ success: true, message: "Marketing-Einwilligung aktualisiert" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: false, error: errors[0]?.message || "Anmeldung fehlgeschlagen" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    }
-
-    if (!createRes.ok) {
-      console.error("Shopify customer create error:", data);
-      throw new Error(data.errors ? JSON.stringify(data.errors) : "Shopify API-Fehler");
     }
 
     return new Response(
