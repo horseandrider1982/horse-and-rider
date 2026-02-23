@@ -54,11 +54,9 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="h-4 w-4 hidden md:block" />Dashboard</TabsTrigger>
             <TabsTrigger value="users" className="gap-2"><Users className="h-4 w-4 hidden md:block" />Kunden</TabsTrigger>
-            <TabsTrigger value="cfg-products" className="gap-2"><Package className="h-4 w-4 hidden md:block" />Artikel</TabsTrigger>
-            <TabsTrigger value="cfg-groups" className="gap-2"><Layers className="h-4 w-4 hidden md:block" />Gruppen</TabsTrigger>
             <TabsTrigger value="configurator" className="gap-2"><Settings className="h-4 w-4 hidden md:block" />Konfigurator</TabsTrigger>
           </TabsList>
 
@@ -103,43 +101,53 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="cfg-products">
-            <Card>
-              <CardHeader>
-                <CardTitle>Konfigurator-Artikel</CardTitle>
-                <CardDescription>Shopify-Produkte als Konfigurator-Artikel verwalten.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ConfiguratorProducts />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="cfg-groups">
-            <Card>
-              <CardHeader>
-                <CardTitle>Konfigurations-Gruppen</CardTitle>
-                <CardDescription>Gruppen und Werte für den Konfigurator erstellen und bearbeiten.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ConfiguratorGroups />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="configurator">
-            <Card>
-              <CardHeader>
-                <CardTitle>Konfigurator-Einstellungen</CardTitle>
-                <CardDescription>Allgemeine Einstellungen für den Konfigurator.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Weitere Einstellungen werden hier verfügbar sein.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <Tabs defaultValue="cfg-products" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="cfg-products" className="gap-2"><Package className="h-4 w-4 hidden md:block" />Artikel</TabsTrigger>
+                <TabsTrigger value="cfg-groups" className="gap-2"><Layers className="h-4 w-4 hidden md:block" />Gruppen</TabsTrigger>
+                <TabsTrigger value="cfg-settings" className="gap-2"><Settings className="h-4 w-4 hidden md:block" />Einstellungen</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="cfg-products">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Konfigurator-Artikel</CardTitle>
+                    <CardDescription>Shopify-Produkte als Konfigurator-Artikel verwalten.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ConfiguratorProducts />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="cfg-groups">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Konfigurations-Gruppen</CardTitle>
+                    <CardDescription>Gruppen und Werte für den Konfigurator erstellen und bearbeiten.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ConfiguratorGroups />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="cfg-settings">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Konfigurator-Einstellungen</CardTitle>
+                    <CardDescription>Allgemeine Einstellungen für den Konfigurator.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Weitere Einstellungen werden hier verfügbar sein.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </main>
