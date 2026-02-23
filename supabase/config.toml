@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.sync-brands]
 verify_jwt = false
+
+[functions.generate-brand-seo]
+verify_jwt = false
