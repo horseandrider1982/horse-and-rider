@@ -199,6 +199,33 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_paths: {
+        Row: {
+          canonical_key: string
+          first_seen_at: string
+          id: string
+          is_current: boolean
+          last_seen_at: string
+          path: string
+        }
+        Insert: {
+          canonical_key: string
+          first_seen_at?: string
+          id?: string
+          is_current?: boolean
+          last_seen_at?: string
+          path: string
+        }
+        Update: {
+          canonical_key?: string
+          first_seen_at?: string
+          id?: string
+          is_current?: boolean
+          last_seen_at?: string
+          path?: string
+        }
+        Relationships: []
+      }
       news_article_products: {
         Row: {
           article_id: string
@@ -309,32 +336,159 @@ export type Database = {
         }
         Relationships: []
       }
+      redirect_edges: {
+        Row: {
+          created_at: string
+          from_path: string
+          id: string
+          redirect_id: string | null
+          to_path: string
+        }
+        Insert: {
+          created_at?: string
+          from_path: string
+          id?: string
+          redirect_id?: string | null
+          to_path: string
+        }
+        Update: {
+          created_at?: string
+          from_path?: string
+          id?: string
+          redirect_id?: string | null
+          to_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redirect_edges_redirect_id_fkey"
+            columns: ["redirect_id"]
+            isOneToOne: false
+            referencedRelation: "redirects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      redirect_hits: {
+        Row: {
+          day: string
+          hits: number
+          id: string
+          new_path: string
+          old_path: string
+          redirect_id: string | null
+        }
+        Insert: {
+          day?: string
+          hits?: number
+          id?: string
+          new_path: string
+          old_path: string
+          redirect_id?: string | null
+        }
+        Update: {
+          day?: string
+          hits?: number
+          id?: string
+          new_path?: string
+          old_path?: string
+          redirect_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redirect_hits_redirect_id_fkey"
+            columns: ["redirect_id"]
+            isOneToOne: false
+            referencedRelation: "redirects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      redirect_issues: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json | null
+          resolved_at: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          status: Database["public"]["Enums"]["issue_status"]
+          type: Database["public"]["Enums"]["issue_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          status?: Database["public"]["Enums"]["issue_status"]
+          type: Database["public"]["Enums"]["issue_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          status?: Database["public"]["Enums"]["issue_status"]
+          type?: Database["public"]["Enums"]["issue_type"]
+        }
+        Relationships: []
+      }
       redirects: {
         Row: {
           article_number: string | null
+          canonical_key: string | null
           created_at: string
+          entity_id: string | null
+          entity_type:
+            | Database["public"]["Enums"]["redirect_entity_type"]
+            | null
           id: string
           is_active: boolean
+          new_path: string | null
           new_url: string
+          old_path: string | null
           old_url: string
+          priority: number | null
+          sku: string | null
+          source: Database["public"]["Enums"]["redirect_source"] | null
           updated_at: string
         }
         Insert: {
           article_number?: string | null
+          canonical_key?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?:
+            | Database["public"]["Enums"]["redirect_entity_type"]
+            | null
           id?: string
           is_active?: boolean
+          new_path?: string | null
           new_url: string
+          old_path?: string | null
           old_url: string
+          priority?: number | null
+          sku?: string | null
+          source?: Database["public"]["Enums"]["redirect_source"] | null
           updated_at?: string
         }
         Update: {
           article_number?: string | null
+          canonical_key?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?:
+            | Database["public"]["Enums"]["redirect_entity_type"]
+            | null
           id?: string
           is_active?: boolean
+          new_path?: string | null
           new_url?: string
+          old_path?: string | null
           old_url?: string
+          priority?: number | null
+          sku?: string | null
+          source?: Database["public"]["Enums"]["redirect_source"] | null
           updated_at?: string
         }
         Relationships: []
@@ -362,6 +516,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_redirect_loop: {
+        Args: { p_new_path: string; p_old_path: string }
+        Returns: boolean
+      }
+      collapse_redirect_chains: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -369,6 +528,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_url: { Args: { input: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
@@ -380,8 +540,30 @@ export type Database = {
         | "image_multi"
         | "checkbox"
         | "radio"
+      issue_severity: "info" | "warning" | "critical"
+      issue_status: "open" | "resolved" | "ignored"
+      issue_type:
+        | "loop_detected"
+        | "chain_detected"
+        | "duplicate_old_path"
+        | "missing_target"
+        | "import_sku_not_found"
+        | "import_old_path_conflict"
       news_category: "horse_rider_news" | "produktnews" | "events"
       news_status: "draft" | "published"
+      redirect_entity_type:
+        | "product"
+        | "collection"
+        | "page"
+        | "brand"
+        | "news"
+        | "custom"
+      redirect_source:
+        | "manual"
+        | "import_csv"
+        | "auto_url_change"
+        | "migration_seed"
+        | "system_collapse"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -519,8 +701,33 @@ export const Constants = {
         "checkbox",
         "radio",
       ],
+      issue_severity: ["info", "warning", "critical"],
+      issue_status: ["open", "resolved", "ignored"],
+      issue_type: [
+        "loop_detected",
+        "chain_detected",
+        "duplicate_old_path",
+        "missing_target",
+        "import_sku_not_found",
+        "import_old_path_conflict",
+      ],
       news_category: ["horse_rider_news", "produktnews", "events"],
       news_status: ["draft", "published"],
+      redirect_entity_type: [
+        "product",
+        "collection",
+        "page",
+        "brand",
+        "news",
+        "custom",
+      ],
+      redirect_source: [
+        "manual",
+        "import_csv",
+        "auto_url_change",
+        "migration_seed",
+        "system_collapse",
+      ],
     },
   },
 } as const
