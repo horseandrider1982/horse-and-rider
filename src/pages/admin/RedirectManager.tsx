@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -345,6 +346,16 @@ export default function RedirectManager() {
           <div className="text-2xl font-bold">{redirects.filter(r => r.source === "system_collapse").length}</div>
           <div className="text-xs text-muted-foreground">Kollabiert</div>
         </div>
+      </div>
+
+      {/* Navigation to sub-pages */}
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/admin/301/monitoring">📊 Monitoring Dashboard</Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/admin/301/conflicts">⚠️ Konfliktzentrum</Link>
+        </Button>
       </div>
 
       {/* Open Issues */}

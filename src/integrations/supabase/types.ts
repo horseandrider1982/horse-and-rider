@@ -336,6 +336,45 @@ export type Database = {
         }
         Relationships: []
       }
+      public_routes: {
+        Row: {
+          canonical_key: string
+          current_path: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["redirect_entity_type"]
+          id: string
+          is_public: boolean
+          last_synced_at: string
+          sku: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          canonical_key: string
+          current_path: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["redirect_entity_type"]
+          id?: string
+          is_public?: boolean
+          last_synced_at?: string
+          sku?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_key?: string
+          current_path?: string
+          entity_id?: string
+          entity_type?: Database["public"]["Enums"]["redirect_entity_type"]
+          id?: string
+          is_public?: boolean
+          last_synced_at?: string
+          sku?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       redirect_edges: {
         Row: {
           created_at: string
