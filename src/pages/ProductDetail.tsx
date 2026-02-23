@@ -1,13 +1,28 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
-import { Loader2, ShoppingCart, ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, ShoppingCart, ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
+import { useProductConfigurator } from "@/hooks/useConfigurator";
 import { useCartStore } from "@/stores/cartStore";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ConfiguratorWizard } from "@/components/configurator/ConfiguratorWizard";
 import { toast } from "sonner";
+import type { ConfigurationState } from "@/types/configurator";
+
+const STORAGE_KEY = (id: string) => `cfg_${id}`;
+
+function loadConfig(productId: string): ConfigurationState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY(productId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.isConfigured) return parsed;
+  } catch {}
+  return null;
+}
 
 const ProductDetail = () => {
   const { handle } = useParams<{ handle: string }>();
@@ -16,6 +31,20 @@ const ProductDetail = () => {
   const cartLoading = useCartStore(state => state.isLoading);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [mainImage, setMainImage] = useState(0);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [configState, setConfigState] = useState<ConfigurationState | null>(null);
+
+  const shopifyProductId = product?.node?.id;
+  const { data: configuratorData } = useProductConfigurator(shopifyProductId);
+  const isConfigurator = !!configuratorData && configuratorData.groups.length > 0;
+
+  // Load saved config from localStorage
+  useEffect(() => {
+    if (shopifyProductId) {
+      const saved = loadConfig(shopifyProductId);
+      if (saved) setConfigState(saved);
+    }
+  }, [shopifyProductId]);
 
   if (isLoading) {
     return (
@@ -45,9 +74,52 @@ const ProductDetail = () => {
   const variants = product.node.variants.edges;
   const selectedVariant = variants[selectedVariantIndex]?.node;
   const images = product.node.images.edges;
+  const basePrice = selectedVariant ? parseFloat(selectedVariant.price.amount) : parseFloat(product.node.priceRange.minVariantPrice.amount);
+  const totalPrice = basePrice + (configState?.totalPriceDelta ?? 0);
+
+  const handleWizardComplete = (state: ConfigurationState) => {
+    setConfigState(state);
+    if (shopifyProductId) {
+      localStorage.setItem(STORAGE_KEY(shopifyProductId), JSON.stringify(state));
+    }
+    toast.success("Konfiguration abgeschlossen", { position: "top-center" });
+  };
 
   const handleAddToCart = async () => {
     if (!selectedVariant) return;
+
+    // Build line item attributes for configurator
+    const attributes: Array<{ key: string; value: string }> = [];
+    if (isConfigurator && configState?.isConfigured) {
+      // Human-readable summary
+      const summaryParts = configState.selections.map(sel => {
+        const group = configuratorData!.groups.find(g => g.id === sel.groupId);
+        if (!group) return '';
+        let valDisplay = '';
+        if (sel.type === 'text_input') valDisplay = String(sel.value);
+        else if (sel.type === 'checkbox') valDisplay = sel.value === true ? 'Ja' : 'Nein';
+        else if (Array.isArray(sel.value)) valDisplay = sel.value.map(id => group.values.find(v => v.id === id)?.name || id).join(', ');
+        else if (typeof sel.value === 'string') valDisplay = group.values.find(v => v.id === sel.value)?.name || String(sel.value);
+        return `${group.name}: ${valDisplay}`;
+      }).filter(Boolean);
+
+      attributes.push({ key: 'Konfiguration', value: summaryParts.join(' | ') });
+      attributes.push({ key: '_cfg_price_delta_total', value: configState.totalPriceDelta.toFixed(2) });
+
+      // Per-group keys
+      configState.selections.forEach(sel => {
+        const group = configuratorData!.groups.find(g => g.id === sel.groupId);
+        if (group) {
+          let val = '';
+          if (sel.type === 'text_input') val = String(sel.value);
+          else if (sel.type === 'checkbox') val = sel.value === true ? 'Ja' : 'Nein';
+          else if (Array.isArray(sel.value)) val = sel.value.map(id => group.values.find(v => v.id === id)?.name || id).join(', ');
+          else if (typeof sel.value === 'string') val = group.values.find(v => v.id === sel.value)?.name || '';
+          attributes.push({ key: `cfg_${group.name}`, value: val });
+        }
+      });
+    }
+
     await addItem({
       product,
       variantId: selectedVariant.id,
@@ -55,9 +127,12 @@ const ProductDetail = () => {
       price: selectedVariant.price,
       quantity: 1,
       selectedOptions: selectedVariant.selectedOptions || [],
+      ...(attributes.length > 0 ? { attributes } : {}),
     });
     toast.success("In den Warenkorb gelegt", { description: product.node.title, position: "top-center" });
   };
+
+  const canAddToCart = !isConfigurator || configState?.isConfigured;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -89,8 +164,14 @@ const ProductDetail = () => {
             <div>
               <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3">{product.node.title}</h1>
               <p className="text-2xl font-bold text-primary mb-4">
-                {selectedVariant ? parseFloat(selectedVariant.price.amount).toFixed(2) : parseFloat(product.node.priceRange.minVariantPrice.amount).toFixed(2)} €
+                {isConfigurator && configState?.isConfigured ? (
+                  <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">(inkl. Konfiguration)</span></>
+                ) : (
+                  <>{basePrice.toFixed(2)} €</>
+                )}
               </p>
+
+              {/* Variant selection */}
               {product.node.options.length > 0 && product.node.options[0].name !== "Title" && (
                 <div className="mb-6">
                   {product.node.options.map((option) => (
@@ -111,10 +192,38 @@ const ProductDetail = () => {
                   ))}
                 </div>
               )}
-              <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale} className="w-full bg-primary text-primary-foreground hover:opacity-90" size="lg">
+
+              {/* Configurator buttons */}
+              {isConfigurator && (
+                <div className="mb-4">
+                  <Button
+                    onClick={() => setWizardOpen(true)}
+                    variant="outline"
+                    size="lg"
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground mb-2"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {configState?.isConfigured ? 'Konfiguration ändern' : 'Jetzt konfigurieren'}
+                  </Button>
+                  {configState?.isConfigured && (
+                    <div className="text-xs text-muted-foreground bg-muted rounded p-2">
+                      ✓ Konfiguration abgeschlossen
+                      {configState.totalPriceDelta !== 0 && ` (Aufpreis: ${configState.totalPriceDelta > 0 ? '+' : ''}${configState.totalPriceDelta.toFixed(2)} €)`}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <Button
+                onClick={handleAddToCart}
+                disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart}
+                className="w-full bg-primary text-primary-foreground hover:opacity-90"
+                size="lg"
+              >
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {selectedVariant?.availableForSale ? "In den Warenkorb" : "Nicht verfügbar"}
+                {!canAddToCart ? 'Bitte zuerst konfigurieren' : selectedVariant?.availableForSale ? "In den Warenkorb" : "Nicht verfügbar"}
               </Button>
+
               {product.node.description && (
                 <div className="mt-6 pt-6 border-t border-border">
                   <h3 className="font-semibold mb-2">Beschreibung</h3>
@@ -126,6 +235,19 @@ const ProductDetail = () => {
         </div>
       </main>
       <Footer />
+
+      {isConfigurator && configuratorData && (
+        <ConfiguratorWizard
+          open={wizardOpen}
+          onOpenChange={setWizardOpen}
+          groups={configuratorData.groups}
+          basePrice={basePrice}
+          currencyCode={product.node.priceRange.minVariantPrice.currencyCode}
+          productTitle={product.node.title}
+          onComplete={handleWizardComplete}
+          initialSelections={configState?.selections}
+        />
+      )}
     </div>
   );
 };

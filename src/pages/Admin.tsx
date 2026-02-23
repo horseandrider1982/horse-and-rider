@@ -8,7 +8,9 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers } from "lucide-react";
+import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
+import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 
 export default function Admin() {
   const { user, loading: authLoading, isAdmin } = useAuth();
@@ -52,9 +54,11 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="h-4 w-4 hidden md:block" />Dashboard</TabsTrigger>
             <TabsTrigger value="users" className="gap-2"><Users className="h-4 w-4 hidden md:block" />Kunden</TabsTrigger>
+            <TabsTrigger value="cfg-products" className="gap-2"><Package className="h-4 w-4 hidden md:block" />Artikel</TabsTrigger>
+            <TabsTrigger value="cfg-groups" className="gap-2"><Layers className="h-4 w-4 hidden md:block" />Gruppen</TabsTrigger>
             <TabsTrigger value="configurator" className="gap-2"><Settings className="h-4 w-4 hidden md:block" />Konfigurator</TabsTrigger>
           </TabsList>
 
@@ -99,17 +103,40 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="cfg-products">
+            <Card>
+              <CardHeader>
+                <CardTitle>Konfigurator-Artikel</CardTitle>
+                <CardDescription>Shopify-Produkte als Konfigurator-Artikel verwalten.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ConfiguratorProducts />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="cfg-groups">
+            <Card>
+              <CardHeader>
+                <CardTitle>Konfigurations-Gruppen</CardTitle>
+                <CardDescription>Gruppen und Werte für den Konfigurator erstellen und bearbeiten.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ConfiguratorGroups />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="configurator">
             <Card>
               <CardHeader>
-                <CardTitle>Konfigurator-Administration</CardTitle>
-                <CardDescription>Verwalte den Produktkonfigurator.</CardDescription>
+                <CardTitle>Konfigurator-Einstellungen</CardTitle>
+                <CardDescription>Allgemeine Einstellungen für den Konfigurator.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">
                   <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Der Konfigurator-Bereich wird hier eingerichtet.</p>
-                  <p className="text-sm mt-2">Teile mir mit, welche Konfigurationsoptionen du benötigst.</p>
+                  <p>Weitere Einstellungen werden hier verfügbar sein.</p>
                 </div>
               </CardContent>
             </Card>

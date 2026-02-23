@@ -14,6 +14,155 @@ export type Database = {
   }
   public: {
     Tables: {
+      configurator_group_values: {
+        Row: {
+          description: string | null
+          group_id: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price_delta: number
+          sku_hint: string | null
+          sort_order: number
+        }
+        Insert: {
+          description?: string | null
+          group_id: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price_delta?: number
+          sku_hint?: string | null
+          sort_order?: number
+        }
+        Update: {
+          description?: string | null
+          group_id?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price_delta?: number
+          sku_hint?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configurator_group_values_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "configurator_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      configurator_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          field_type: Database["public"]["Enums"]["configurator_field_type"]
+          id: string
+          is_required: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          field_type?: Database["public"]["Enums"]["configurator_field_type"]
+          id?: string
+          is_required?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          field_type?: Database["public"]["Enums"]["configurator_field_type"]
+          id?: string
+          is_required?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      configurator_product_groups: {
+        Row: {
+          configurator_product_id: string
+          group_id: string
+          id: string
+          is_required_override: boolean | null
+          sort_order: number
+        }
+        Insert: {
+          configurator_product_id: string
+          group_id: string
+          id?: string
+          is_required_override?: boolean | null
+          sort_order?: number
+        }
+        Update: {
+          configurator_product_id?: string
+          group_id?: string
+          id?: string
+          is_required_override?: boolean | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configurator_product_groups_configurator_product_id_fkey"
+            columns: ["configurator_product_id"]
+            isOneToOne: false
+            referencedRelation: "configurator_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configurator_product_groups_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "configurator_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      configurator_products: {
+        Row: {
+          created_at: string
+          featured_image_url: string | null
+          id: string
+          shopify_handle: string
+          shopify_product_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          shopify_handle: string
+          shopify_product_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          shopify_handle?: string
+          shopify_product_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -74,6 +223,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      configurator_field_type:
+        | "text_input"
+        | "dropdown_single"
+        | "dropdown_multi"
+        | "image_single"
+        | "image_multi"
+        | "checkbox"
+        | "radio"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -202,6 +359,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      configurator_field_type: [
+        "text_input",
+        "dropdown_single",
+        "dropdown_multi",
+        "image_single",
+        "image_multi",
+        "checkbox",
+        "radio",
+      ],
     },
   },
 } as const
