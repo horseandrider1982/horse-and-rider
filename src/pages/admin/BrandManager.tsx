@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface BrandRow {
@@ -31,6 +31,7 @@ export default function BrandManager() {
   const [brands, setBrands] = useState<BrandRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [editing, setEditing] = useState<BrandRow | null>(null);
   const [isNew, setIsNew] = useState(false);
 
@@ -109,6 +110,38 @@ export default function BrandManager() {
         <div>
           <Label>SEO-Text (HTML erlaubt)</Label>
           <Textarea rows={8} value={editing.seo_text || ""} onChange={(e) => setEditing({ ...editing, seo_text: e.target.value || null })} placeholder="<h3>Über die Marke...</h3><p>...</p>" />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            disabled={generating || !editing.name}
+            onClick={async () => {
+              setGenerating(true);
+              try {
+                const { data, error } = await supabase.functions.invoke("generate-brand-seo", {
+                  body: {
+                    brandName: editing.name,
+                    websiteUrl: editing.website_url,
+                    existingSeoText: editing.seo_text,
+                  },
+                });
+                if (error) throw error;
+                if (data?.error) throw new Error(data.error);
+                if (data?.seo_text) {
+                  setEditing({ ...editing, seo_text: data.seo_text });
+                  toast.success(data.scraped ? "SEO-Text aus Website-Daten generiert" : "SEO-Text generiert (ohne Website-Daten)");
+                }
+              } catch (e: any) {
+                toast.error("Fehler: " + (e.message || "Text konnte nicht generiert werden"));
+              } finally {
+                setGenerating(false);
+              }
+            }}
+          >
+            <Sparkles className={`h-4 w-4 mr-1 ${generating ? "animate-pulse" : ""}`} />
+            {generating ? "Generiere SEO-Text…" : "SEO-Text mit KI generieren"}
+          </Button>
         </div>
         <div>
           <Label>URL Marke (wird nicht veröffentlicht)</Label>
