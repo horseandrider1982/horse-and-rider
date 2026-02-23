@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeUrl } from "@/lib/urlNormalize";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 /**
  * Enterprise RedirectGuard with:
@@ -26,6 +27,22 @@ export function RedirectGuard() {
   const location = useLocation();
   const navigate = useNavigate();
   const checking = useRef(false);
+
+  // Realtime cache invalidation
+  useEffect(() => {
+    const channel = supabase
+      .channel("redirect-cache-invalidation")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "redirects" },
+        (_payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+          cache.clear();
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   useEffect(() => {
     const path = normalizeUrl(location.pathname);
