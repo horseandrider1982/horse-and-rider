@@ -1,0 +1,1 @@
+export { SmartSearchBar } from "./SmartSearchBar";

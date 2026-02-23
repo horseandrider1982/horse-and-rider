@@ -3,6 +3,7 @@ import { CartDrawer } from "./CartDrawer";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { SmartSearchBar } from "@/components/SmartSearch";
 import logo from "@/assets/logo.png";
 
 export const Header = () => {
@@ -10,12 +11,12 @@ export const Header = () => {
 
   return (
     <header className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <Link to="/" className="flex-shrink-0">
           <img src={logo} alt="Horse & Rider Luhmühlen" className="h-12 md:h-16 w-auto" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-foreground">
+        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
           <Link to="/" className="hover:text-primary transition-colors">Startseite</Link>
           <a href="https://www.horse-and-rider.de/Vielseitigkeit" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Vielseitigkeit</a>
           <a href="https://www.horse-and-rider.de/Saettel" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Sättel</a>
@@ -24,6 +25,7 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-3">
+          <SmartSearchBar className="hidden sm:block w-48 md:w-64 lg:w-72" />
           <Button variant="ghost" size="icon" asChild>
             <Link to={user ? "/account" : "/auth"}>
               <User className="h-5 w-5" />
