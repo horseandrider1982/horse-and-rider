@@ -146,7 +146,7 @@ export default function MarkenDetail() {
             </div>
             <div className="flex items-center gap-5">
               {brand.logoUrl && (
-                <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-16 md:h-20 w-auto object-contain brightness-0" />
+                <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-10 w-auto max-w-[140px] object-contain brightness-0" />
               )}
               <h1 className="font-heading text-3xl md:text-4xl font-bold">{brand.name}</h1>
             </div>
