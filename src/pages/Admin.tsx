@@ -8,14 +8,20 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
+import NewsArticles from "@/pages/admin/NewsArticles";
+import NewsEditor from "@/pages/admin/NewsEditor";
+import type { NewsArticle } from "@/hooks/useNewsArticles";
 
 export default function Admin() {
   const { user, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [userCount, setUserCount] = useState(0);
+  const [newsView, setNewsView] = useState<'list' | 'new' | 'edit'>('list');
+  const [editArticleId, setEditArticleId] = useState<string>('');
+  const [duplicateArticle, setDuplicateArticle] = useState<NewsArticle | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -54,8 +60,9 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="h-4 w-4 hidden md:block" />Dashboard</TabsTrigger>
+            <TabsTrigger value="news" className="gap-2" onClick={() => setNewsView('list')}><Newspaper className="h-4 w-4 hidden md:block" />News</TabsTrigger>
             <TabsTrigger value="users" className="gap-2"><Users className="h-4 w-4 hidden md:block" />Kunden</TabsTrigger>
             <TabsTrigger value="configurator" className="gap-2"><Settings className="h-4 w-4 hidden md:block" />Konfigurator</TabsTrigger>
           </TabsList>
@@ -87,6 +94,28 @@ export default function Admin() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="news">
+            <Card>
+              <CardHeader>
+                <CardTitle>News & Artikel</CardTitle>
+                <CardDescription>Erstellen und verwalten Sie Ihre News-Beiträge.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {newsView === 'list' ? (
+                  <NewsArticles
+                    onNew={() => { setDuplicateArticle(null); setNewsView('new'); }}
+                    onEdit={(id) => { setEditArticleId(id); setNewsView('edit'); }}
+                    onDuplicate={(article) => { setDuplicateArticle(article); setNewsView('new'); }}
+                  />
+                ) : newsView === 'edit' ? (
+                  <NewsEditor articleId={editArticleId} onBack={() => setNewsView('list')} />
+                ) : (
+                  <NewsEditor duplicateFrom={duplicateArticle} onBack={() => setNewsView('list')} />
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="users">
