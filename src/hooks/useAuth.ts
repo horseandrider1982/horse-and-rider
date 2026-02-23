@@ -9,55 +9,51 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAdmin = async (userId: string) => {
-      try {
-        console.log('[useAuth] checkAdmin start for', userId);
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .maybeSingle();
-        console.log('[useAuth] checkAdmin result:', data, 'error:', error);
-        setIsAdmin(!!data);
-      } catch (e) {
-        console.error('[useAuth] checkAdmin exception:', e);
-        setIsAdmin(false);
-      }
-    };
-
-    // Set up listener first
+    // Set up listener first (no async work inside!)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        console.log('[useAuth] onAuthStateChange event:', _event, 'user:', session?.user?.id);
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-
-        if (session?.user) {
-          await checkAdmin(session.user.id);
-        } else {
+        if (!session?.user) {
           setIsAdmin(false);
         }
-        console.log('[useAuth] setting loading=false (from listener)');
         setLoading(false);
       }
     );
 
     // Then get initial session
-    console.log('[useAuth] calling getSession...');
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[useAuth] getSession result, user:', session?.user?.id);
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkAdmin(session.user.id);
-      }
-      console.log('[useAuth] setting loading=false (from getSession)');
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Separate effect to check admin role when user changes
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    let cancelled = false;
+    supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!cancelled) {
+          if (error) setIsAdmin(false);
+          else setIsAdmin(!!data);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [user]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
