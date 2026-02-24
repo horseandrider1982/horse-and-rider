@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartDrawer } from "./CartDrawer";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
 import { Button } from "@/components/ui/button";
-import { User, Search, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { User, Search, X, LogIn, LogOut, UserCircle } from "lucide-react";
 import { SmartSearchBar } from "@/components/SmartSearch";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const MobileSearchOverlay = ({ onClose }: { onClose: () => void }) => {
@@ -25,7 +28,14 @@ const MobileSearchOverlay = ({ onClose }: { onClose: () => void }) => {
 export const Header = () => {
   const { user } = useAuth();
   const { data: menus } = usePublicCmsMenus();
+  const navigate = useNavigate();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Erfolgreich abgemeldet");
+    navigate("/");
+  };
 
   const topNavItems = menus?.top_navigation || [];
 
@@ -60,11 +70,37 @@ export const Header = () => {
             >
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link to={user ? "/account" : "/auth"}>
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-popover z-[100]">
+                {user ? (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="flex items-center gap-2 cursor-pointer">
+                        <UserCircle className="h-4 w-4" />
+                        Kundenkonto
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+                      <LogOut className="h-4 w-4" />
+                      Abmelden
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link to="/auth" className="flex items-center gap-2 cursor-pointer">
+                      <LogIn className="h-4 w-4" />
+                      Anmelden
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <CartDrawer />
           </div>
         </div>
