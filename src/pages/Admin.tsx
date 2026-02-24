@@ -8,14 +8,18 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
 import NewsEditor from "@/pages/admin/NewsEditor";
 import BrandManager from "@/pages/admin/BrandManager";
 import RedirectManager from "@/pages/admin/RedirectManager";
+import CmsPages from "@/pages/admin/CmsPages";
+import CmsPageEditor from "@/pages/admin/CmsPageEditor";
+import CmsMenuEditor from "@/pages/admin/CmsMenuEditor";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
+import type { CmsPage } from "@/hooks/useCmsPages";
 
 export default function Admin() {
   const { user, loading: authLoading, isAdmin } = useAuth();
@@ -24,6 +28,9 @@ export default function Admin() {
   const [newsView, setNewsView] = useState<'list' | 'new' | 'edit'>('list');
   const [editArticleId, setEditArticleId] = useState<string>('');
   const [duplicateArticle, setDuplicateArticle] = useState<NewsArticle | null>(null);
+  const [cmsView, setCmsView] = useState<'list' | 'new' | 'edit'>('list');
+  const [editCmsPageId, setEditCmsPageId] = useState<string>('');
+  const [duplicateCmsPage, setDuplicateCmsPage] = useState<CmsPage | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -62,8 +69,9 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="h-4 w-4 hidden md:block" />Dashboard</TabsTrigger>
+            <TabsTrigger value="cms" className="gap-2" onClick={() => setCmsView('list')}><FileText className="h-4 w-4 hidden md:block" />CMS</TabsTrigger>
             <TabsTrigger value="news" className="gap-2" onClick={() => setNewsView('list')}><Newspaper className="h-4 w-4 hidden md:block" />News</TabsTrigger>
             <TabsTrigger value="brands" className="gap-2"><Tag className="h-4 w-4 hidden md:block" />Marken</TabsTrigger>
             <TabsTrigger value="redirects" className="gap-2"><ArrowRightLeft className="h-4 w-4 hidden md:block" />301</TabsTrigger>
@@ -98,6 +106,49 @@ export default function Admin() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="cms">
+            <Tabs defaultValue="cms-content" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="cms-content" className="gap-2"><FileText className="h-4 w-4 hidden md:block" />Content</TabsTrigger>
+                <TabsTrigger value="cms-menus" className="gap-2"><Layers className="h-4 w-4 hidden md:block" />Menüs</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="cms-content">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>CMS-Seiten</CardTitle>
+                    <CardDescription>Statische Seiten erstellen und verwalten.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {cmsView === 'list' ? (
+                      <CmsPages
+                        onNew={() => { setDuplicateCmsPage(null); setCmsView('new'); }}
+                        onEdit={(id) => { setEditCmsPageId(id); setCmsView('edit'); }}
+                        onDuplicate={(page) => { setDuplicateCmsPage(page); setCmsView('new'); }}
+                      />
+                    ) : cmsView === 'edit' ? (
+                      <CmsPageEditor pageId={editCmsPageId} onBack={() => setCmsView('list')} />
+                    ) : (
+                      <CmsPageEditor duplicateFrom={duplicateCmsPage} onBack={() => setCmsView('list')} />
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="cms-menus">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Menü-Verwaltung</CardTitle>
+                    <CardDescription>Drag & Drop Menü-Editor für alle Navigationsbereiche.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CmsMenuEditor />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="news">
