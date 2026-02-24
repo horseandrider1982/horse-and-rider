@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CartDrawer } from "./CartDrawer";
 import { useAuth } from "@/hooks/useAuth";
+import { usePublicCmsMenus, type PublicMenuItem } from "@/hooks/usePublicCmsMenus";
 import { Button } from "@/components/ui/button";
 import { User, Search, X } from "lucide-react";
 import { SmartSearchBar } from "@/components/SmartSearch";
@@ -20,9 +21,28 @@ const MobileSearchOverlay = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
+function CmsNavLink({ item }: { item: PublicMenuItem }) {
+  const isExternal = item.target === '_blank' || item.url?.startsWith('http');
+  if (isExternal) {
+    return (
+      <a href={item.url || '#'} target={item.target} rel="noopener noreferrer" className="hover:text-primary transition-colors">
+        {item.label}
+      </a>
+    );
+  }
+  return (
+    <Link to={item.url || '#'} className="hover:text-primary transition-colors">
+      {item.label}
+    </Link>
+  );
+}
+
 export const Header = () => {
   const { user } = useAuth();
+  const { data: menus } = usePublicCmsMenus();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const topNavItems = menus?.top_navigation || [];
 
   return (
     <>
@@ -33,13 +53,15 @@ export const Header = () => {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
-            <Link to="/" className="hover:text-primary transition-colors">Startseite</Link>
-            <Link to="/unsere-marken" className="hover:text-primary transition-colors">Unsere Marken</Link>
-            <Link to="/news" className="hover:text-primary transition-colors">News</Link>
-            <a href="https://www.horse-and-rider.de/Vielseitigkeit" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Vielseitigkeit</a>
-            <a href="https://www.horse-and-rider.de/Saettel" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Sättel</a>
-            <a href="https://www.horse-and-rider.de/Gebisse" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Gebisse</a>
-            <a href="https://www.horse-and-rider.de/Sattel-Service-von-Horse-Rider-Luhmuehlen" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Service</a>
+            {topNavItems.length > 0 ? (
+              topNavItems.map(item => <CmsNavLink key={item.id} item={item} />)
+            ) : (
+              <>
+                <Link to="/" className="hover:text-primary transition-colors">Startseite</Link>
+                <Link to="/unsere-marken" className="hover:text-primary transition-colors">Unsere Marken</Link>
+                <Link to="/news" className="hover:text-primary transition-colors">News</Link>
+              </>
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
