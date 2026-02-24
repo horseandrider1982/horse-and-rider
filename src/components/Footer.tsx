@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { storefrontApiRequest } from "@/lib/shopify";
+import { usePublicCmsMenus, type PublicMenuItem } from "@/hooks/usePublicCmsMenus";
 import logo from "@/assets/logo.png";
 
 const PAYMENT_SETTINGS_QUERY = `
@@ -179,8 +180,28 @@ function NewsletterSignup() {
   );
 }
 
+function FooterMenuLink({ item }: { item: PublicMenuItem }) {
+  const isExternal = item.target === '_blank' || item.url?.startsWith('http');
+  if (isExternal) {
+    return (
+      <a href={item.url || '#'} target={item.target} rel="noopener noreferrer" className="block text-background/70 hover:text-background transition-colors">
+        {item.label}
+      </a>
+    );
+  }
+  return (
+    <Link to={item.url || '#'} className="block text-background/70 hover:text-background transition-colors">
+      {item.label}
+    </Link>
+  );
+}
+
 export const Footer = () => {
   const { data: paymentMethods } = usePaymentSettings();
+  const { data: menus } = usePublicCmsMenus();
+
+  const infoItems = menus?.information || [];
+  const legalItems = menus?.legal_information || [];
 
   return (
     <footer className="bg-foreground text-background/90 py-12">
@@ -218,13 +239,18 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold text-background mb-4">Informationen</h4>
             <nav className="space-y-2 text-sm">
-              <Link to="/news" className="block text-background/70 hover:text-background transition-colors">News & Aktuelles</Link>
-              <Link to="/unsere-marken" className="block text-background/70 hover:text-background transition-colors">Unsere Marken</Link>
-              <Link to="/account" className="block text-background/70 hover:text-background transition-colors">Kundenkonto</Link>
-              <a href="https://www.horse-and-rider.de" target="_blank" rel="noopener noreferrer" className="block text-background/70 hover:text-background transition-colors">Online shoppen</a>
-              <Link to="/versand" className="block text-background/70 hover:text-background transition-colors">Versand & Zahlung</Link>
-              <Link to="/faq" className="block text-background/70 hover:text-background transition-colors">FAQ</Link>
-              <Link to="/kontakt" className="block text-background/70 hover:text-background transition-colors">Kontakt</Link>
+              {infoItems.length > 0 ? (
+                infoItems.map(item => <FooterMenuLink key={item.id} item={item} />)
+              ) : (
+                <>
+                  <Link to="/news" className="block text-background/70 hover:text-background transition-colors">News & Aktuelles</Link>
+                  <Link to="/unsere-marken" className="block text-background/70 hover:text-background transition-colors">Unsere Marken</Link>
+                  <Link to="/account" className="block text-background/70 hover:text-background transition-colors">Kundenkonto</Link>
+                  <Link to="/versand" className="block text-background/70 hover:text-background transition-colors">Versand & Zahlung</Link>
+                  <Link to="/faq" className="block text-background/70 hover:text-background transition-colors">FAQ</Link>
+                  <Link to="/kontakt" className="block text-background/70 hover:text-background transition-colors">Kontakt</Link>
+                </>
+              )}
             </nav>
           </div>
 
@@ -232,10 +258,16 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold text-background mb-4">Gesetzliche Informationen</h4>
             <nav className="space-y-2 text-sm">
-              <Link to="/datenschutz" className="block text-background/70 hover:text-background transition-colors">Datenschutz</Link>
-              <Link to="/agb" className="block text-background/70 hover:text-background transition-colors">AGB</Link>
-              <Link to="/impressum" className="block text-background/70 hover:text-background transition-colors">Impressum</Link>
-              <Link to="/widerrufsrecht" className="block text-background/70 hover:text-background transition-colors">Widerrufsrecht</Link>
+              {legalItems.length > 0 ? (
+                legalItems.map(item => <FooterMenuLink key={item.id} item={item} />)
+              ) : (
+                <>
+                  <Link to="/datenschutz" className="block text-background/70 hover:text-background transition-colors">Datenschutz</Link>
+                  <Link to="/agb" className="block text-background/70 hover:text-background transition-colors">AGB</Link>
+                  <Link to="/impressum" className="block text-background/70 hover:text-background transition-colors">Impressum</Link>
+                  <Link to="/widerrufsrecht" className="block text-background/70 hover:text-background transition-colors">Widerrufsrecht</Link>
+                </>
+              )}
             </nav>
           </div>
 
