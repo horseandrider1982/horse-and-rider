@@ -94,12 +94,22 @@ export const Header = () => {
                     </Link>
                   </DropdownMenuItem>
                 )}
-                {user && (
+                {user ? (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
                       <LogOut className="h-4 w-4" />
                       Abmelden
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/auth" className="flex items-center gap-2 cursor-pointer">
+                        <LogIn className="h-4 w-4" />
+                        Anmelden
+                      </Link>
                     </DropdownMenuItem>
                   </>
                 )}
