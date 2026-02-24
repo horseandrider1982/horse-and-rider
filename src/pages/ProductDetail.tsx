@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Loader2, ShoppingCart, ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
+import { useBrands } from "@/hooks/useBrands";
 import { useProductConfigurator } from "@/hooks/useConfigurator";
 import { useCartStore } from "@/stores/cartStore";
 import { TopBar } from "@/components/TopBar";
@@ -37,6 +38,8 @@ const ProductDetail = () => {
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
   const isConfigurator = !!configuratorData && configuratorData.groups.length > 0;
+  const { data: brands } = useBrands();
+  const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
 
   // Load saved config from localStorage
   useEffect(() => {
@@ -162,6 +165,14 @@ const ProductDetail = () => {
               )}
             </div>
             <div>
+              {brand?.logoUrl && (
+                <img
+                  src={brand.logoUrl}
+                  alt={brand.name}
+                  className="h-10 w-auto object-contain mb-3"
+                  style={{ filter: 'brightness(0)' }}
+                />
+              )}
               <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3">{product.node.title}</h1>
               <p className="text-2xl font-bold text-primary mb-4">
                 {isConfigurator && configState?.isConfigured ? (
