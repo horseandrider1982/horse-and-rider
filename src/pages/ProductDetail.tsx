@@ -169,7 +169,7 @@ const ProductDetail = () => {
                 <img
                   src={brand.logoUrl}
                   alt={brand.name}
-                  className="h-10 w-auto object-contain mb-3"
+                  className="h-6 w-auto object-contain mb-2"
                   style={{ filter: 'brightness(0)' }}
                 />
               )}
