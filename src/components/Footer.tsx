@@ -312,22 +312,29 @@ export const Footer = () => {
           {/* Trusted Shops */}
           <div>
             <h5 className="font-semibold text-background text-sm mb-3">Käuferschutz</h5>
-            <div className="flex items-start gap-4">
-              <a
-                href="https://www.trustedshops.de/bewertung/info_XD9E26EDF6E35468A4F6C9BDFD0A6E540.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block flex-shrink-0"
+            <a
+              href="https://www.trustedshops.de/bewertung/info_XD9E26EDF6E35468A4F6C9BDFD0A6E540.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <img
+                src="https://widgets.trustedshops.com/images/seal/XD9E26EDF6E35468A4F6C9BDFD0A6E540/80/seal.png"
+                alt="Trusted Shops Käuferschutz"
+                className="h-16 w-auto"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              <span
+                className="items-center justify-center rounded px-3 py-2 text-xs font-bold border border-background/30 text-background hidden gap-1.5"
               >
-                <img
-                  src="https://widgets.trustedshops.com/images/seal/XD9E26EDF6E35468A4F6C9BDFD0A6E540/80/seal.png"
-                  alt="Trusted Shops Käuferschutz"
-                  className="h-16 w-auto"
-                />
-              </a>
-              {/* Trusted Shops Review Sticker */}
-              <div id="trustedShopsReviewSticker" className="flex-shrink-0" />
-            </div>
+                ✓ Trusted Shops zertifiziert
+              </span>
+            </a>
           </div>
         </div>
 
