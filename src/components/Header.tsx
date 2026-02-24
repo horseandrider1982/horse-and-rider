@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CartDrawer } from "./CartDrawer";
 import { useAuth } from "@/hooks/useAuth";
-import { usePublicCmsMenus, type PublicMenuItem } from "@/hooks/usePublicCmsMenus";
+import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
+import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
 import { Button } from "@/components/ui/button";
 import { User, Search, X } from "lucide-react";
 import { SmartSearchBar } from "@/components/SmartSearch";
@@ -21,22 +22,6 @@ const MobileSearchOverlay = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-function CmsNavLink({ item }: { item: PublicMenuItem }) {
-  const isExternal = item.target === '_blank' || item.url?.startsWith('http');
-  if (isExternal) {
-    return (
-      <a href={item.url || '#'} target={item.target} rel="noopener noreferrer" className="hover:text-primary transition-colors">
-        {item.label}
-      </a>
-    );
-  }
-  return (
-    <Link to={item.url || '#'} className="hover:text-primary transition-colors">
-      {item.label}
-    </Link>
-  );
-}
-
 export const Header = () => {
   const { user } = useAuth();
   const { data: menus } = usePublicCmsMenus();
@@ -54,7 +39,7 @@ export const Header = () => {
 
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
             {topNavItems.length > 0 ? (
-              topNavItems.map(item => <CmsNavLink key={item.id} item={item} />)
+              <CmsMenuItemRenderer items={topNavItems} linkClassName="hover:text-primary transition-colors" mode="inline" />
             ) : (
               <>
                 <Link to="/" className="hover:text-primary transition-colors">Startseite</Link>

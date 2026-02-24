@@ -101,6 +101,24 @@ export const STOREFRONT_QUERY = `
   }
 `;
 
+export const SHOPIFY_MENU_QUERY = `
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      title
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
+    }
+  }
+`;
+
 export const PRODUCT_BY_HANDLE_QUERY = `
   query GetProductByHandle($handle: String!) {
     productByHandle(handle: $handle) {
