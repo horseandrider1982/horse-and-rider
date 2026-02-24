@@ -57,7 +57,7 @@ export function usePublicCmsMenus() {
         let url = item.url;
         if (item.type === 'cms_page' && item.cms_page_id) {
           const slug = pageSlugMap.get(item.cms_page_id);
-          if (slug) url = `/pages/${slug}`;
+          if (slug) url = `/${slug}`;
         }
 
         result[key].push({

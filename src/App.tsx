@@ -17,12 +17,7 @@ import RedirectMonitoring from "./pages/admin/RedirectMonitoring";
 import RedirectConflicts from "./pages/admin/RedirectConflicts";
 import UnsereMarken from "./pages/UnsereMarken";
 import MarkenDetail from "./pages/MarkenDetail";
-import Impressum from "./pages/Impressum";
-import Datenschutz from "./pages/Datenschutz";
-import AGB from "./pages/AGB";
-import Widerrufsrecht from "./pages/Widerrufsrecht";
 import Kontakt from "./pages/Kontakt";
-import Versand from "./pages/Versand";
 import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
@@ -52,12 +47,12 @@ const AppContent = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsDetail />} />
-        <Route path="/impressum" element={<Impressum />} />
-        <Route path="/datenschutz" element={<Datenschutz />} />
-        <Route path="/agb" element={<AGB />} />
-        <Route path="/widerrufsrecht" element={<Widerrufsrecht />} />
+        <Route path="/impressum" element={<CmsPage />} />
+        <Route path="/datenschutz" element={<CmsPage />} />
+        <Route path="/agb" element={<CmsPage />} />
+        <Route path="/widerrufsrecht" element={<CmsPage />} />
         <Route path="/kontakt" element={<Kontakt />} />
-        <Route path="/versand" element={<Versand />} />
+        <Route path="/versand" element={<CmsPage />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/pages/:slug" element={<CmsPage />} />
         <Route path="*" element={<NotFound />} />
