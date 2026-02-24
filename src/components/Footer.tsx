@@ -8,7 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { storefrontApiRequest } from "@/lib/shopify";
-import { usePublicCmsMenus, type PublicMenuItem } from "@/hooks/usePublicCmsMenus";
+import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
+import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
 import logo from "@/assets/logo.png";
 
 const PAYMENT_SETTINGS_QUERY = `
@@ -180,21 +181,7 @@ function NewsletterSignup() {
   );
 }
 
-function FooterMenuLink({ item }: { item: PublicMenuItem }) {
-  const isExternal = item.target === '_blank' || item.url?.startsWith('http');
-  if (isExternal) {
-    return (
-      <a href={item.url || '#'} target={item.target} rel="noopener noreferrer" className="block text-background/70 hover:text-background transition-colors">
-        {item.label}
-      </a>
-    );
-  }
-  return (
-    <Link to={item.url || '#'} className="block text-background/70 hover:text-background transition-colors">
-      {item.label}
-    </Link>
-  );
-}
+
 
 export const Footer = () => {
   const { data: paymentMethods } = usePaymentSettings();
@@ -240,7 +227,7 @@ export const Footer = () => {
             <h4 className="font-semibold text-background mb-4">Informationen</h4>
             <nav className="space-y-2 text-sm">
               {infoItems.length > 0 ? (
-                infoItems.map(item => <FooterMenuLink key={item.id} item={item} />)
+                <CmsMenuItemRenderer items={infoItems} linkClassName="block text-background/70 hover:text-background transition-colors" mode="block" />
               ) : (
                 <>
                   <Link to="/news" className="block text-background/70 hover:text-background transition-colors">News & Aktuelles</Link>
@@ -259,7 +246,7 @@ export const Footer = () => {
             <h4 className="font-semibold text-background mb-4">Gesetzliche Informationen</h4>
             <nav className="space-y-2 text-sm">
               {legalItems.length > 0 ? (
-                legalItems.map(item => <FooterMenuLink key={item.id} item={item} />)
+                <CmsMenuItemRenderer items={legalItems} linkClassName="block text-background/70 hover:text-background transition-colors" mode="block" />
               ) : (
                 <>
                   <Link to="/datenschutz" className="block text-background/70 hover:text-background transition-colors">Datenschutz</Link>
