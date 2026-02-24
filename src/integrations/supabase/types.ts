@@ -53,6 +53,132 @@ export type Database = {
         }
         Relationships: []
       }
+      cms_menu_items: {
+        Row: {
+          cms_page_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          menu_id: string
+          sort_order: number
+          target: Database["public"]["Enums"]["cms_link_target"]
+          type: Database["public"]["Enums"]["cms_menu_item_type"]
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          cms_page_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          menu_id: string
+          sort_order?: number
+          target?: Database["public"]["Enums"]["cms_link_target"]
+          type: Database["public"]["Enums"]["cms_menu_item_type"]
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          cms_page_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          menu_id?: string
+          sort_order?: number
+          target?: Database["public"]["Enums"]["cms_link_target"]
+          type?: Database["public"]["Enums"]["cms_menu_item_type"]
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_menu_items_cms_page_id_fkey"
+            columns: ["cms_page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_menu_items_menu_id_fkey"
+            columns: ["menu_id"]
+            isOneToOne: false
+            referencedRelation: "cms_menus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_menus: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cms_pages: {
+        Row: {
+          content: string
+          created_at: string
+          editor_mode: Database["public"]["Enums"]["cms_editor_mode"]
+          id: string
+          name: string
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          status: Database["public"]["Enums"]["cms_page_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          editor_mode?: Database["public"]["Enums"]["cms_editor_mode"]
+          id?: string
+          name: string
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["cms_page_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          editor_mode?: Database["public"]["Enums"]["cms_editor_mode"]
+          id?: string
+          name?: string
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["cms_page_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       configurator_group_values: {
         Row: {
           description: string | null
@@ -580,6 +706,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      cms_editor_mode: "standard" | "ai"
+      cms_link_target: "_self" | "_blank"
+      cms_menu_item_type:
+        | "cms_page"
+        | "custom_link"
+        | "shopify_menu_placeholder"
+      cms_page_status: "draft" | "active"
       configurator_field_type:
         | "text_input"
         | "dropdown_single"
@@ -740,6 +873,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      cms_editor_mode: ["standard", "ai"],
+      cms_link_target: ["_self", "_blank"],
+      cms_menu_item_type: [
+        "cms_page",
+        "custom_link",
+        "shopify_menu_placeholder",
+      ],
+      cms_page_status: ["draft", "active"],
       configurator_field_type: [
         "text_input",
         "dropdown_single",

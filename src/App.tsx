@@ -27,6 +27,7 @@ import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
+import CmsPage from "./pages/CmsPage";
 import { CookieBanner } from "./components/CookieBanner";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const AppContent = () => {
         <Route path="/kontakt" element={<Kontakt />} />
         <Route path="/versand" element={<Versand />} />
         <Route path="/faq" element={<FAQ />} />
+        <Route path="/pages/:slug" element={<CmsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <CookieBanner />
