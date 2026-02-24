@@ -28,5 +28,30 @@
     <script type="module" src="/src/main.tsx"></script>
     <!-- Trusted Shops Trustbadge -->
     <script async data-desktop-y-offset="0" data-mobile-y-offset="0" data-desktop-disable-reviews="false" data-desktop-enable-custom="false" data-desktop-position="right" data-desktop-custom-width="156" data-desktop-enable-fadeout="false" data-disable-mobile="false" data-disable-trustbadge="false" data-mobile-custom-width="156" data-mobile-disable-reviews="false" data-mobile-enable-custom="false" data-mobile-position="right" data-mobile-enable-topbar="false" data-mobile-enable-fadeout="true" charset="UTF-8" src="//widgets.trustedshops.com/js/XD9E26EDF6E35468A4F6C9BDFD0A6E540.js"></script>
+    <!-- Trusted Shops Review Sticker -->
+    <script>
+      (function() {
+        var _tsRatingConfig = {
+          tsid: 'XD9E26EDF6E35468A4F6C9BDFD0A6E540',
+          variant: 'skyscraper_horizontal',
+          theme: 'light',
+          reviews: 5,
+          betterThan: 3.0,
+          richSnippets: 'on',
+          backgroundColor: 'transparent',
+          linkColor: '#FFFFFF',
+          quotationMarkColor: '#FFFFFF',
+          fontFamily: 'inherit',
+          reviewMinLength: 10
+        };
+        var _ts = document.createElement('script');
+        _ts.type = 'text/javascript';
+        _ts.charset = 'utf-8';
+        _ts.async = true;
+        _ts.src = '//widgets.trustedshops.com/reviews/tsSticker/tsProductStickerSummary.js';
+        var __ts = document.getElementsByTagName('script')[0];
+        __ts.parentNode.insertBefore(_ts, __ts);
+      })();
+    </script>
   </body>
 </html>
