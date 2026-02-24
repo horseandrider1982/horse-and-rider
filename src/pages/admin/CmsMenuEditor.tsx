@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Plus, GripVertical, Trash2, Pencil, ExternalLink, FileText, Link as LinkIcon, ShoppingBag } from 'lucide-react';
+import { Loader2, Plus, GripVertical, Trash2, Pencil, ExternalLink, FileText, Link as LinkIcon, ShoppingBag, LayoutTemplate } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -272,6 +272,43 @@ export default function CmsMenuEditor() {
             <Button variant="outline" size="sm" className="w-full" onClick={() => setCustomLinkDialog(true)}>
               <Plus className="h-3.5 w-3.5 mr-1.5" />Neuen Link erstellen
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Predefined Pages */}
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Vordefinierte Seiten</CardTitle></CardHeader>
+          <CardContent className="space-y-1">
+            {[
+              { label: 'Kontakt', url: '/kontakt' },
+              { label: 'News & Aktuelles', url: '/news' },
+              { label: 'FAQ', url: '/faq' },
+              { label: 'Kundenkonto', url: '/account' },
+              { label: 'An-/Abmelden', url: '/auth' },
+              { label: 'Unsere Marken', url: '/unsere-marken' },
+            ].map(page => (
+              <div key={page.url} className="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-muted/50 group">
+                <LayoutTemplate className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                <span className="flex-1 truncate">{page.label}</span>
+                <Select onValueChange={(menuId) => {
+                  const menuItems = menuItemsByMenu[menuId] || [];
+                  saveItem.mutateAsync({
+                    menu_id: menuId,
+                    type: 'custom_link',
+                    label: page.label,
+                    url: page.url,
+                    target: '_self',
+                    sort_order: menuItems.length,
+                    is_active: true,
+                  }).then(() => toast.success(`"${page.label}" hinzugefügt`)).catch(() => toast.error('Fehler'));
+                }}>
+                  <SelectTrigger className="h-6 w-6 p-0 border-0 opacity-0 group-hover:opacity-100"><Plus className="h-3 w-3" /></SelectTrigger>
+                  <SelectContent>
+                    {menus?.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
