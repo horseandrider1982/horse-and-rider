@@ -38,6 +38,7 @@ export const Header = () => {
   };
 
   const topNavItems = menus?.top_navigation || [];
+  const accountMenuItems = menus?.account_icon_menu || [];
 
   return (
     <>
@@ -77,27 +78,30 @@ export const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-popover z-[100]">
-                {user ? (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/account" className="flex items-center gap-2 cursor-pointer">
-                        <UserCircle className="h-4 w-4" />
-                        Kundenkonto
+                {accountMenuItems.length > 0 ? (
+                  accountMenuItems.map(item => (
+                    <DropdownMenuItem key={item.id} asChild>
+                      <Link to={item.url || '/'} className="flex items-center gap-2 cursor-pointer">
+                        {item.label}
                       </Link>
                     </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link to={user ? "/account" : "/auth"} className="flex items-center gap-2 cursor-pointer">
+                      <UserCircle className="h-4 w-4" />
+                      {user ? 'Kundenkonto' : 'Anmelden'}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {user && (
+                  <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
                       <LogOut className="h-4 w-4" />
                       Abmelden
                     </DropdownMenuItem>
                   </>
-                ) : (
-                  <DropdownMenuItem asChild>
-                    <Link to="/auth" className="flex items-center gap-2 cursor-pointer">
-                      <LogIn className="h-4 w-4" />
-                      Anmelden
-                    </Link>
-                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
