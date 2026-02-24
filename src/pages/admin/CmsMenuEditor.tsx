@@ -280,6 +280,7 @@ export default function CmsMenuEditor() {
           <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Vordefinierte Seiten</CardTitle></CardHeader>
           <CardContent className="space-y-1">
             {[
+              { label: 'Startseite', url: '/' },
               { label: 'Kontakt', url: '/kontakt' },
               { label: 'News & Aktuelles', url: '/news' },
               { label: 'FAQ', url: '/faq' },
