@@ -27,6 +27,7 @@ const NAV_ITEMS = [
   { key: "redirects", label: "301", icon: ArrowRightLeft },
   { key: "users", label: "Kunden", icon: Users },
   { key: "configurator", label: "Konfigurator", icon: Settings },
+  { key: "calendly", label: "Calendly", icon: Calendar },
 ] as const;
 
 type NavKey = (typeof NAV_ITEMS)[number]["key"];
