@@ -10,28 +10,24 @@ const SHOPIFY_API_VERSION = "2025-07";
 const SHOPIFY_STORE_DOMAIN = "bpjvam-c1.myshopify.com";
 const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
-const PREDICTIVE_SEARCH_QUERY = `
-  query predictiveSearch($query: String!, $limit: Int!, $limitScope: PredictiveSearchLimitScope!) {
-    predictiveSearch(query: $query, limit: $limit, limitScope: $limitScope, types: [PRODUCT, PAGE]) {
-      products {
-        id
-        title
-        handle
-        vendor
-        featuredImage {
-          url
-          altText
+const PRODUCTS_SEARCH_QUERY = `
+  query SearchProducts($query: String!, $first: Int!) {
+    products(first: $first, query: $query) {
+      edges {
+        node {
+          id
+          title
+          handle
+          vendor
+          featuredImage {
+            url
+            altText
+          }
+          priceRange {
+            minVariantPrice { amount currencyCode }
+            maxVariantPrice { amount currencyCode }
+          }
         }
-        priceRange {
-          minVariantPrice { amount currencyCode }
-          maxVariantPrice { amount currencyCode }
-        }
-      }
-      pages {
-        id
-        title
-        handle
-        bodySummary
       }
     }
   }
@@ -50,7 +46,6 @@ function getCached(key: string) {
 
 function setCache(key: string, data: unknown) {
   cache.set(key, { data, ts: Date.now() });
-  // Evict old entries
   if (cache.size > 200) {
     const oldest = cache.keys().next().value;
     if (oldest) cache.delete(oldest);
@@ -86,20 +81,8 @@ interface NormalizedResult {
       priceText: string;
       vendor: string | null;
     }>;
-    articles: Array<{
-      id: string;
-      title: string;
-      url: string;
-      imageUrl: string | null;
-      imageAlt: string | null;
-      excerpt: string | null;
-    }>;
-    pages: Array<{
-      id: string;
-      title: string;
-      url: string;
-      excerpt: string | null;
-    }>;
+    articles: Array<never>;
+    pages: Array<never>;
   };
 }
 
@@ -128,7 +111,6 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Check cache
   const cacheKey = q.toLowerCase();
   const cached = getCached(cacheKey);
   if (cached) {
@@ -137,7 +119,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+  // Publishable storefront token - safe to include directly
+  const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN") || "d69c81decdb58ced137c44fa1b033aa3";
   if (!storefrontToken) {
     return new Response(
       JSON.stringify({ error: "Server configuration error" }),
@@ -148,6 +131,11 @@ Deno.serve(async (req) => {
     );
   }
 
+  const emptyResult: NormalizedResult = {
+    query: q,
+    groups: { products: [], articles: [], pages: [] },
+  };
+
   try {
     const shopifyRes = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
@@ -156,17 +144,13 @@ Deno.serve(async (req) => {
         "X-Shopify-Storefront-Access-Token": storefrontToken,
       },
       body: JSON.stringify({
-        query: PREDICTIVE_SEARCH_QUERY,
-        variables: { query: q, limit: 6, limitScope: "EACH" },
+        query: PRODUCTS_SEARCH_QUERY,
+        variables: { query: q, first: 6 },
       }),
     });
 
     if (!shopifyRes.ok) {
       console.error("Shopify API error:", shopifyRes.status);
-      const emptyResult: NormalizedResult = {
-        query: q,
-        groups: { products: [], articles: [], pages: [] },
-      };
       return new Response(JSON.stringify(emptyResult), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -176,85 +160,41 @@ Deno.serve(async (req) => {
 
     if (shopifyData.errors) {
       console.error("Shopify GraphQL errors:", shopifyData.errors);
-      // Continue with partial data if predictiveSearch is still present
-      if (!shopifyData.data?.predictiveSearch) {
-        const emptyResult: NormalizedResult = {
-          query: q,
-          groups: { products: [], articles: [], pages: [] },
-        };
-        return new Response(JSON.stringify(emptyResult), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
     }
 
-    const ps = shopifyData.data?.predictiveSearch;
+    const edges = shopifyData.data?.products?.edges || [];
 
     const result: NormalizedResult = {
       query: q,
       groups: {
-        products: (ps?.products || []).slice(0, 6).map(
-          (p: {
-            id: string;
-            title: string;
-            handle: string;
-            vendor: string | null;
-            featuredImage: { url: string; altText: string | null } | null;
-            priceRange: {
-              minVariantPrice: { amount: string; currencyCode: string };
-              maxVariantPrice: { amount: string; currencyCode: string };
+        products: edges.slice(0, 6).map(
+          (edge: {
+            node: {
+              id: string;
+              title: string;
+              handle: string;
+              vendor: string | null;
+              featuredImage: { url: string; altText: string | null } | null;
+              priceRange: {
+                minVariantPrice: { amount: string; currencyCode: string };
+                maxVariantPrice: { amount: string; currencyCode: string };
+              };
             };
           }) => ({
-            id: p.id,
-            title: p.title,
-            url: `/product/${p.handle}`,
-            imageUrl: p.featuredImage?.url || null,
-            imageAlt: p.featuredImage?.altText || null,
+            id: edge.node.id,
+            title: edge.node.title,
+            url: `/product/${edge.node.handle}`,
+            imageUrl: edge.node.featuredImage?.url || null,
+            imageAlt: edge.node.featuredImage?.altText || null,
             priceText: buildPriceText(
-              p.priceRange.minVariantPrice,
-              p.priceRange.maxVariantPrice
+              edge.node.priceRange.minVariantPrice,
+              edge.node.priceRange.maxVariantPrice
             ),
-            vendor: p.vendor || null,
+            vendor: edge.node.vendor || null,
           })
         ),
-        articles: (ps?.articles || []).slice(0, 3).map(
-          (a: {
-            id: string;
-            title: string;
-            handle: string;
-            image: { url: string; altText: string | null } | null;
-            excerpt: string | null;
-            blog: { handle: string } | null;
-          }) => ({
-            id: a.id,
-            title: a.title,
-            url: `/blogs/${a.blog?.handle || "news"}/${a.handle}`,
-            imageUrl: a.image?.url || null,
-            imageAlt: a.image?.altText || null,
-            excerpt: a.excerpt
-              ? a.excerpt.length > 80
-                ? a.excerpt.slice(0, 80) + "…"
-                : a.excerpt
-              : null,
-          })
-        ),
-        pages: (ps?.pages || []).slice(0, 3).map(
-          (p: {
-            id: string;
-            title: string;
-            handle: string;
-            bodySummary: string | null;
-          }) => ({
-            id: p.id,
-            title: p.title,
-            url: `/pages/${p.handle}`,
-            excerpt: p.bodySummary
-              ? p.bodySummary.length > 80
-                ? p.bodySummary.slice(0, 80) + "…"
-                : p.bodySummary
-              : null,
-          })
-        ),
+        articles: [],
+        pages: [],
       },
     };
 
@@ -265,10 +205,6 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("Search error:", err);
-    const emptyResult: NormalizedResult = {
-      query: q,
-      groups: { products: [], articles: [], pages: [] },
-    };
     return new Response(JSON.stringify(emptyResult), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
