@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, ArrowLeft, Sparkles } from "lucide-react";
+import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone } from "lucide-react";
+import beratungPortrait from "@/assets/beratung-portrait.png";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
