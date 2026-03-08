@@ -244,38 +244,39 @@ const ProductDetail = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed">{product.node.description}</p>
                 </div>
               )}
-            </div>
-          </div>
 
-          {/* Beratungs-Strip */}
-          <div className="mt-10 bg-muted/50 border border-border rounded-lg p-6 flex flex-col md:flex-row items-center gap-6">
-            <img
-              src={beratungPortrait}
-              alt="Persönliche Beratung"
-              className="w-20 h-20 rounded-full object-cover flex-shrink-0"
-            />
-            <div className="flex-1 text-center md:text-left">
-              <p className="font-semibold text-foreground">Beratung nötig?</p>
-              <p className="font-semibold text-foreground">Fragen zum Produkt? Unsicher mit der Größe?</p>
-              <p className="text-sm text-muted-foreground mt-1">Kontaktieren Sie uns einfach über einen der folgenden Wege:</p>
-            </div>
-            <div className="flex items-center gap-6 flex-shrink-0">
-              <a href="tel:+4941728319873" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
-                <Phone className="h-7 w-7" />
-                <span className="text-xs font-medium">Telefon</span>
-              </a>
-              <Link to="/kontakt" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
-                <MessageSquare className="h-7 w-7" />
-                <span className="text-xs font-medium">Kontaktformular</span>
-              </Link>
-              <a href="https://wa.me/4941728319873" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
-                <Smartphone className="h-7 w-7" />
-                <span className="text-xs font-medium">WhatsApp</span>
-              </a>
-              <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
-                <Monitor className="h-7 w-7" />
-                <span className="text-xs font-medium">Online Beratung</span>
-              </button>
+              {/* Beratungs-Strip */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <div className="flex items-center gap-3 mb-3">
+                  <img
+                    src={beratungPortrait}
+                    alt="Persönliche Beratung"
+                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">Beratung nötig? Fragen zum Produkt?</p>
+                    <p className="text-xs text-muted-foreground">Kontaktieren Sie uns einfach:</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <a href="tel:+4941728319873" className="flex flex-col items-center gap-1 text-primary hover:text-primary/80 transition-colors flex-1">
+                    <Phone className="h-6 w-6" />
+                    <span className="text-[10px] font-medium">Telefon</span>
+                  </a>
+                  <Link to="/kontakt" className="flex flex-col items-center gap-1 text-primary hover:text-primary/80 transition-colors flex-1">
+                    <MessageSquare className="h-6 w-6" />
+                    <span className="text-[10px] font-medium">Kontaktformular</span>
+                  </Link>
+                  <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1 text-primary hover:text-primary/80 transition-colors flex-1">
+                    <Monitor className="h-6 w-6" />
+                    <span className="text-[10px] font-medium">Online Beratung</span>
+                  </button>
+                  <a href="https://wa.me/4941728319873" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 text-primary hover:text-primary/80 transition-colors flex-1">
+                    <Smartphone className="h-6 w-6" />
+                    <span className="text-[10px] font-medium">WhatsApp</span>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
