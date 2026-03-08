@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone } from "lucide-react";
+import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor } from "lucide-react";
+import { CalendlyModal } from "@/components/CalendlyModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
@@ -35,6 +36,7 @@ const ProductDetail = () => {
   const [mainImage, setMainImage] = useState(0);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [configState, setConfigState] = useState<ConfigurationState | null>(null);
+  const [calendlyOpen, setCalendlyOpen] = useState(false);
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
@@ -270,6 +272,10 @@ const ProductDetail = () => {
                 <Smartphone className="h-7 w-7" />
                 <span className="text-xs font-medium">WhatsApp</span>
               </a>
+              <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                <Monitor className="h-7 w-7" />
+                <span className="text-xs font-medium">Online Beratung</span>
+              </button>
             </div>
           </div>
 
@@ -289,6 +295,7 @@ const ProductDetail = () => {
           initialSelections={configState?.selections}
         />
       )}
+      <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
     </div>
   );
 };

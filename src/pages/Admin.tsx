@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
@@ -15,6 +15,7 @@ import RedirectManager from "@/pages/admin/RedirectManager";
 import CmsPages from "@/pages/admin/CmsPages";
 import CmsPageEditor from "@/pages/admin/CmsPageEditor";
 import CmsMenuEditor from "@/pages/admin/CmsMenuEditor";
+import CalendlySettings from "@/pages/admin/CalendlySettings";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { key: "redirects", label: "301", icon: ArrowRightLeft },
   { key: "users", label: "Kunden", icon: Users },
   { key: "configurator", label: "Konfigurator", icon: Settings },
+  { key: "calendly", label: "Calendly", icon: Calendar },
 ] as const;
 
 type NavKey = (typeof NAV_ITEMS)[number]["key"];
@@ -153,6 +155,7 @@ export default function Admin() {
           {activeSection === "redirects" && <RedirectsSection />}
           {activeSection === "users" && <UsersSection />}
           {activeSection === "configurator" && <ConfiguratorSection />}
+          {activeSection === "calendly" && <CalendlySettings />}
         </div>
       </main>
     </div>
