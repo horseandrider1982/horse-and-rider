@@ -272,6 +272,10 @@ const ProductDetail = () => {
                 <Smartphone className="h-7 w-7" />
                 <span className="text-xs font-medium">WhatsApp</span>
               </a>
+              <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                <Monitor className="h-7 w-7" />
+                <span className="text-xs font-medium">Online Beratung</span>
+              </button>
             </div>
           </div>
 
