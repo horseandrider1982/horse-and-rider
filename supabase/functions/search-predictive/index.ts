@@ -119,7 +119,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+  // Publishable storefront token - safe to include directly
+  const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN") || "d69c81decdb58ced137c44fa1b033aa3";
   if (!storefrontToken) {
     return new Response(
       JSON.stringify({ error: "Server configuration error" }),
