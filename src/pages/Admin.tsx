@@ -15,6 +15,7 @@ import RedirectManager from "@/pages/admin/RedirectManager";
 import CmsPages from "@/pages/admin/CmsPages";
 import CmsPageEditor from "@/pages/admin/CmsPageEditor";
 import CmsMenuEditor from "@/pages/admin/CmsMenuEditor";
+import CalendlySettings from "@/pages/admin/CalendlySettings";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
