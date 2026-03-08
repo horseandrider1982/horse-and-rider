@@ -258,10 +258,10 @@ const ProductDetail = () => {
                     <Phone className="h-12 w-12" />
                     <span className="text-sm font-medium">Telefon</span>
                   </a>
-                  <Link to="/kontakt" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                  <button onClick={() => setContactOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <MessageSquare className="h-12 w-12" />
                     <span className="text-sm font-medium">Kontaktformular</span>
-                  </Link>
+                  </button>
                   <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Monitor className="h-12 w-12" />
                     <span className="text-sm font-medium">Online Beratung</span>
