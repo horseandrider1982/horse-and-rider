@@ -300,6 +300,12 @@ const ProductDetail = () => {
         />
       )}
       <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
+      <ProductContactModal
+        open={contactOpen}
+        onOpenChange={setContactOpen}
+        productTitle={product.node.title}
+        productId={handle || ''}
+      />
     </div>
   );
 };
