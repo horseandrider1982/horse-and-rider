@@ -260,20 +260,20 @@ const ProductDetail = () => {
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <a href="tel:+4941728319873" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
-                    <Phone className="h-8 w-8" />
-                    <span className="text-xs font-medium">Telefon</span>
+                    <Phone className="h-12 w-12" />
+                    <span className="text-sm font-medium">Telefon</span>
                   </a>
                   <Link to="/kontakt" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
-                    <MessageSquare className="h-8 w-8" />
-                    <span className="text-xs font-medium">Kontaktformular</span>
+                    <MessageSquare className="h-12 w-12" />
+                    <span className="text-sm font-medium">Kontaktformular</span>
                   </Link>
                   <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
-                    <Monitor className="h-8 w-8" />
-                    <span className="text-xs font-medium">Online Beratung</span>
+                    <Monitor className="h-12 w-12" />
+                    <span className="text-sm font-medium">Online Beratung</span>
                   </button>
                   <a href="https://wa.me/4941728319873" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
-                    <Smartphone className="h-8 w-8" />
-                    <span className="text-xs font-medium">WhatsApp</span>
+                    <Smartphone className="h-12 w-12" />
+                    <span className="text-sm font-medium">WhatsApp</span>
                   </a>
                 </div>
               </div>
