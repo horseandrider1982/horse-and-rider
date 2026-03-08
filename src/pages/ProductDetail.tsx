@@ -252,7 +252,7 @@ const ProductDetail = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <a href="tel:+4941728319873" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                  <a href="tel:+4941726403" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Phone className="h-12 w-12" />
                     <span className="text-sm font-medium">Telefon</span>
                   </a>
