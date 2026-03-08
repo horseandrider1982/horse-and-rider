@@ -238,13 +238,6 @@ const ProductDetail = () => {
                 {!canAddToCart ? 'Bitte zuerst konfigurieren' : selectedVariant?.availableForSale ? "In den Warenkorb" : "Nicht verfügbar"}
               </Button>
 
-              {product.node.description && (
-                <div className="mt-6 pt-6 border-t border-border">
-                  <h3 className="font-semibold mb-2">Beschreibung</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{product.node.description}</p>
-                </div>
-              )}
-
               {/* Beratungs-Strip */}
               <div className="mt-6 pt-6 border-t border-border">
                 <div className="flex items-center gap-4 mb-4">
@@ -279,6 +272,14 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Beschreibung – volle Breite */}
+          {product.node.description && (
+            <div className="mt-10 pt-8 border-t border-border">
+              <h3 className="font-heading text-xl font-semibold mb-4">Beschreibung</h3>
+              <p className="text-base text-muted-foreground leading-relaxed">{product.node.description}</p>
+            </div>
+          )}
 
         </div>
       </main>
