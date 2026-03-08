@@ -36,6 +36,7 @@ const ProductDetail = () => {
   const [mainImage, setMainImage] = useState(0);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [configState, setConfigState] = useState<ConfigurationState | null>(null);
+  const [calendlyOpen, setCalendlyOpen] = useState(false);
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
