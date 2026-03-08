@@ -184,13 +184,16 @@ Deno.serve(async (req) => {
 
     if (shopifyData.errors) {
       console.error("Shopify GraphQL errors:", shopifyData.errors);
-      const emptyResult: NormalizedResult = {
-        query: q,
-        groups: { products: [], articles: [], pages: [] },
-      };
-      return new Response(JSON.stringify(emptyResult), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Continue with partial data if predictiveSearch is still present
+      if (!shopifyData.data?.predictiveSearch) {
+        const emptyResult: NormalizedResult = {
+          query: q,
+          groups: { products: [], articles: [], pages: [] },
+        };
+        return new Response(JSON.stringify(emptyResult), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const ps = shopifyData.data?.predictiveSearch;
