@@ -12,7 +12,7 @@ const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_AP
 
 const PREDICTIVE_SEARCH_QUERY = `
   query predictiveSearch($query: String!, $limit: Int!, $limitScope: PredictiveSearchLimitScope!) {
-    predictiveSearch(query: $query, limit: $limit, limitScope: $limitScope, types: [PRODUCT, ARTICLE, PAGE]) {
+    predictiveSearch(query: $query, limit: $limit, limitScope: $limitScope, types: [PRODUCT, PAGE]) {
       products {
         id
         title
@@ -26,14 +26,6 @@ const PREDICTIVE_SEARCH_QUERY = `
           minVariantPrice { amount currencyCode }
           maxVariantPrice { amount currencyCode }
         }
-      }
-      articles {
-        id
-        title
-        handle
-        image { url altText }
-        excerpt
-        blog { handle }
       }
       pages {
         id
