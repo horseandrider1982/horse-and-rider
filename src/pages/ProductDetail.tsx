@@ -295,6 +295,7 @@ const ProductDetail = () => {
           initialSelections={configState?.selections}
         />
       )}
+      <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
     </div>
   );
 };
