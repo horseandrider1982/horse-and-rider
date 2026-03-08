@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { SearchResults } from "@/types/search";
 
-const DEBOUNCE_MS = 150;
+const DEBOUNCE_MS = 350;
 const CACHE_TTL = 45_000;
 
 const queryCache = new Map<string, { data: SearchResults; ts: number }>();
