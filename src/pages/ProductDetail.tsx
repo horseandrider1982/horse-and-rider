@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
+import { ProductContactModal } from "@/components/ProductContactModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
@@ -37,6 +38,7 @@ const ProductDetail = () => {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [configState, setConfigState] = useState<ConfigurationState | null>(null);
   const [calendlyOpen, setCalendlyOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
@@ -256,10 +258,10 @@ const ProductDetail = () => {
                     <Phone className="h-12 w-12" />
                     <span className="text-sm font-medium">Telefon</span>
                   </a>
-                  <Link to="/kontakt" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                  <button onClick={() => setContactOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <MessageSquare className="h-12 w-12" />
                     <span className="text-sm font-medium">Kontaktformular</span>
-                  </Link>
+                  </button>
                   <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Monitor className="h-12 w-12" />
                     <span className="text-sm font-medium">Online Beratung</span>
@@ -298,6 +300,12 @@ const ProductDetail = () => {
         />
       )}
       <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
+      <ProductContactModal
+        open={contactOpen}
+        onOpenChange={setContactOpen}
+        productTitle={product.node.title}
+        productId={handle || ''}
+      />
     </div>
   );
 };
