@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, ArrowLeft, Sparkles } from "lucide-react";
+import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone } from "lucide-react";
+import beratungPortrait from "@/assets/beratung-portrait.png";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
@@ -243,6 +244,35 @@ const ProductDetail = () => {
               )}
             </div>
           </div>
+
+          {/* Beratungs-Strip */}
+          <div className="mt-10 bg-muted/50 border border-border rounded-lg p-6 flex flex-col md:flex-row items-center gap-6">
+            <img
+              src={beratungPortrait}
+              alt="Persönliche Beratung"
+              className="w-20 h-20 rounded-full object-cover flex-shrink-0"
+            />
+            <div className="flex-1 text-center md:text-left">
+              <p className="font-semibold text-foreground">Beratung nötig?</p>
+              <p className="font-semibold text-foreground">Fragen zum Produkt? Unsicher mit der Größe?</p>
+              <p className="text-sm text-muted-foreground mt-1">Kontaktieren Sie uns einfach über einen der folgenden Wege:</p>
+            </div>
+            <div className="flex items-center gap-6 flex-shrink-0">
+              <a href="tel:+4941728319873" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                <Phone className="h-7 w-7" />
+                <span className="text-xs font-medium">Telefon</span>
+              </a>
+              <Link to="/kontakt" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                <MessageSquare className="h-7 w-7" />
+                <span className="text-xs font-medium">Kontaktformular</span>
+              </Link>
+              <a href="https://wa.me/4941728319873" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                <Smartphone className="h-7 w-7" />
+                <span className="text-xs font-medium">WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
         </div>
       </main>
       <Footer />
