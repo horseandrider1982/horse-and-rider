@@ -266,7 +266,7 @@ const ProductDetail = () => {
                     <Monitor className="h-12 w-12" />
                     <span className="text-sm font-medium">Online Beratung</span>
                   </button>
-                  <a href="https://wa.me/4941728319873" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                  <a href="https://wa.me/4941726403" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Smartphone className="h-12 w-12" />
                     <span className="text-sm font-medium">WhatsApp</span>
                   </a>
