@@ -155,6 +155,7 @@ export default function Admin() {
           {activeSection === "redirects" && <RedirectsSection />}
           {activeSection === "users" && <UsersSection />}
           {activeSection === "configurator" && <ConfiguratorSection />}
+          {activeSection === "calendly" && <CalendlySettings />}
         </div>
       </main>
     </div>
