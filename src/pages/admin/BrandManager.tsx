@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw, Sparkles } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw, Sparkles, Database } from "lucide-react";
 import { toast } from "sonner";
 
 interface BrandRow {
