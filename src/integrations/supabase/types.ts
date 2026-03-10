@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_knowledge: {
+        Row: {
+          brand_id: string
+          content: string
+          crawled_at: string
+          id: string
+          page_title: string | null
+          source_url: string
+        }
+        Insert: {
+          brand_id: string
+          content?: string
+          crawled_at?: string
+          id?: string
+          page_title?: string | null
+          source_url: string
+        }
+        Update: {
+          brand_id?: string
+          content?: string
+          crawled_at?: string
+          id?: string
+          page_title?: string | null
+          source_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_knowledge_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brands: {
         Row: {
           created_at: string
