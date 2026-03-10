@@ -29,6 +29,7 @@ const NAV_ITEMS = [
   { key: "users", label: "Kunden", icon: Users },
   { key: "configurator", label: "Konfigurator", icon: Settings },
   { key: "calendly", label: "Calendly", icon: Calendar },
+  { key: "search", label: "Suche", icon: SearchIcon },
 ] as const;
 
 type NavKey = (typeof NAV_ITEMS)[number]["key"];
