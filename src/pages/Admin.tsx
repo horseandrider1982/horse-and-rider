@@ -158,6 +158,7 @@ export default function Admin() {
           {activeSection === "users" && <UsersSection />}
           {activeSection === "configurator" && <ConfiguratorSection />}
           {activeSection === "calendly" && <CalendlySettings />}
+          {activeSection === "search" && <SearchSettings />}
         </div>
       </main>
     </div>
