@@ -702,6 +702,33 @@ export type Database = {
         }
         Relationships: []
       }
+      search_synonyms: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          synonyms: string[]
+          term: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          synonyms?: string[]
+          term: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          synonyms?: string[]
+          term?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string
