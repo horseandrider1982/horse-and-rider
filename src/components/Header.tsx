@@ -6,30 +6,17 @@ import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, Search, X, LogIn, LogOut, UserCircle } from "lucide-react";
-import { SmartSearchBar } from "@/components/SmartSearch";
+import { User, Search, LogIn, LogOut, UserCircle } from "lucide-react";
+import { SearchOverlay } from "@/components/SmartSearch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
-
-const MobileSearchOverlay = ({ onClose }: { onClose: () => void }) => {
-  return (
-    <div className="fixed inset-0 z-[200] bg-background flex flex-col">
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-        <SmartSearchBar className="flex-1" autoFocus />
-        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Suche schließen">
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-    </div>
-  );
-};
 
 export const Header = () => {
   const { user } = useAuth();
   const { data: menus } = usePublicCmsMenus();
   const navigate = useNavigate();
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -61,13 +48,13 @@ export const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <SmartSearchBar className="hidden sm:block w-48 md:w-64 lg:w-72" />
+            {/* Search trigger button */}
             <Button
               variant="ghost"
               size="icon"
-              className="sm:hidden"
-              onClick={() => setMobileSearchOpen(true)}
+              onClick={() => setSearchOpen(true)}
               aria-label="Suche öffnen"
+              className="relative"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -119,7 +106,8 @@ export const Header = () => {
           </div>
         </div>
       </header>
-      {mobileSearchOpen && <MobileSearchOverlay onClose={() => setMobileSearchOpen(false)} />}
+
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 };
