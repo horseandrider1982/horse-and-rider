@@ -1,0 +1,90 @@
+import { useState } from "react";
+import { Search, Sparkles } from "lucide-react";
+import { SearchOverlay } from "@/components/SmartSearch";
+import { cn } from "@/lib/utils";
+
+const QUICK_CHIPS = [
+  "Winterdecke",
+  "Airbagweste",
+  "Schabracke",
+  "Reithelm",
+  "Gamaschen",
+  "Turnierbekleidung",
+];
+
+export const HeroBanner = () => {
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  return (
+    <>
+      <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--primary)/0.08)] via-background to-[hsl(var(--primary)/0.04)]">
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        <div className="relative container mx-auto px-4 py-12 sm:py-16 lg:py-20">
+          <div className="max-w-3xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase mb-5">
+              <Sparkles className="w-3.5 h-3.5" />
+              KI-gestützte Suche & Beratung
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-4">
+              Finde die perfekte Ausrüstung{" "}
+              <span className="text-primary">für Pferd & Reiter</span>
+            </h1>
+
+            {/* Subline */}
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-8">
+              Suche nach Produkten, Marken und Kategorien — oder stelle eine Frage
+              und erhalte eine persönliche Beratung durch unsere KI.
+            </p>
+
+            {/* Fake search field that opens the overlay */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className={cn(
+                "w-full max-w-2xl mx-auto flex items-center gap-3",
+                "h-14 sm:h-16 px-5 rounded-2xl",
+                "bg-background border-2 border-border",
+                "shadow-lg shadow-primary/5 hover:shadow-xl hover:shadow-primary/10",
+                "hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/20",
+                "transition-all duration-200 cursor-text group"
+              )}
+            >
+              <Search className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+              <span className="text-muted-foreground text-base sm:text-lg text-left">
+                Produkte suchen oder eine Frage stellen …
+              </span>
+            </button>
+
+            {/* Quick chips */}
+            <div className="flex flex-wrap justify-center gap-2 mt-5">
+              <span className="text-xs text-muted-foreground self-center mr-1">Beliebt:</span>
+              {QUICK_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => setSearchOpen(true)}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-xs font-medium",
+                    "border border-border bg-background/80",
+                    "text-muted-foreground hover:text-primary hover:border-primary/40",
+                    "transition-colors"
+                  )}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
+  );
+};
