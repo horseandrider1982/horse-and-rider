@@ -143,7 +143,7 @@ export const SmartSearchBar: React.FC<{ className?: string; autoFocus?: boolean 
         <div
           id={dropdownId}
           role="listbox"
-          className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-xl shadow-lg z-[100] overflow-hidden"
+          className="absolute top-full right-0 mt-1 min-w-[400px] w-[min(500px,90vw)] bg-popover border border-border rounded-xl shadow-lg z-[100] overflow-hidden"
         >
           <SmartSearchDropdown
             results={results}
