@@ -1,6 +1,6 @@
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-
+import { HeroBanner } from "@/components/HeroBanner";
 import { ServiceCards } from "@/components/ServiceCards";
 import { ProductGrid } from "@/components/ProductGrid";
 import { CategoryHighlights } from "@/components/CategoryHighlights";
@@ -12,7 +12,7 @@ const Index = () => {
       <TopBar />
       <Header />
       <main className="flex-1">
-        
+        <HeroBanner />
         <ServiceCards />
         <ProductGrid />
         <CategoryHighlights />
