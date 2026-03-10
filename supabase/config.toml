@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.cms-ai-generate]
 verify_jwt = false
+
+[functions.search-ai-advisor]
+verify_jwt = false
