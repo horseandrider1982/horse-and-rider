@@ -59,6 +59,37 @@ export default function BrandManager() {
 
   useEffect(() => { fetchBrands(); }, []);
 
+  const handleCrawlAll = async () => {
+    setCrawling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crawl-brand-knowledge");
+      if (error) throw error;
+      toast.success(`Wissensdatenbank aktualisiert: ${data?.crawled ?? 0} Seiten gecrawlt von ${data?.brands ?? 0} Marken`);
+      if (data?.errors?.length) {
+        toast.warning(`${data.errors.length} Fehler beim Crawlen`);
+      }
+    } catch (e: any) {
+      toast.error("Crawling fehlgeschlagen: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setCrawling(false);
+    }
+  };
+
+  const handleCrawlBrand = async (brandId: string, brandName: string) => {
+    setCrawling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crawl-brand-knowledge", {
+        body: { brandId },
+      });
+      if (error) throw error;
+      toast.success(`${brandName}: ${data?.crawled ?? 0} Seiten gecrawlt`);
+    } catch (e: any) {
+      toast.error(`Crawling für ${brandName} fehlgeschlagen: ` + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setCrawling(false);
+    }
+  };
+
   const handleNew = () => {
     setIsNew(true);
     setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, website_url: null, featured: false, is_active: true });
