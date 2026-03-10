@@ -32,6 +32,7 @@ export default function BrandManager() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [crawling, setCrawling] = useState(false);
   const [editing, setEditing] = useState<BrandRow | null>(null);
   const [isNew, setIsNew] = useState(false);
 
