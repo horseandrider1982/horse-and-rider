@@ -225,6 +225,7 @@ export default function BrandManager() {
                 <th className="text-left py-3 px-2 font-medium">Marke</th>
                 <th className="text-left py-3 px-2 font-medium">Logo</th>
                 <th className="text-left py-3 px-2 font-medium">SEO-Text</th>
+                <th className="text-left py-3 px-2 font-medium">URL</th>
                 <th className="text-left py-3 px-2 font-medium">Featured</th>
                 <th className="text-right py-3 px-2 font-medium">Aktionen</th>
               </tr>
@@ -237,6 +238,23 @@ export default function BrandManager() {
                     {b.logo_url ? <img src={b.logo_url} alt="" className="h-8 w-auto" /> : <span className="text-muted-foreground">–</span>}
                   </td>
                   <td className="py-3 px-2 text-muted-foreground">{b.seo_text ? "✓" : "–"}</td>
+                  <td className="py-3 px-2 text-muted-foreground text-xs">
+                    {b.website_url ? (
+                      <span className="flex items-center gap-1">
+                        ✓
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-1.5 text-xs"
+                          disabled={crawling}
+                          onClick={() => handleCrawlBrand(b.id, b.name)}
+                          title="Wissen dieser Marke crawlen"
+                        >
+                          <Database className="h-3 w-3" />
+                        </Button>
+                      </span>
+                    ) : "–"}
+                  </td>
                   <td className="py-3 px-2">{b.featured ? "★" : "–"}</td>
                   <td className="py-3 px-2 text-right">
                     <div className="flex gap-1 justify-end">
