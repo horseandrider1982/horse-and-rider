@@ -199,7 +199,11 @@ export default function BrandManager() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">{brands.length} Marken gepflegt · Täglicher Auto-Sync um 03:00 Uhr</p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" onClick={handleCrawlAll} disabled={crawling}>
+            <Database className={`h-4 w-4 mr-1 ${crawling ? "animate-pulse" : ""}`} />
+            {crawling ? "Crawle…" : "Wissensdatenbank aktualisieren"}
+          </Button>
           <Button size="sm" variant="outline" onClick={handleSync} disabled={syncing}>
             <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Sync läuft…" : "Shopify-Sync"}
