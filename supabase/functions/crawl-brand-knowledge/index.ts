@@ -13,7 +13,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { brandId } = await req.json();
+    let brandId: string | undefined;
+    try {
+      const body = await req.text();
+      if (body && body.trim().length > 0) {
+        const parsed = JSON.parse(body);
+        brandId = parsed.brandId;
+      }
+    } catch {
+      // No body or invalid JSON — crawl all brands
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
