@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw, Sparkles } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, X, Check, RefreshCw, Sparkles, Database } from "lucide-react";
 import { toast } from "sonner";
 
 interface BrandRow {
@@ -32,6 +32,7 @@ export default function BrandManager() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [crawling, setCrawling] = useState(false);
   const [editing, setEditing] = useState<BrandRow | null>(null);
   const [isNew, setIsNew] = useState(false);
 
@@ -57,6 +58,37 @@ export default function BrandManager() {
   };
 
   useEffect(() => { fetchBrands(); }, []);
+
+  const handleCrawlAll = async () => {
+    setCrawling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crawl-brand-knowledge");
+      if (error) throw error;
+      toast.success(`Wissensdatenbank aktualisiert: ${data?.crawled ?? 0} Seiten gecrawlt von ${data?.brands ?? 0} Marken`);
+      if (data?.errors?.length) {
+        toast.warning(`${data.errors.length} Fehler beim Crawlen`);
+      }
+    } catch (e: any) {
+      toast.error("Crawling fehlgeschlagen: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setCrawling(false);
+    }
+  };
+
+  const handleCrawlBrand = async (brandId: string, brandName: string) => {
+    setCrawling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crawl-brand-knowledge", {
+        body: { brandId },
+      });
+      if (error) throw error;
+      toast.success(`${brandName}: ${data?.crawled ?? 0} Seiten gecrawlt`);
+    } catch (e: any) {
+      toast.error(`Crawling für ${brandName} fehlgeschlagen: ` + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setCrawling(false);
+    }
+  };
 
   const handleNew = () => {
     setIsNew(true);
@@ -167,7 +199,11 @@ export default function BrandManager() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">{brands.length} Marken gepflegt · Täglicher Auto-Sync um 03:00 Uhr</p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" onClick={handleCrawlAll} disabled={crawling}>
+            <Database className={`h-4 w-4 mr-1 ${crawling ? "animate-pulse" : ""}`} />
+            {crawling ? "Crawle…" : "Wissensdatenbank aktualisieren"}
+          </Button>
           <Button size="sm" variant="outline" onClick={handleSync} disabled={syncing}>
             <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Sync läuft…" : "Shopify-Sync"}
@@ -189,6 +225,7 @@ export default function BrandManager() {
                 <th className="text-left py-3 px-2 font-medium">Marke</th>
                 <th className="text-left py-3 px-2 font-medium">Logo</th>
                 <th className="text-left py-3 px-2 font-medium">SEO-Text</th>
+                <th className="text-left py-3 px-2 font-medium">URL</th>
                 <th className="text-left py-3 px-2 font-medium">Featured</th>
                 <th className="text-right py-3 px-2 font-medium">Aktionen</th>
               </tr>
@@ -201,6 +238,23 @@ export default function BrandManager() {
                     {b.logo_url ? <img src={b.logo_url} alt="" className="h-8 w-auto" /> : <span className="text-muted-foreground">–</span>}
                   </td>
                   <td className="py-3 px-2 text-muted-foreground">{b.seo_text ? "✓" : "–"}</td>
+                  <td className="py-3 px-2 text-muted-foreground text-xs">
+                    {b.website_url ? (
+                      <span className="flex items-center gap-1">
+                        ✓
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-1.5 text-xs"
+                          disabled={crawling}
+                          onClick={() => handleCrawlBrand(b.id, b.name)}
+                          title="Wissen dieser Marke crawlen"
+                        >
+                          <Database className="h-3 w-3" />
+                        </Button>
+                      </span>
+                    ) : "–"}
+                  </td>
                   <td className="py-3 px-2">{b.featured ? "★" : "–"}</td>
                   <td className="py-3 px-2 text-right">
                     <div className="flex gap-1 justify-end">

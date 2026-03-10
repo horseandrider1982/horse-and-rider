@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,31 +7,158 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `Du bist ein kompetenter, freundlicher Berater für einen Online-Reitsportshop für Pferd und Reiter.
+const SHOPIFY_STORE_DOMAIN = "bpjvam-c1.myshopify.com";
+const SHOPIFY_API_VERSION = "2025-07";
+const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
-Deine Aufgabe:
-- Beantworte Fragen rund um Reitsportausrüstung kurz, kompetent und hilfreich.
-- Gib konkrete Empfehlungen und Auswahlkriterien.
-- Antworte auf Deutsch, verständlich und verkaufsstark.
-- Halte dich kurz: maximal 3-4 Sätze pro Antwort.
-- Wenn du Produkte empfiehlst, nenne Produktkategorien und Suchbegriffe.
+const PRODUCTS_SEARCH_QUERY = `
+  query SearchProducts($query: String!, $first: Int!) {
+    products(first: $first, query: $query) {
+      edges {
+        node {
+          title
+          description
+          handle
+          vendor
+          productType
+          tags
+          priceRange {
+            minVariantPrice { amount currencyCode }
+          }
+        }
+      }
+    }
+  }
+`;
 
-Reitsport-Synonyme die du kennen solltest:
-- Schabracke = Saddle Pad
-- Gamaschen = Boots / Beinschutz
-- Airbagweste = Sicherheitsweste
-- Pferdedecke = Outdoordecke / Regendecke / Winterdecke
-- Reithelm = Helm
-- Turnierjacket = Turniersakko
+async function fetchShopifyProducts(query: string, storefrontToken: string): Promise<string> {
+  try {
+    const res = await fetch(SHOPIFY_STOREFRONT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": storefrontToken,
+      },
+      body: JSON.stringify({
+        query: PRODUCTS_SEARCH_QUERY,
+        variables: { query, first: 8 },
+      }),
+    });
 
-Format deiner Antwort als JSON:
-{
-  "answer": "Deine kompakte, hilfreiche Antwort",
-  "recommendedProducts": ["Suchbegriff 1", "Suchbegriff 2"],
-  "categories": ["Kategorie 1", "Kategorie 2"]
+    if (!res.ok) return "";
+    const data = await res.json();
+    const edges = data.data?.products?.edges || [];
+
+    return edges.map((e: any) => {
+      const n = e.node;
+      const price = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: n.priceRange.minVariantPrice.currencyCode,
+      }).format(parseFloat(n.priceRange.minVariantPrice.amount));
+
+      return `- ${n.title} (${n.vendor || "–"}, ${price}): ${(n.description || "").slice(0, 300)}`;
+    }).join("\n");
+  } catch {
+    return "";
+  }
 }
 
-Antworte AUSSCHLIESSLICH mit dem JSON-Objekt, ohne Markdown-Codeblöcke.`;
+async function fetchCmsPages(sb: any, query: string): Promise<string> {
+  try {
+    const { data } = await sb
+      .from("cms_pages")
+      .select("title, content, slug")
+      .eq("status", "active")
+      .textSearch("content", query.split(" ").join(" & "), { type: "plain" })
+      .limit(5);
+
+    if (!data || data.length === 0) {
+      // Fallback: fetch all active pages
+      const { data: allPages } = await sb
+        .from("cms_pages")
+        .select("title, content, slug")
+        .eq("status", "active")
+        .limit(10);
+
+      if (!allPages || allPages.length === 0) return "";
+      return allPages.map((p: any) => {
+        const plainText = p.content.replace(/<[^>]*>/g, "").slice(0, 500);
+        return `[CMS-Seite: ${p.title}] ${plainText}`;
+      }).join("\n\n");
+    }
+
+    return data.map((p: any) => {
+      const plainText = p.content.replace(/<[^>]*>/g, "").slice(0, 500);
+      return `[CMS-Seite: ${p.title}] ${plainText}`;
+    }).join("\n\n");
+  } catch {
+    return "";
+  }
+}
+
+async function fetchBrandKnowledge(sb: any, query: string): Promise<string> {
+  try {
+    // Get all brand knowledge and do simple text matching
+    const { data } = await sb
+      .from("brand_knowledge")
+      .select("page_title, content, source_url, brand_id")
+      .limit(100);
+
+    if (!data || data.length === 0) return "";
+
+    // Also get brand names
+    const brandIds = [...new Set(data.map((d: any) => d.brand_id))];
+    const { data: brands } = await sb
+      .from("brands")
+      .select("id, name")
+      .in("id", brandIds);
+
+    const brandMap = new Map((brands || []).map((b: any) => [b.id, b.name]));
+
+    // Filter by relevance: check if query words appear in content
+    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+    const relevant = data.filter((d: any) => {
+      const text = `${d.page_title || ""} ${d.content}`.toLowerCase();
+      return queryWords.some(w => text.includes(w));
+    }).slice(0, 10);
+
+    if (relevant.length === 0) {
+      // Return first few entries as general context
+      return data.slice(0, 5).map((d: any) => {
+        const brand = brandMap.get(d.brand_id) || "Unbekannt";
+        return `[${brand} - ${d.page_title || d.source_url}] ${d.content.slice(0, 400)}`;
+      }).join("\n\n");
+    }
+
+    return relevant.map((d: any) => {
+      const brand = brandMap.get(d.brand_id) || "Unbekannt";
+      return `[${brand} - ${d.page_title || d.source_url}] ${d.content.slice(0, 600)}`;
+    }).join("\n\n");
+  } catch (e) {
+    console.error("Brand knowledge fetch error:", e);
+    return "";
+  }
+}
+
+async function fetchBrandSeoTexts(sb: any): Promise<string> {
+  try {
+    const { data } = await sb
+      .from("brands")
+      .select("name, seo_text")
+      .eq("is_active", true)
+      .not("seo_text", "is", null)
+      .limit(50);
+
+    if (!data || data.length === 0) return "";
+
+    return data.map((b: any) => {
+      const plainText = (b.seo_text || "").replace(/<[^>]*>/g, "").slice(0, 400);
+      return `[Marke: ${b.name}] ${plainText}`;
+    }).join("\n\n");
+  } catch {
+    return "";
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -54,6 +182,59 @@ Deno.serve(async (req) => {
       );
     }
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN") || "d69c81decdb58ced137c44fa1b033aa3";
+
+    const sb = createClient(supabaseUrl, serviceKey);
+
+    // Fetch all context in parallel
+    const [productContext, cmsContext, brandKnowledge, brandSeo] = await Promise.all([
+      fetchShopifyProducts(query.trim(), storefrontToken),
+      fetchCmsPages(sb, query.trim()),
+      fetchBrandKnowledge(sb, query.trim()),
+      fetchBrandSeoTexts(sb),
+    ]);
+
+    const contextParts: string[] = [];
+    if (productContext) contextParts.push(`=== PRODUKTE IM SHOP ===\n${productContext}`);
+    if (cmsContext) contextParts.push(`=== CMS-SEITEN ===\n${cmsContext}`);
+    if (brandKnowledge) contextParts.push(`=== MARKENWISSEN (gecrawlte Herstellerseiten) ===\n${brandKnowledge}`);
+    if (brandSeo) contextParts.push(`=== MARKEN-BESCHREIBUNGEN ===\n${brandSeo}`);
+
+    const contextBlock = contextParts.length > 0
+      ? `\n\nHier sind die verfügbaren Informationen aus dem Shop und den Herstellerseiten:\n\n${contextParts.join("\n\n")}`
+      : "\n\nEs sind aktuell keine relevanten Daten verfügbar.";
+
+    const systemPrompt = `Du bist ein kompetenter, freundlicher Berater für den Online-Reitsportshop "Horse & Rider Luhmühlen".
+
+WICHTIGE REGELN:
+- Antworte AUSSCHLIESSLICH basierend auf den unten bereitgestellten Informationen.
+- ERFINDE KEINE Informationen, Produkte, Preise oder Fakten.
+- Wenn du etwas nicht weißt oder keine passenden Daten findest, sage das ehrlich.
+- Beziehe dich auf tatsächliche Produkte, Marken und Informationen aus dem Shop.
+- Antworte auf Deutsch, kompetent, freundlich und vertrauenswürdig.
+- Halte dich kurz: maximal 3-5 Sätze.
+- Wenn du Produkte empfiehlst, nenne die tatsächlichen Produktnamen aus den bereitgestellten Daten.
+
+Reitsport-Synonyme:
+- Schabracke = Saddle Pad
+- Gamaschen = Boots / Beinschutz
+- Airbagweste = Sicherheitsweste
+- Pferdedecke = Outdoordecke / Regendecke / Winterdecke
+- Reithelm = Helm
+- Turnierjacket = Turniersakko
+${contextBlock}
+
+Format deiner Antwort als JSON:
+{
+  "answer": "Deine kompakte, hilfreiche Antwort basierend auf den bereitgestellten Daten",
+  "recommendedProducts": ["Exakter Produktname 1", "Exakter Produktname 2"],
+  "categories": ["Relevante Kategorie 1", "Relevante Kategorie 2"]
+}
+
+Antworte AUSSCHLIESSLICH mit dem JSON-Objekt, ohne Markdown-Codeblöcke.`;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -63,7 +244,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: query.trim() },
         ],
       }),
@@ -93,14 +274,11 @@ Deno.serve(async (req) => {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    // Parse JSON from AI response
     let parsed;
     try {
-      // Remove potential markdown code fences
       const cleaned = content.replace(/```json?\s*/g, "").replace(/```\s*/g, "").trim();
       parsed = JSON.parse(cleaned);
     } catch {
-      // Fallback: treat as plain text answer
       parsed = {
         answer: content,
         recommendedProducts: [],

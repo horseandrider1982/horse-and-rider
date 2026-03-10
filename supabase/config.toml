@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.search-ai-advisor]
 verify_jwt = false
+
+[functions.crawl-brand-knowledge]
+verify_jwt = false
