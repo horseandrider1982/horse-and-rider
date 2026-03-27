@@ -192,6 +192,21 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
             <CardHeader className="pb-3"><CardTitle className="text-base">Einstellungen</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
+                <Label>Sprache</Label>
+                <Select value={locale} onValueChange={setLocale}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
+                    <SelectItem value="en">🇬🇧 English</SelectItem>
+                    <SelectItem value="es">🇪🇸 Español</SelectItem>
+                    <SelectItem value="nl">🇳🇱 Nederlands</SelectItem>
+                    <SelectItem value="pl">🇵🇱 Polski</SelectItem>
+                    <SelectItem value="da">🇩🇰 Dansk</SelectItem>
+                    <SelectItem value="sv">🇸🇪 Svenska</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
                 <Label>Status</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as 'draft' | 'active')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

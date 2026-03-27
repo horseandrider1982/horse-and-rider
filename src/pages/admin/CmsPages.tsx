@@ -83,6 +83,9 @@ export default function CmsPages({ onNew, onEdit, onDuplicate }: CmsPagesProps) 
                   <td className="py-2 px-2 font-medium">{p.name}</td>
                   <td className="py-2 px-2 hidden md:table-cell text-muted-foreground">/pages/{p.slug}</td>
                   <td className="py-2 px-2">
+                    <Badge variant="outline" className="text-xs uppercase">{(p as any).locale || 'de'}</Badge>
+                  </td>
+                  <td className="py-2 px-2">
                     <Badge variant={p.status === 'active' ? 'default' : 'secondary'}>
                       {p.status === 'active' ? 'Aktiv' : 'Entwurf'}
                     </Badge>
