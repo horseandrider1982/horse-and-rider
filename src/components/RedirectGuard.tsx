@@ -4,14 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { normalizeUrl } from "@/lib/urlNormalize";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
-/**
- * Enterprise RedirectGuard with:
- * - LRU session cache (avoids re-querying known paths)
- * - Multi-hop resolution (max 5 hops, failsafe)
- * - Async hit logging
- */
-
-// Simple in-memory LRU cache
 const cache = new Map<string, string | null>();
 const MAX_CACHE = 500;
 
@@ -23,12 +15,16 @@ function cacheSet(key: string, value: string | null) {
   cache.set(key, value);
 }
 
+/** Strip locale prefix (e.g. /de/foo → /foo) for redirect lookups */
+function stripLocalePrefix(pathname: string): string {
+  return pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
+}
+
 export function RedirectGuard() {
   const location = useLocation();
   const navigate = useNavigate();
   const checking = useRef(false);
 
-  // Realtime cache invalidation
   useEffect(() => {
     const channel = supabase
       .channel("redirect-cache-invalidation")
@@ -45,14 +41,21 @@ export function RedirectGuard() {
   }, []);
 
   useEffect(() => {
-    const path = normalizeUrl(location.pathname);
+    // Strip locale prefix for redirect DB lookup
+    const rawPath = stripLocalePrefix(location.pathname);
+    const path = normalizeUrl(rawPath);
+
+    // Don't redirect admin paths
+    if (location.pathname.startsWith('/admin')) return;
     if (checking.current) return;
 
-    // Check cache first
     if (cache.has(path)) {
       const cached = cache.get(path);
       if (cached && cached !== path) {
-        navigate(cached, { replace: true });
+        // Reconstruct with locale prefix
+        const localeMatch = location.pathname.match(/^\/([a-z]{2})(?=\/|$)/);
+        const prefix = localeMatch ? `/${localeMatch[1]}` : '';
+        navigate(`${prefix}${cached}`, { replace: true });
       }
       return;
     }
@@ -61,7 +64,6 @@ export function RedirectGuard() {
 
     const check = async () => {
       try {
-        // Resolve redirect chain (max 5 hops)
         let currentPath = path;
         let hops = 0;
         const visited = new Set([path]);
@@ -80,7 +82,7 @@ export function RedirectGuard() {
           if (!data) break;
 
           const target = data.new_path || normalizeUrl(data.new_url);
-          if (!target || visited.has(target)) break; // loop prevention
+          if (!target || visited.has(target)) break;
 
           if (hops === 0) redirectId = data.id;
           visited.add(target);
@@ -88,16 +90,16 @@ export function RedirectGuard() {
           hops++;
         }
 
-        // Cache the result
         const finalTarget = currentPath !== path ? currentPath : null;
         cacheSet(path, finalTarget);
 
         if (finalTarget) {
-          // Async hit logging (fire and forget)
           if (redirectId) {
             logHit(redirectId, path, finalTarget).catch(() => {});
           }
-          navigate(finalTarget, { replace: true });
+          const localeMatch = location.pathname.match(/^\/([a-z]{2})(?=\/|$)/);
+          const prefix = localeMatch ? `/${localeMatch[1]}` : '';
+          navigate(`${prefix}${finalTarget}`, { replace: true });
         }
       } finally {
         checking.current = false;
@@ -112,20 +114,14 @@ export function RedirectGuard() {
 
 async function logHit(redirectId: string, oldPath: string, newPath: string) {
   const today = new Date().toISOString().split("T")[0];
-  // Try upsert via increment
-  const { error } = await supabase
+  await supabase
     .from("redirect_hits")
     .upsert(
       { redirect_id: redirectId, old_path: oldPath, new_path: newPath, day: today, hits: 1 },
       { onConflict: "redirect_id,day" }
     );
-  // If insert succeeded with hits=1, it's new. Otherwise we need to increment.
-  if (error) {
-    // Fallback: just try insert, ignore duplicate
-  }
 }
 
-// Export cache clear for testing
 export function clearRedirectCache() {
   cache.clear();
 }

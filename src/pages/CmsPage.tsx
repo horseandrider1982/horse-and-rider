@@ -10,8 +10,9 @@ import { useEffect } from 'react';
 export default function CmsPage() {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const location = useLocation();
-  // Support both /pages/:slug and direct routes like /impressum
-  const slug = paramSlug || location.pathname.replace(/^\//, '');
+  // Support both /pages/:slug and direct routes like /:locale/impressum
+  // Strip locale prefix (2 lowercase letters) from pathname
+  const slug = paramSlug || location.pathname.replace(/^\/[a-z]{2}\//, '').replace(/^\//, '');
   const { data: page, isLoading, error } = usePublicCmsPage(slug);
 
   useEffect(() => {

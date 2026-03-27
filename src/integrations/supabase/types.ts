@@ -750,6 +750,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ui_translations: {
+        Row: {
+          auto_generated: boolean
+          created_at: string
+          id: string
+          key: string
+          locale: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          auto_generated?: boolean
+          created_at?: string
+          id?: string
+          key: string
+          locale: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          auto_generated?: boolean
+          created_at?: string
+          id?: string
+          key?: string
+          locale?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

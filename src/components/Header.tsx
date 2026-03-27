@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { LocaleLink } from "./LocaleLink";
 import { CartDrawer } from "./CartDrawer";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
@@ -10,6 +12,7 @@ import { User, Search, LogIn, LogOut, UserCircle } from "lucide-react";
 import { SearchOverlay } from "@/components/SmartSearch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n";
 import logo from "@/assets/logo.png";
 
 export const Header = () => {
@@ -17,11 +20,12 @@ export const Header = () => {
   const { data: menus } = usePublicCmsMenus();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { t, localePath } = useI18n();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    toast.success("Erfolgreich abgemeldet");
-    navigate("/");
+    toast.success(t("header.logged_out"));
+    navigate(localePath("/"));
   };
 
   const topNavItems = menus?.top_navigation || [];
@@ -31,72 +35,60 @@ export const Header = () => {
     <>
       <header className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <Link to="/" className="flex-shrink-0">
+          <LocaleLink to="/" className="flex-shrink-0">
             <img src={logo} alt="Horse & Rider Luhmühlen" className="h-9 md:h-11 w-auto" />
-          </Link>
+          </LocaleLink>
 
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
             {topNavItems.length > 0 ? (
               <CmsMenuItemRenderer items={topNavItems} linkClassName="hover:text-primary transition-colors" mode="inline" />
             ) : (
               <>
-                <Link to="/" className="hover:text-primary transition-colors">Startseite</Link>
-                <Link to="/unsere-marken" className="hover:text-primary transition-colors">Unsere Marken</Link>
-                <Link to="/news" className="hover:text-primary transition-colors">News</Link>
+                <LocaleLink to="/" className="hover:text-primary transition-colors">{t("nav.home")}</LocaleLink>
+                <LocaleLink to="/unsere-marken" className="hover:text-primary transition-colors">{t("nav.brands")}</LocaleLink>
+                <LocaleLink to="/news" className="hover:text-primary transition-colors">{t("nav.news")}</LocaleLink>
               </>
             )}
           </nav>
 
           <div className="flex items-center gap-3">
-            {/* Search trigger button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Suche öffnen"
-              className="relative"
-            >
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label={t("header.search_open")} className="relative">
               <Search className="h-5 w-5" />
             </Button>
+            <LanguageSwitcher />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
+                <Button variant="ghost" size="icon"><User className="h-5 w-5" /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-popover z-[100]">
                 {accountMenuItems.length > 0 ? (
                   accountMenuItems.map(item => (
                     <DropdownMenuItem key={item.id} asChild>
-                      <Link to={item.url || '/'} className="flex items-center gap-2 cursor-pointer">
-                        {item.label}
-                      </Link>
+                      <LocaleLink to={item.url || '/'} className="flex items-center gap-2 cursor-pointer">{item.label}</LocaleLink>
                     </DropdownMenuItem>
                   ))
                 ) : (
                   <DropdownMenuItem asChild>
-                    <Link to={user ? "/account" : "/auth"} className="flex items-center gap-2 cursor-pointer">
+                    <LocaleLink to={user ? "/account" : "/auth"} className="flex items-center gap-2 cursor-pointer">
                       <UserCircle className="h-4 w-4" />
-                      {user ? 'Kundenkonto' : 'Anmelden'}
-                    </Link>
+                      {user ? t("header.account") : t("header.login")}
+                    </LocaleLink>
                   </DropdownMenuItem>
                 )}
                 {user ? (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
-                      <LogOut className="h-4 w-4" />
-                      Abmelden
+                      <LogOut className="h-4 w-4" />{t("header.logout")}
                     </DropdownMenuItem>
                   </>
                 ) : (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to="/auth" className="flex items-center gap-2 cursor-pointer">
-                        <LogIn className="h-4 w-4" />
-                        Anmelden
-                      </Link>
+                      <LocaleLink to="/auth" className="flex items-center gap-2 cursor-pointer">
+                        <LogIn className="h-4 w-4" />{t("header.login")}
+                      </LocaleLink>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -106,7 +98,6 @@ export const Header = () => {
           </div>
         </div>
       </header>
-
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
