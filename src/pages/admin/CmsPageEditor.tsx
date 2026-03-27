@@ -57,6 +57,7 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
       setContent(duplicateFrom.content);
       setEditorMode(duplicateFrom.editor_mode);
       setStatus('draft');
+      setLocale((duplicateFrom as any).locale || 'de');
       setSeoTitle(duplicateFrom.seo_title || '');
       setSeoDesc(duplicateFrom.seo_description || '');
     }
