@@ -27,6 +27,12 @@ export const defaultTranslations: Record<string, string> = {
   "hero.subtitle": "Suche nach Produkten, Marken und Kategorien — oder stelle eine Frage und erhalte eine persönliche Beratung durch unsere KI.",
   "hero.search_placeholder": "Produkte suchen oder eine Frage stellen …",
   "hero.popular": "Beliebt:",
+  "hero.chip.winterdecke": "Winterdecke",
+  "hero.chip.airbagweste": "Airbagweste",
+  "hero.chip.schabracke": "Schabracke",
+  "hero.chip.reithelm": "Reithelm",
+  "hero.chip.gamaschen": "Gamaschen",
+  "hero.chip.turnierbekleidung": "Turnierbekleidung",
 
   // HeroSection
   "hero_section.title": "Ihr kompetenter Partner rund um den Reitsport",
