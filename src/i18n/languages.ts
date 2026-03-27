@@ -41,8 +41,8 @@ export async function fetchAvailableLanguages(): Promise<AvailableLocale[]> {
       })
     );
 
-    // Use Shopify locales if multiple, otherwise fallback
-    if (locales.length > 1) {
+    // Use whatever Shopify returns (only published languages)
+    if (locales.length > 0) {
       cachedLocales = locales;
       return locales;
     }
@@ -50,7 +50,7 @@ export async function fetchAvailableLanguages(): Promise<AvailableLocale[]> {
     console.error("Failed to fetch languages from Shopify:", err);
   }
 
-  // Fallback to known configured languages
+  // Fallback only on error
   cachedLocales = FALLBACK_LOCALES;
   return FALLBACK_LOCALES;
 }
