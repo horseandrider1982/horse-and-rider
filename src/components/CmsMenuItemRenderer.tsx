@@ -42,8 +42,8 @@ function ShopifyNavLink({ item, className, mode }: { item: ShopifyMenuItem; clas
   return <Link to={item.url} className={linkCls}>{item.title}</Link>;
 }
 
-function ShopifyMenuPlaceholder({ className, mode }: { className?: string; mode: 'inline' | 'block' }) {
-  const { data: shopifyItems } = useShopifyMenu('main-menu');
+function ShopifyMenuPlaceholder({ handle, className, mode }: { handle?: string; className?: string; mode: 'inline' | 'block' }) {
+  const { data: shopifyItems } = useShopifyMenu(handle || 'main-menu');
   if (!shopifyItems?.length) return null;
   return (
     <>
@@ -68,7 +68,7 @@ export function CmsMenuItemRenderer({ items, className, linkClassName, mode = 'i
     <>
       {items.map(item => {
         if (item.type === 'shopify_menu_placeholder') {
-          return <ShopifyMenuPlaceholder key={item.id} className={linkClassName} mode={mode} />;
+          return <ShopifyMenuPlaceholder key={item.id} handle={item.url || undefined} className={linkClassName} mode={mode} />;
         }
         return <SingleMenuLink key={item.id} item={item} className={linkClassName} mode={mode} />;
       })}
