@@ -28,6 +28,7 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
   const [content, setContent] = useState('');
   const [editorMode, setEditorMode] = useState<'standard' | 'ai'>('standard');
   const [status, setStatus] = useState<'draft' | 'active'>('draft');
+  const [locale, setLocale] = useState('de');
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDesc, setSeoDesc] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
