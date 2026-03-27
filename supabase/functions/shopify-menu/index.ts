@@ -2,10 +2,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SHOPIFY_ADMIN_URL = "https://bpjvam-c1.myshopify.com/admin/api/2025-07/graphql.json";
+const SHOPIFY_STOREFRONT_URL =
+  "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 
 const MENU_QUERY = `
   query GetMenu($handle: String!) {
@@ -39,19 +41,19 @@ serve(async (req) => {
       });
     }
 
-    const shopifyToken = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
-    if (!shopifyToken) {
-      return new Response(JSON.stringify({ error: "SHOPIFY_ACCESS_TOKEN not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+    if (!storefrontToken) {
+      return new Response(
+        JSON.stringify({ error: "SHOPIFY_STOREFRONT_ACCESS_TOKEN not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const response = await fetch(SHOPIFY_ADMIN_URL, {
+    const response = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Access-Token": shopifyToken,
+        "X-Shopify-Storefront-Access-Token": storefrontToken,
       },
       body: JSON.stringify({ query: MENU_QUERY, variables: { handle } }),
     });
@@ -59,7 +61,7 @@ serve(async (req) => {
     const data = await response.json();
 
     if (data.errors) {
-      console.error("Shopify Admin API errors:", data.errors);
+      console.error("Shopify Storefront API errors:", JSON.stringify(data.errors));
       return new Response(JSON.stringify({ items: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
