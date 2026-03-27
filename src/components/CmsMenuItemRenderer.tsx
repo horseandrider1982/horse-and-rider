@@ -68,7 +68,7 @@ export function CmsMenuItemRenderer({ items, className, linkClassName, mode = 'i
     <>
       {items.map(item => {
         if (item.type === 'shopify_menu_placeholder') {
-          return <ShopifyMenuPlaceholder key={item.id} className={linkClassName} mode={mode} />;
+          return <ShopifyMenuPlaceholder key={item.id} handle={item.url || undefined} className={linkClassName} mode={mode} />;
         }
         return <SingleMenuLink key={item.id} item={item} className={linkClassName} mode={mode} />;
       })}
