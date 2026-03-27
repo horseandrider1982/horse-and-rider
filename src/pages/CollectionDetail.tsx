@@ -1,14 +1,16 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/i18n";
-import Header from "@/components/Header";
+import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TopBar } from "@/components/TopBar";
-import { storefrontApiRequest, SHOPIFY_STOREFRONT_URL, SHOPIFY_STOREFRONT_TOKEN } from "@/lib/shopify";
 import { LocaleLink } from "@/components/LocaleLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+
+const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
+const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
 
 const COLLECTION_QUERY = `
   query GetCollection($handle: String!, $first: Int!, $language: LanguageCode) @inContext(language: $language) {
@@ -23,6 +25,7 @@ const COLLECTION_QUERY = `
             title
             handle
             vendor
+            description
             priceRange {
               minVariantPrice {
                 amount
@@ -47,6 +50,10 @@ const COLLECTION_QUERY = `
                     currencyCode
                   }
                   availableForSale
+                  selectedOptions {
+                    name
+                    value
+                  }
                 }
               }
             }
@@ -167,13 +174,12 @@ export default function CollectionDetail() {
                             <button
                               onClick={() => {
                                 addItem({
-                                  id: variant.id,
-                                  title: product.title,
-                                  price: parseFloat(variant.price.amount),
-                                  currency: variant.price.currencyCode,
-                                  image: image?.url,
+                                  product: { node: product },
+                                  variantId: variant.id,
+                                  variantTitle: variant.title || "",
+                                  price: { amount: variant.price.amount, currencyCode: variant.price.currencyCode },
                                   quantity: 1,
-                                  handle: product.handle,
+                                  selectedOptions: variant.selectedOptions || [],
                                 });
                                 toast.success(t("products.added_to_cart"));
                               }}
