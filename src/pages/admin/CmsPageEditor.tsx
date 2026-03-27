@@ -82,10 +82,11 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
         content,
         editor_mode: editorMode,
         status: finalStatus,
+        locale,
         seo_title: seoTitle || null,
         seo_description: seoDesc || null,
         ...(finalStatus === 'active' && !existing?.published_at ? { published_at: new Date().toISOString() } : {}),
-      });
+      } as any);
       toast.success(finalStatus === 'active' ? 'Seite aktiviert' : 'Seite gespeichert');
       onBack();
     } catch (err: any) {
