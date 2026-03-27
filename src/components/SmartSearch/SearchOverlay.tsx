@@ -94,7 +94,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
           ) : (
             <div className={cn("px-4 sm:px-8 lg:px-12 py-6", "flex flex-col gap-6")}>
               {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} />}
-              <SearchProductGrid results={results} isLoading={isLoading} query={query} onProductClick={onProductClick} />
+              <SearchProductGrid results={results} isLoading={isLoading} query={query} onProductClick={handleProductClick} />
             </div>
           )}
         </div>
