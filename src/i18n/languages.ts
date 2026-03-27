@@ -33,10 +33,10 @@ export async function fetchAvailableLanguages(): Promise<AvailableLocale[]> {
     if (error) throw error;
 
     const locales: AvailableLocale[] = (data?.locales || []).map(
-      (l: { locale: string; name: string; primary: boolean }) => ({
+      (l: { locale: string; name: string; endonymName?: string; primary: boolean }) => ({
         code: l.locale.toLowerCase(),
         name: l.name,
-        endonymName: l.name,
+        endonymName: l.endonymName || l.name,
         primary: l.primary || false,
       })
     );
