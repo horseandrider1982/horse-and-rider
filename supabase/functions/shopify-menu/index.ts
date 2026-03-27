@@ -9,18 +9,19 @@ const corsHeaders = {
 const SHOPIFY_STOREFRONT_URL =
   "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 
-const MENU_QUERY = `
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      title
-      items {
-        id
-        title
-        url
-        items {
+// Fetch collections directly since menu query requires unauthenticated_read_content scope
+const COLLECTIONS_QUERY = `
+  query GetCollections($first: Int!, $language: LanguageCode) @inContext(language: $language) {
+    collections(first: $first) {
+      edges {
+        node {
           id
           title
-          url
+          handle
+          image {
+            url
+            altText
+          }
         }
       }
     }
@@ -33,13 +34,8 @@ serve(async (req) => {
   }
 
   try {
-    const { handle } = await req.json();
-    if (!handle) {
-      return new Response(JSON.stringify({ error: "handle is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const body = await req.json().catch(() => ({}));
+    const { handle, language } = body;
 
     const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
     if (!storefrontToken) {
@@ -49,13 +45,18 @@ serve(async (req) => {
       );
     }
 
+    // If handle is provided, we try to fetch collections and filter
+    // Otherwise fetch all collections as menu items
+    const variables: Record<string, unknown> = { first: 50 };
+    if (language) variables.language = language.toUpperCase();
+
     const response = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Shopify-Storefront-Access-Token": storefrontToken,
       },
-      body: JSON.stringify({ query: MENU_QUERY, variables: { handle } }),
+      body: JSON.stringify({ query: COLLECTIONS_QUERY, variables }),
     });
 
     const data = await response.json();
@@ -67,7 +68,18 @@ serve(async (req) => {
       });
     }
 
-    const items = data?.data?.menu?.items || [];
+    const collections = data?.data?.collections?.edges || [];
+    
+    // Transform collections into menu-like items
+    const items = collections.map((edge: { node: { id: string; title: string; handle: string; image?: { url: string; altText: string | null } } }) => ({
+      id: edge.node.id,
+      title: edge.node.title,
+      url: `/collections/${edge.node.handle}`,
+      handle: edge.node.handle,
+      image: edge.node.image || null,
+      items: [], // no sub-items for collections
+    }));
+
     return new Response(JSON.stringify({ items }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
