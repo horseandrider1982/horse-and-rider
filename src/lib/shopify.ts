@@ -51,7 +51,7 @@ export interface ShopifyProduct {
 }
 
 export const STOREFRONT_QUERY = `
-  query GetProducts($first: Int!, $query: String) {
+  query GetProducts($first: Int!, $query: String, $language: LanguageCode) @inContext(language: $language) {
     products(first: $first, query: $query) {
       edges {
         node {
