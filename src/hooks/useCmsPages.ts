@@ -5,6 +5,7 @@ export interface CmsPage {
   id: string;
   name: string;
   slug: string;
+  locale: string;
   title: string;
   content: string;
   editor_mode: 'standard' | 'ai';
