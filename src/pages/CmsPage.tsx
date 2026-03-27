@@ -6,14 +6,16 @@ import { Footer } from '@/components/Footer';
 import { Loader2 } from 'lucide-react';
 import NotFound from './NotFound';
 import { useEffect } from 'react';
+import { useI18n } from '@/i18n';
 
 export default function CmsPage() {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const location = useLocation();
+  const { locale } = useI18n();
   // Support both /pages/:slug and direct routes like /:locale/impressum
   // Strip locale prefix (2 lowercase letters) from pathname
   const slug = paramSlug || location.pathname.replace(/^\/[a-z]{2}\//, '').replace(/^\//, '');
-  const { data: page, isLoading, error } = usePublicCmsPage(slug);
+  const { data: page, isLoading, error } = usePublicCmsPage(slug, locale);
 
   useEffect(() => {
     if (page) {
