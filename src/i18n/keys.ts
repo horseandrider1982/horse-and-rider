@@ -140,7 +140,7 @@ export const defaultTranslations: Record<string, string> = {
   "search.result_one": "1 Ergebnis",
   "search.result_other": "{count} Ergebnisse",
   "search.loading_error": "Suchergebnisse konnten nicht geladen werden.",
-  "search.no_results": "Keine Ergebnisse für „{query}"",
+  "search.no_results": 'Keine Ergebnisse f\u00FCr \u201E{query}\u201C',
 
   // ProductContact
   "contact.title": "Produktanfrage",
