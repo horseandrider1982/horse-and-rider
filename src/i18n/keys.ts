@@ -273,7 +273,7 @@ export const defaultTranslations: Record<string, string> = {
   "search.trending_products": "Angesagte Produkte",
   "search.products": "Produkte",
   "search.hits": "{count} Treffer",
-  "search.no_products": "Keine Produkte für „{query}" gefunden",
+  "search.no_products": 'Keine Produkte f\u00FCr \u201E{query}\u201C gefunden',
   "search.try_different": "Versuche einen anderen Suchbegriff oder stelle eine Frage.",
   "search.searching": "Suche läuft…",
   "search.ai_advice": "KI-Beratung",
