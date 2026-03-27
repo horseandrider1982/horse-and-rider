@@ -135,7 +135,7 @@ export const defaultTranslations: Record<string, string> = {
   "search.placeholder": "Produkte suchen oder eine Frage stellen …",
   "search.clear": "Suche leeren",
   "search.back": "Zurück",
-  "search.results_for": "Suchergebnisse für „{query}"",
+  "search.results_for": 'Suchergebnisse für \u201E{query}\u201C',
   "search.search": "Suche",
   "search.result_one": "1 Ergebnis",
   "search.result_other": "{count} Ergebnisse",
