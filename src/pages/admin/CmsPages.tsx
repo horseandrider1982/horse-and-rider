@@ -71,6 +71,7 @@ export default function CmsPages({ onNew, onEdit, onDuplicate }: CmsPagesProps) 
               <tr className="border-b">
                 <th className="text-left py-2.5 px-2 font-medium">Name</th>
                 <th className="text-left py-2.5 px-2 font-medium hidden md:table-cell">Slug</th>
+                <th className="text-left py-2.5 px-2 font-medium">Sprache</th>
                 <th className="text-left py-2.5 px-2 font-medium">Status</th>
                 <th className="text-left py-2.5 px-2 font-medium hidden md:table-cell">Aktualisiert</th>
                 <th className="text-right py-2.5 px-2 font-medium">Aktionen</th>
