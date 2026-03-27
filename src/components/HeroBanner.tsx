@@ -46,9 +46,9 @@ export const HeroBanner = () => {
             </button>
             <div className="flex flex-wrap justify-center gap-2 mt-5">
               <span className="text-xs text-muted-foreground self-center mr-1">{t("hero.popular")}</span>
-              {["Winterdecke", "Airbagweste", "Schabracke", "Reithelm", "Gamaschen", "Turnierbekleidung"].map((chip) => (
+              {(["winterdecke", "airbagweste", "schabracke", "reithelm", "gamaschen", "turnierbekleidung"] as const).map((chipKey) => (
                 <button
-                  key={chip}
+                  key={chipKey}
                   onClick={() => setSearchOpen(true)}
                   className={cn(
                     "px-3 py-1 rounded-full text-xs font-medium",
@@ -57,7 +57,7 @@ export const HeroBanner = () => {
                     "transition-colors"
                   )}
                 >
-                  {chip}
+                  {t(`hero.chip.${chipKey}`)}
                 </button>
               ))}
             </div>
