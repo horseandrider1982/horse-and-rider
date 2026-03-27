@@ -71,6 +71,7 @@ export default function CmsPages({ onNew, onEdit, onDuplicate }: CmsPagesProps) 
               <tr className="border-b">
                 <th className="text-left py-2.5 px-2 font-medium">Name</th>
                 <th className="text-left py-2.5 px-2 font-medium hidden md:table-cell">Slug</th>
+                <th className="text-left py-2.5 px-2 font-medium">Sprache</th>
                 <th className="text-left py-2.5 px-2 font-medium">Status</th>
                 <th className="text-left py-2.5 px-2 font-medium hidden md:table-cell">Aktualisiert</th>
                 <th className="text-right py-2.5 px-2 font-medium">Aktionen</th>
@@ -81,6 +82,9 @@ export default function CmsPages({ onNew, onEdit, onDuplicate }: CmsPagesProps) 
                 <tr key={p.id} className="border-b hover:bg-muted/20 transition-colors">
                   <td className="py-2 px-2 font-medium">{p.name}</td>
                   <td className="py-2 px-2 hidden md:table-cell text-muted-foreground">/pages/{p.slug}</td>
+                  <td className="py-2 px-2">
+                    <Badge variant="outline" className="text-xs uppercase">{(p as any).locale || 'de'}</Badge>
+                  </td>
                   <td className="py-2 px-2">
                     <Badge variant={p.status === 'active' ? 'default' : 'secondary'}>
                       {p.status === 'active' ? 'Aktiv' : 'Entwurf'}

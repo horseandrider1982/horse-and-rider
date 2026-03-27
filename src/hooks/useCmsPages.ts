@@ -5,6 +5,7 @@ export interface CmsPage {
   id: string;
   name: string;
   slug: string;
+  locale: string;
   title: string;
   content: string;
   editor_mode: 'standard' | 'ai';
@@ -54,18 +55,32 @@ export function useAdminCmsPage(id: string) {
   });
 }
 
-export function usePublicCmsPage(slug: string) {
+export function usePublicCmsPage(slug: string, locale: string = 'de') {
   return useQuery({
-    queryKey: ['cms-page', slug],
+    queryKey: ['cms-page', slug, locale],
     queryFn: async () => {
+      // Try exact locale first, then fall back to 'de'
       const { data, error } = await supabase
         .from('cms_pages')
         .select('*')
         .eq('slug', slug)
+        .eq('locale', locale)
         .eq('status', 'active')
         .single();
-      if (error) throw error;
-      return data as CmsPage;
+      if (!error && data) return data as CmsPage;
+
+      // Fallback to default locale
+      if (locale !== 'de') {
+        const { data: fallback, error: fbErr } = await supabase
+          .from('cms_pages')
+          .select('*')
+          .eq('slug', slug)
+          .eq('locale', 'de')
+          .eq('status', 'active')
+          .single();
+        if (!fbErr && fallback) return fallback as CmsPage;
+      }
+      throw error || new Error('Page not found');
     },
     enabled: !!slug,
   });

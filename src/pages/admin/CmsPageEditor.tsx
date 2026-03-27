@@ -28,6 +28,7 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
   const [content, setContent] = useState('');
   const [editorMode, setEditorMode] = useState<'standard' | 'ai'>('standard');
   const [status, setStatus] = useState<'draft' | 'active'>('draft');
+  const [locale, setLocale] = useState('de');
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDesc, setSeoDesc] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
@@ -42,6 +43,7 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
       setContent(existing.content);
       setEditorMode(existing.editor_mode);
       setStatus(existing.status);
+      setLocale((existing as any).locale || 'de');
       setSeoTitle(existing.seo_title || '');
       setSeoDesc(existing.seo_description || '');
     }
@@ -55,6 +57,7 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
       setContent(duplicateFrom.content);
       setEditorMode(duplicateFrom.editor_mode);
       setStatus('draft');
+      setLocale((duplicateFrom as any).locale || 'de');
       setSeoTitle(duplicateFrom.seo_title || '');
       setSeoDesc(duplicateFrom.seo_description || '');
     }
@@ -79,10 +82,11 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
         content,
         editor_mode: editorMode,
         status: finalStatus,
+        locale,
         seo_title: seoTitle || null,
         seo_description: seoDesc || null,
         ...(finalStatus === 'active' && !existing?.published_at ? { published_at: new Date().toISOString() } : {}),
-      });
+      } as any);
       toast.success(finalStatus === 'active' ? 'Seite aktiviert' : 'Seite gespeichert');
       onBack();
     } catch (err: any) {
@@ -187,6 +191,21 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-base">Einstellungen</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Sprache</Label>
+                <Select value={locale} onValueChange={setLocale}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
+                    <SelectItem value="en">🇬🇧 English</SelectItem>
+                    <SelectItem value="es">🇪🇸 Español</SelectItem>
+                    <SelectItem value="nl">🇳🇱 Nederlands</SelectItem>
+                    <SelectItem value="pl">🇵🇱 Polski</SelectItem>
+                    <SelectItem value="da">🇩🇰 Dansk</SelectItem>
+                    <SelectItem value="sv">🇸🇪 Svenska</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1.5">
                 <Label>Status</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as 'draft' | 'active')}>
