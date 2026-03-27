@@ -107,13 +107,17 @@ const LANG_NAMES: Record<string, string> = {
   ro: "Română",
 };
 
+function FlagIcon({ code, className }: { code: string; className?: string }) {
+  const Component = FLAG_COMPONENTS[code];
+  if (Component) return <Component className={className} />;
+  return <span className={className}>🌐</span>;
+}
+
 export function LanguageSwitcher() {
   const { locale, availableLocales, switchLocale, isLoadingLocales } = useI18n();
   const [open, setOpen] = useState(false);
 
   if (isLoadingLocales || availableLocales.length <= 1) return null;
-
-  const currentFlag = FLAG_MAP[locale] || "🌐";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -124,7 +128,7 @@ export function LanguageSwitcher() {
           className="gap-1.5 px-2 text-sm font-medium hover:bg-accent/60 transition-colors"
           aria-label="Change language"
         >
-          <span className="text-base leading-none">{currentFlag}</span>
+          <FlagIcon code={locale} className="w-5 h-3.5 rounded-[2px] shadow-sm" />
           <span className="hidden sm:inline uppercase text-xs tracking-wide">
             {locale}
           </span>
@@ -137,7 +141,6 @@ export function LanguageSwitcher() {
         <div className="grid gap-0.5">
           {availableLocales.map((l) => {
             const isActive = locale === l.code;
-            const flag = FLAG_MAP[l.code] || "🌐";
             const name = LANG_NAMES[l.code] || l.endonymName || l.name;
 
             return (
@@ -155,7 +158,7 @@ export function LanguageSwitcher() {
                   }
                 `}
               >
-                <span className="text-lg leading-none">{flag}</span>
+                <FlagIcon code={l.code} className="w-5 h-3.5 rounded-[2px] shadow-sm" />
                 <span className="flex-1 text-left">{name}</span>
                 {isActive && (
                   <Check className="h-4 w-4 text-primary shrink-0" />
