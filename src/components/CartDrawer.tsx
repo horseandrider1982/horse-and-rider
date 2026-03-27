@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { useI18n } from "@/i18n";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
+  const { t } = useI18n();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
 
@@ -15,11 +17,14 @@ export const CartDrawer = () => {
 
   const handleCheckout = () => {
     const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      window.open(checkoutUrl, '_blank');
-      setIsOpen(false);
-    }
+    if (checkoutUrl) { window.open(checkoutUrl, '_blank'); setIsOpen(false); }
   };
+
+  const itemsDesc = totalItems === 0
+    ? t("cart.empty")
+    : totalItems === 1
+      ? t("cart.items_one")
+      : t("cart.items_other", { count: totalItems });
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -27,25 +32,21 @@ export const CartDrawer = () => {
         <Button variant="outline" size="icon" className="relative">
           <ShoppingCart className="h-5 w-5" />
           {totalItems > 0 && (
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">
-              {totalItems}
-            </Badge>
+            <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">{totalItems}</Badge>
           )}
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg flex flex-col h-full">
         <SheetHeader className="flex-shrink-0">
-          <SheetTitle className="font-heading">Warenkorb</SheetTitle>
-          <SheetDescription>
-            {totalItems === 0 ? "Dein Warenkorb ist leer" : `${totalItems} Artikel im Warenkorb`}
-          </SheetDescription>
+          <SheetTitle className="font-heading">{t("cart.title")}</SheetTitle>
+          <SheetDescription>{itemsDesc}</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col flex-1 pt-6 min-h-0">
           {items.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Dein Warenkorb ist leer</p>
+                <p className="text-muted-foreground">{t("cart.empty")}</p>
               </div>
             </div>
           ) : (
@@ -68,17 +69,11 @@ export const CartDrawer = () => {
                         <p className="font-semibold text-sm mt-1">{parseFloat(item.price.amount).toFixed(2)} €</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(item.variantId)}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(item.variantId)}><Trash2 className="h-3 w-3" /></Button>
                         <div className="flex items-center gap-1">
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.variantId, item.quantity - 1)}>
-                            <Minus className="h-3 w-3" />
-                          </Button>
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.variantId, item.quantity - 1)}><Minus className="h-3 w-3" /></Button>
                           <span className="w-8 text-center text-xs">{item.quantity}</span>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.variantId, item.quantity + 1)}>
-                            <Plus className="h-3 w-3" />
-                          </Button>
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.variantId, item.quantity + 1)}><Plus className="h-3 w-3" /></Button>
                         </div>
                       </div>
                     </div>
@@ -87,11 +82,11 @@ export const CartDrawer = () => {
               </div>
               <div className="flex-shrink-0 space-y-4 pt-4 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Gesamt</span>
+                  <span className="text-lg font-semibold">{t("cart.total")}</span>
                   <span className="text-xl font-bold">{totalPrice.toFixed(2)} €</span>
                 </div>
                 <Button onClick={handleCheckout} className="w-full bg-primary text-primary-foreground hover:opacity-90" size="lg" disabled={items.length === 0 || isLoading || isSyncing}>
-                  {isLoading || isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ExternalLink className="w-4 h-4 mr-2" />Zur Kasse</>}
+                  {isLoading || isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ExternalLink className="w-4 h-4 mr-2" />{t("cart.checkout")}</>}
                 </Button>
               </div>
             </>

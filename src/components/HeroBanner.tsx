@@ -2,48 +2,31 @@ import { useState } from "react";
 import { Search, Sparkles } from "lucide-react";
 import { SearchOverlay } from "@/components/SmartSearch";
 import { cn } from "@/lib/utils";
-
-const QUICK_CHIPS = [
-  "Winterdecke",
-  "Airbagweste",
-  "Schabracke",
-  "Reithelm",
-  "Gamaschen",
-  "Turnierbekleidung",
-];
+import { useI18n } from "@/i18n";
 
 export const HeroBanner = () => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { t } = useI18n();
 
   return (
     <>
       <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--primary)/0.08)] via-background to-[hsl(var(--primary)/0.04)]">
-        {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
-
         <div className="relative container mx-auto px-4 py-12 sm:py-16 lg:py-20">
           <div className="max-w-3xl mx-auto text-center">
-            {/* Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase mb-5">
               <Sparkles className="w-3.5 h-3.5" />
-              KI-gestützte Suche & Beratung
+              {t("hero.badge")}
             </div>
-
-            {/* Headline */}
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-4">
-              Finde die perfekte Ausrüstung{" "}
-              <span className="text-primary">für Pferd & Reiter</span>
+              {t("hero.title")}{" "}
+              <span className="text-primary">{t("hero.title_highlight")}</span>
             </h1>
-
-            {/* Subline */}
             <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-8">
-              Suche nach Produkten, Marken und Kategorien — oder stelle eine Frage
-              und erhalte eine persönliche Beratung durch unsere KI.
+              {t("hero.subtitle")}
             </p>
-
-            {/* Fake search field that opens the overlay */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -58,14 +41,12 @@ export const HeroBanner = () => {
             >
               <Search className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
               <span className="text-muted-foreground text-base sm:text-lg text-left">
-                Produkte suchen oder eine Frage stellen …
+                {t("hero.search_placeholder")}
               </span>
             </button>
-
-            {/* Quick chips */}
             <div className="flex flex-wrap justify-center gap-2 mt-5">
-              <span className="text-xs text-muted-foreground self-center mr-1">Beliebt:</span>
-              {QUICK_CHIPS.map((chip) => (
+              <span className="text-xs text-muted-foreground self-center mr-1">{t("hero.popular")}</span>
+              {["Winterdecke", "Airbagweste", "Schabracke", "Reithelm", "Gamaschen", "Turnierbekleidung"].map((chip) => (
                 <button
                   key={chip}
                   onClick={() => setSearchOpen(true)}
@@ -83,7 +64,6 @@ export const HeroBanner = () => {
           </div>
         </div>
       </section>
-
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

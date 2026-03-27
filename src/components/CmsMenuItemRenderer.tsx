@@ -1,14 +1,13 @@
-import { Link } from 'react-router-dom';
 import { useShopifyMenu, type ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 import type { PublicMenuItem } from '@/hooks/usePublicCmsMenus';
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { LocaleLink } from './LocaleLink';
 
 interface CmsMenuItemRendererProps {
   items: PublicMenuItem[];
   className?: string;
   linkClassName?: string;
-  /** Render mode: 'inline' renders items as siblings, 'block' renders as block links */
   mode?: 'inline' | 'block';
 }
 
@@ -39,7 +38,7 @@ function ShopifyNavLink({ item, className, mode }: { item: ShopifyMenuItem; clas
   if (isExternal) {
     return <a href={item.url} target="_blank" rel="noopener noreferrer" className={linkCls}>{item.title}</a>;
   }
-  return <Link to={item.url} className={linkCls}>{item.title}</Link>;
+  return <LocaleLink to={item.url} className={linkCls}>{item.title}</LocaleLink>;
 }
 
 function ShopifyMenuPlaceholder({ handle, className, mode }: { handle?: string; className?: string; mode: 'inline' | 'block' }) {
@@ -54,23 +53,23 @@ function ShopifyMenuPlaceholder({ handle, className, mode }: { handle?: string; 
   );
 }
 
-function SingleMenuLink({ item, className, mode }: { item: PublicMenuItem; className?: string; mode: 'inline' | 'block' }) {
+function SingleMenuLink({ item, className }: { item: PublicMenuItem; className?: string }) {
   const isExternal = item.target === '_blank' || item.url?.startsWith('http');
   const cls = className || '';
   if (isExternal) {
     return <a href={item.url || '#'} target={item.target} rel="noopener noreferrer" className={cls}>{item.label}</a>;
   }
-  return <Link to={item.url || '#'} className={cls}>{item.label}</Link>;
+  return <LocaleLink to={item.url || '#'} className={cls}>{item.label}</LocaleLink>;
 }
 
-export function CmsMenuItemRenderer({ items, className, linkClassName, mode = 'inline' }: CmsMenuItemRendererProps) {
+export function CmsMenuItemRenderer({ items, linkClassName, mode = 'inline' }: CmsMenuItemRendererProps) {
   return (
     <>
       {items.map(item => {
         if (item.type === 'shopify_menu_placeholder') {
           return <ShopifyMenuPlaceholder key={item.id} handle={item.url || undefined} className={linkClassName} mode={mode} />;
         }
-        return <SingleMenuLink key={item.id} item={item} className={linkClassName} mode={mode} />;
+        return <SingleMenuLink key={item.id} item={item} className={linkClassName} />;
       })}
     </>
   );
