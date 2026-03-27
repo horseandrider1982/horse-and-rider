@@ -97,12 +97,6 @@ export function MobileMenu() {
           </SheetHeader>
 
           <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-            {/* Home */}
-            <LocaleLink to="/" onClick={close}
-              className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-accent/50 transition-colors rounded-md">
-              {t("nav.home")}
-            </LocaleLink>
-
             {/* CMS nav items (includes Shopify placeholders) */}
             {topNavItems.length > 0 ? (
               topNavItems.map((item: PublicMenuItem) => {
