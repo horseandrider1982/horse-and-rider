@@ -42,8 +42,8 @@ function ShopifyNavLink({ item, className, mode }: { item: ShopifyMenuItem; clas
   return <Link to={item.url} className={linkCls}>{item.title}</Link>;
 }
 
-function ShopifyMenuPlaceholder({ className, mode }: { className?: string; mode: 'inline' | 'block' }) {
-  const { data: shopifyItems } = useShopifyMenu('main-menu');
+function ShopifyMenuPlaceholder({ handle, className, mode }: { handle?: string; className?: string; mode: 'inline' | 'block' }) {
+  const { data: shopifyItems } = useShopifyMenu(handle || 'main-menu');
   if (!shopifyItems?.length) return null;
   return (
     <>
