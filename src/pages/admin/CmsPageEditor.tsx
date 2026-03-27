@@ -43,6 +43,7 @@ export default function CmsPageEditor({ pageId, duplicateFrom, onBack }: CmsPage
       setContent(existing.content);
       setEditorMode(existing.editor_mode);
       setStatus(existing.status);
+      setLocale((existing as any).locale || 'de');
       setSeoTitle(existing.seo_title || '');
       setSeoDesc(existing.seo_description || '');
     }
