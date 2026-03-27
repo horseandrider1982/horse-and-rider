@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
@@ -13,6 +13,8 @@ import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ConfiguratorWizard } from "@/components/configurator/ConfiguratorWizard";
+import { LocaleLink } from "@/components/LocaleLink";
+import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import type { ConfigurationState } from "@/types/configurator";
 
@@ -29,6 +31,7 @@ function loadConfig(productId: string): ConfigurationState | null {
 }
 
 const ProductDetail = () => {
+  const { t } = useI18n();
   const { handle } = useParams<{ handle: string }>();
   const { data: product, isLoading, error } = useProductByHandle(handle || "");
   const addItem = useCartStore(state => state.addItem);
@@ -46,7 +49,6 @@ const ProductDetail = () => {
   const { data: brands } = useBrands();
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
 
-  // Load saved config from localStorage
   useEffect(() => {
     if (shopifyProductId) {
       const saved = loadConfig(shopifyProductId);
@@ -70,8 +72,8 @@ const ProductDetail = () => {
         <TopBar /><Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Produkt nicht gefunden</p>
-            <Link to="/" className="text-primary hover:underline">Zurück zum Shop</Link>
+            <p className="text-muted-foreground mb-4">{t("product.not_found")}</p>
+            <LocaleLink to="/" className="text-primary hover:underline">{t("product.back")}</LocaleLink>
           </div>
         </div>
         <Footer />
@@ -90,44 +92,37 @@ const ProductDetail = () => {
     if (shopifyProductId) {
       localStorage.setItem(STORAGE_KEY(shopifyProductId), JSON.stringify(state));
     }
-    toast.success("Konfiguration abgeschlossen", { position: "top-center" });
+    toast.success(t("product.config_complete"), { position: "top-center" });
   };
 
   const handleAddToCart = async () => {
     if (!selectedVariant) return;
-
-    // Build line item attributes for configurator
     const attributes: Array<{ key: string; value: string }> = [];
     if (isConfigurator && configState?.isConfigured) {
-      // Human-readable summary
       const summaryParts = configState.selections.map(sel => {
         const group = configuratorData!.groups.find(g => g.id === sel.groupId);
         if (!group) return '';
         let valDisplay = '';
         if (sel.type === 'text_input') valDisplay = String(sel.value);
-        else if (sel.type === 'checkbox') valDisplay = sel.value === true ? 'Ja' : 'Nein';
+        else if (sel.type === 'checkbox') valDisplay = sel.value === true ? t("general.yes") : t("general.no");
         else if (Array.isArray(sel.value)) valDisplay = sel.value.map(id => group.values.find(v => v.id === id)?.name || id).join(', ');
         else if (typeof sel.value === 'string') valDisplay = group.values.find(v => v.id === sel.value)?.name || String(sel.value);
         return `${group.name}: ${valDisplay}`;
       }).filter(Boolean);
-
       attributes.push({ key: 'Konfiguration', value: summaryParts.join(' | ') });
       attributes.push({ key: '_cfg_price_delta_total', value: configState.totalPriceDelta.toFixed(2) });
-
-      // Per-group keys
       configState.selections.forEach(sel => {
         const group = configuratorData!.groups.find(g => g.id === sel.groupId);
         if (group) {
           let val = '';
           if (sel.type === 'text_input') val = String(sel.value);
-          else if (sel.type === 'checkbox') val = sel.value === true ? 'Ja' : 'Nein';
+          else if (sel.type === 'checkbox') val = sel.value === true ? t("general.yes") : t("general.no");
           else if (Array.isArray(sel.value)) val = sel.value.map(id => group.values.find(v => v.id === id)?.name || id).join(', ');
           else if (typeof sel.value === 'string') val = group.values.find(v => v.id === sel.value)?.name || '';
           attributes.push({ key: `cfg_${group.name}`, value: val });
         }
       });
     }
-
     await addItem({
       product,
       variantId: selectedVariant.id,
@@ -137,7 +132,7 @@ const ProductDetail = () => {
       selectedOptions: selectedVariant.selectedOptions || [],
       ...(attributes.length > 0 ? { attributes } : {}),
     });
-    toast.success("In den Warenkorb gelegt", { description: product.node.title, position: "top-center" });
+    toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
   };
 
   const canAddToCart = !isConfigurator || configState?.isConfigured;
@@ -147,9 +142,9 @@ const ProductDetail = () => {
       <TopBar /><Header />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
-            <ArrowLeft className="h-4 w-4" /> Zurück zum Shop
-          </Link>
+          <LocaleLink to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
+            <ArrowLeft className="h-4 w-4" /> {t("product.back")}
+          </LocaleLink>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-3">
@@ -171,23 +166,17 @@ const ProductDetail = () => {
             </div>
             <div>
               {brand?.logoUrl && (
-                <img
-                  src={brand.logoUrl}
-                  alt={brand.name}
-                  className="h-6 w-auto object-contain mb-2"
-                  style={{ filter: 'brightness(0)' }}
-                />
+                <img src={brand.logoUrl} alt={brand.name} className="h-6 w-auto object-contain mb-2" style={{ filter: 'brightness(0)' }} />
               )}
               <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3">{product.node.title}</h1>
               <p className="text-2xl font-bold text-primary mb-4">
                 {isConfigurator && configState?.isConfigured ? (
-                  <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">(inkl. Konfiguration)</span></>
+                  <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">{t("product.incl_config")}</span></>
                 ) : (
                   <>{basePrice.toFixed(2)} €</>
                 )}
               </p>
 
-              {/* Variant selection */}
               {product.node.options.length > 0 && product.node.options[0].name !== "Title" && (
                 <div className="mb-6">
                   {product.node.options.map((option) => (
@@ -209,62 +198,47 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {/* Configurator buttons */}
               {isConfigurator && (
                 <div className="mb-4">
-                  <Button
-                    onClick={() => setWizardOpen(true)}
-                    variant="outline"
-                    size="lg"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground mb-2"
-                  >
+                  <Button onClick={() => setWizardOpen(true)} variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground mb-2">
                     <Sparkles className="h-4 w-4 mr-2" />
-                    {configState?.isConfigured ? 'Konfiguration ändern' : 'Jetzt konfigurieren'}
+                    {configState?.isConfigured ? t("product.configure_change") : t("product.configure_now")}
                   </Button>
                   {configState?.isConfigured && (
                     <div className="text-xs text-muted-foreground bg-muted rounded p-2">
-                      ✓ Konfiguration abgeschlossen
+                      ✓ {t("product.config_complete")}
                       {configState.totalPriceDelta !== 0 && ` (Aufpreis: ${configState.totalPriceDelta > 0 ? '+' : ''}${configState.totalPriceDelta.toFixed(2)} €)`}
                     </div>
                   )}
                 </div>
               )}
 
-              <Button
-                onClick={handleAddToCart}
-                disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart}
-                className="w-full bg-primary text-primary-foreground hover:opacity-90"
-                size="lg"
-              >
+              <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart} className="w-full bg-primary text-primary-foreground hover:opacity-90" size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {!canAddToCart ? 'Bitte zuerst konfigurieren' : selectedVariant?.availableForSale ? "In den Warenkorb" : "Nicht verfügbar"}
+                {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
               {/* Beratungs-Strip */}
               <div className="mt-6 pt-6 border-t border-border">
                 <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={beratungPortrait}
-                    alt="Persönliche Beratung"
-                    className="w-20 h-20 rounded-full object-cover flex-shrink-0"
-                  />
+                  <img src={beratungPortrait} alt={t("product.advice_title")} className="w-20 h-20 rounded-full object-cover flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-base text-foreground">Beratung nötig? Fragen zum Produkt?</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">Kontaktieren Sie uns einfach:</p>
+                    <p className="font-semibold text-base text-foreground">{t("product.advice_title")}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{t("product.advice_subtitle")}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <a href="tel:+4941726403" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Phone className="h-12 w-12" />
-                    <span className="text-sm font-medium">Telefon</span>
+                    <span className="text-sm font-medium">{t("product.phone")}</span>
                   </a>
                   <button onClick={() => setContactOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <MessageSquare className="h-12 w-12" />
-                    <span className="text-sm font-medium">Kontaktformular</span>
+                    <span className="text-sm font-medium">{t("product.contact_form")}</span>
                   </button>
                   <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Monitor className="h-12 w-12" />
-                    <span className="text-sm font-medium">Online Beratung</span>
+                    <span className="text-sm font-medium">{t("product.online_advice")}</span>
                   </button>
                   <a href="https://wa.me/4941726403" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
                     <Smartphone className="h-12 w-12" />
@@ -275,37 +249,21 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Beschreibung – volle Breite */}
           {product.node.description && (
             <div className="mt-10 pt-8 border-t border-border">
-              <h3 className="font-heading text-xl font-semibold mb-4">Beschreibung</h3>
+              <h3 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h3>
               <p className="text-base text-muted-foreground leading-relaxed">{product.node.description}</p>
             </div>
           )}
-
         </div>
       </main>
       <Footer />
 
       {isConfigurator && configuratorData && (
-        <ConfiguratorWizard
-          open={wizardOpen}
-          onOpenChange={setWizardOpen}
-          groups={configuratorData.groups}
-          basePrice={basePrice}
-          currencyCode={product.node.priceRange.minVariantPrice.currencyCode}
-          productTitle={product.node.title}
-          onComplete={handleWizardComplete}
-          initialSelections={configState?.selections}
-        />
+        <ConfiguratorWizard open={wizardOpen} onOpenChange={setWizardOpen} groups={configuratorData.groups} basePrice={basePrice} currencyCode={product.node.priceRange.minVariantPrice.currencyCode} productTitle={product.node.title} onComplete={handleWizardComplete} initialSelections={configState?.selections} />
       )}
       <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
-      <ProductContactModal
-        open={contactOpen}
-        onOpenChange={setContactOpen}
-        productTitle={product.node.title}
-        productId={handle || ''}
-      />
+      <ProductContactModal open={contactOpen} onOpenChange={setContactOpen} productTitle={product.node.title} productId={handle || ''} />
     </div>
   );
 };

@@ -1,14 +1,17 @@
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { ShoppingCart, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cartStore";
 import { useProducts } from "@/hooks/useProducts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LocaleLink } from "@/components/LocaleLink";
+import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 const SearchProductCard = ({ product }: { product: ShopifyProduct }) => {
+  const { t } = useI18n();
   const addItem = useCartStore((state) => state.addItem);
   const isLoading = useCartStore((state) => state.isLoading);
   const variant = product.node.variants.edges[0]?.node;
@@ -27,24 +30,20 @@ const SearchProductCard = ({ product }: { product: ShopifyProduct }) => {
       quantity: 1,
       selectedOptions: variant.selectedOptions || [],
     });
-    toast.success("In den Warenkorb gelegt", {
+    toast.success(t("products.added_to_cart"), {
       description: product.node.title,
       position: "top-center",
     });
   };
 
   return (
-    <Link
+    <LocaleLink
       to={`/product/${product.node.handle}`}
       className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block"
     >
       <div className="aspect-square overflow-hidden bg-muted">
         {image ? (
-          <img
-            src={image.url}
-            alt={image.altText || product.node.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             <ShoppingCart className="h-12 w-12" />
@@ -52,33 +51,22 @@ const SearchProductCard = ({ product }: { product: ShopifyProduct }) => {
         )}
       </div>
       <div className="p-4">
-        <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">
-          {product.node.title}
-        </h3>
+        <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
         <div className="flex items-center justify-between">
           <span className="font-bold text-primary">
             {parseFloat(price.amount).toFixed(2)} {price.currencyCode === "EUR" ? "€" : price.currencyCode}
           </span>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 text-xs"
-            onClick={handleAddToCart}
-            disabled={isLoading || !variant?.availableForSale}
-          >
-            {isLoading ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <ShoppingCart className="h-3 w-3" />
-            )}
+          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={handleAddToCart} disabled={isLoading || !variant?.availableForSale}>
+            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShoppingCart className="h-3 w-3" />}
           </Button>
         </div>
       </div>
-    </Link>
+    </LocaleLink>
   );
 };
 
 const Search = () => {
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const { data: products, isLoading, error } = useProducts(50, query);
@@ -89,17 +77,17 @@ const Search = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild className="mb-4">
-            <Link to="/">
+            <LocaleLink to="/">
               <ArrowLeft className="h-4 w-4 mr-1" />
-              Zurück
-            </Link>
+              {t("search.back")}
+            </LocaleLink>
           </Button>
           <h1 className="font-heading text-2xl md:text-3xl font-bold">
-            {query ? `Suchergebnisse für „${query}"` : "Suche"}
+            {query ? t("search.results_for").replace("{query}", query) : t("search.search")}
           </h1>
           {!isLoading && products && (
             <p className="text-muted-foreground mt-1">
-              {products.length} {products.length === 1 ? "Ergebnis" : "Ergebnisse"}
+              {products.length === 1 ? t("search.result_one") : t("search.result_other").replace("{count}", String(products.length))}
             </p>
           )}
         </div>
@@ -111,17 +99,13 @@ const Search = () => {
         )}
 
         {error && (
-          <div className="text-center py-16 text-muted-foreground">
-            Suchergebnisse konnten nicht geladen werden.
-          </div>
+          <div className="text-center py-16 text-muted-foreground">{t("search.loading_error")}</div>
         )}
 
         {!isLoading && !error && products && products.length === 0 && (
           <div className="text-center py-16">
             <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-lg text-muted-foreground">
-              Keine Ergebnisse für „{query}"
-            </p>
+            <p className="text-lg text-muted-foreground">{t("search.no_results").replace("{query}", query)}</p>
           </div>
         )}
 
