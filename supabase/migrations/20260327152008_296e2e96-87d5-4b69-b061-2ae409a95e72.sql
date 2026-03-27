@@ -1,0 +1,1 @@
+UPDATE cms_menu_items SET url = 'kategoriemenu' WHERE id = 'e1bc133a-3cee-450c-b524-1e3f80df268e';
