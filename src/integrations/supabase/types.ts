@@ -175,6 +175,7 @@ export type Database = {
           created_at: string
           editor_mode: Database["public"]["Enums"]["cms_editor_mode"]
           id: string
+          locale: string
           name: string
           published_at: string | null
           seo_description: string | null
@@ -189,6 +190,7 @@ export type Database = {
           created_at?: string
           editor_mode?: Database["public"]["Enums"]["cms_editor_mode"]
           id?: string
+          locale?: string
           name: string
           published_at?: string | null
           seo_description?: string | null
@@ -203,6 +205,7 @@ export type Database = {
           created_at?: string
           editor_mode?: Database["public"]["Enums"]["cms_editor_mode"]
           id?: string
+          locale?: string
           name?: string
           published_at?: string | null
           seo_description?: string | null
