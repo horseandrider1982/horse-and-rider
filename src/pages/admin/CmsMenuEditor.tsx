@@ -141,18 +141,19 @@ export default function CmsMenuEditor() {
     } catch { toast.error('Fehler'); }
   };
 
-  const handleAddShopifyPlaceholder = async (menuId: string) => {
+  const handleAddShopifyPlaceholder = async (shopifyHandle: string, shopifyTitle: string, menuId: string) => {
     const menuItems = menuItemsByMenu[menuId] || [];
     try {
       await saveItem.mutateAsync({
         menu_id: menuId,
         type: 'shopify_menu_placeholder',
-        label: 'Shopify Menü',
+        label: shopifyTitle,
+        url: shopifyHandle,
         target: '_self',
         sort_order: menuItems.length,
         is_active: true,
       });
-      toast.success('Shopify Platzhalter hinzugefügt');
+      toast.success(`Shopify-Menü "${shopifyTitle}" hinzugefügt`);
     } catch { toast.error('Fehler'); }
   };
 
