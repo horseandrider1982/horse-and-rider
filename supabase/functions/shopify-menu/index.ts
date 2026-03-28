@@ -6,10 +6,32 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SHOPIFY_STOREFRONT_URL =
-  "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
+const SHOP_DOMAIN = "bpjvam-c1.myshopify.com";
+const ADMIN_API_VERSION = "2025-07";
+const ADMIN_API_URL = `https://${SHOP_DOMAIN}/admin/api/${ADMIN_API_VERSION}/graphql.json`;
+const STOREFRONT_API_URL = `https://${SHOP_DOMAIN}/api/${ADMIN_API_VERSION}/graphql.json`;
 
-// Fetch collections directly since menu query requires unauthenticated_read_content scope
+// Admin API query to fetch a menu by handle
+const ADMIN_MENU_QUERY = `
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      id
+      title
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
+    }
+  }
+`;
+
+// Fallback: Storefront collections query
 const COLLECTIONS_QUERY = `
   query GetCollections($first: Int!, $language: LanguageCode) @inContext(language: $language) {
     collections(first: $first) {
@@ -18,15 +40,37 @@ const COLLECTIONS_QUERY = `
           id
           title
           handle
-          image {
-            url
-            altText
-          }
+          image { url altText }
         }
       }
     }
   }
 `;
+
+function extractPathFromShopifyUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("myshopify.com") || u.hostname.includes("shopify.com")) {
+      return u.pathname + u.search;
+    }
+    return url;
+  } catch {
+    return url;
+  }
+}
+
+function normalizeMenuItem(item: { id: string; title: string; url: string; items?: { id: string; title: string; url: string }[] }) {
+  const path = extractPathFromShopifyUrl(item.url);
+  // Extract handle from path like /collections/reiter
+  const handleMatch = path.match(/\/collections\/([^/?]+)/);
+  return {
+    id: item.id,
+    title: item.title,
+    url: path,
+    handle: handleMatch?.[1] || null,
+    items: (item.items || []).map(child => normalizeMenuItem(child)),
+  };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -37,7 +81,42 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { handle, language } = body;
 
+    const adminToken = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
     const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+
+    // Try Admin API menu query first if handle is provided and admin token exists
+    if (handle && adminToken) {
+      try {
+        const response = await fetch(ADMIN_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Shopify-Access-Token": adminToken,
+          },
+          body: JSON.stringify({
+            query: ADMIN_MENU_QUERY,
+            variables: { handle },
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data?.data?.menu) {
+          const menu = data.data.menu;
+          const items = (menu.items || []).map(normalizeMenuItem);
+          return new Response(JSON.stringify({ items }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Menu not found – fall through to collections
+        console.log(`Menu "${handle}" not found via Admin API, falling back to collections`);
+      } catch (err) {
+        console.error("Admin API menu query failed:", err);
+      }
+    }
+
+    // Fallback: fetch all collections via Storefront API
     if (!storefrontToken) {
       return new Response(
         JSON.stringify({ error: "SHOPIFY_STOREFRONT_ACCESS_TOKEN not configured" }),
@@ -45,12 +124,10 @@ serve(async (req) => {
       );
     }
 
-    // If handle is provided, we try to fetch collections and filter
-    // Otherwise fetch all collections as menu items
     const variables: Record<string, unknown> = { first: 50 };
     if (language) variables.language = language.toUpperCase();
 
-    const response = await fetch(SHOPIFY_STOREFRONT_URL, {
+    const response = await fetch(STOREFRONT_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -69,15 +146,13 @@ serve(async (req) => {
     }
 
     const collections = data?.data?.collections?.edges || [];
-    
-    // Transform collections into menu-like items
     const items = collections.map((edge: { node: { id: string; title: string; handle: string; image?: { url: string; altText: string | null } } }) => ({
       id: edge.node.id,
       title: edge.node.title,
       url: `/collections/${edge.node.handle}`,
       handle: edge.node.handle,
       image: edge.node.image || null,
-      items: [], // no sub-items for collections
+      items: [],
     }));
 
     return new Response(JSON.stringify({ items }), {
