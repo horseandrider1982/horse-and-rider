@@ -322,11 +322,11 @@ export default function CmsMenuEditor() {
           <CardContent className="space-y-1">
             {!shopifyMenus?.length && <p className="text-xs text-muted-foreground">Keine Shopify-Menüs gefunden</p>}
             {shopifyMenus?.map(sm => (
-              <div key={sm.id} className="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-muted/50 group">
+              <div key={sm.handle} className="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-muted/50 group">
                 <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <span className="truncate block">{sm.title}</span>
-                  <span className="text-xs text-muted-foreground">{sm.handle} · {sm.itemsCount} Einträge</span>
+                  <span className="text-xs text-muted-foreground">{sm.handle}</span>
                 </div>
                 <Select onValueChange={(menuId) => handleAddShopifyPlaceholder(sm.handle, sm.title, menuId)}>
                   <SelectTrigger className="h-6 w-6 p-0 border-0 opacity-0 group-hover:opacity-100"><Plus className="h-3 w-3" /></SelectTrigger>
