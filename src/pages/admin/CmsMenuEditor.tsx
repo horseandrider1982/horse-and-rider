@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Loader2, Plus, GripVertical, Trash2, Pencil, ExternalLink, FileText, Link as LinkIcon, ShoppingBag, LayoutTemplate } from 'lucide-react';
 import { toast } from 'sonner';
+import { useShopifyMenuList } from '@/hooks/useShopifyMenuList';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent, DragOverlay, type DragStartEvent, useDroppable,
