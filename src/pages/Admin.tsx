@@ -15,6 +15,7 @@ import RedirectManager from "@/pages/admin/RedirectManager";
 import CmsPages from "@/pages/admin/CmsPages";
 import CmsPageEditor from "@/pages/admin/CmsPageEditor";
 import CmsMenuEditor from "@/pages/admin/CmsMenuEditor";
+import ShopifyMenuCache from "@/pages/admin/ShopifyMenuCache";
 import CalendlySettings from "@/pages/admin/CalendlySettings";
 import SearchSettings from "@/pages/admin/SearchSettings";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
@@ -219,6 +220,9 @@ function CmsSection({
           <TabsTrigger value="cms-menus" className="gap-2">
             <Layers className="h-4 w-4 hidden md:block" />Menüs
           </TabsTrigger>
+          <TabsTrigger value="shopify-cache" className="gap-2">
+            <Package className="h-4 w-4 hidden md:block" />Shopify Menü-Cache
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="cms-content">
@@ -253,6 +257,10 @@ function CmsSection({
               <CmsMenuEditor />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="shopify-cache">
+          <ShopifyMenuCache />
         </TabsContent>
       </Tabs>
     </>
