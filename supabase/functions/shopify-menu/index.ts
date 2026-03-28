@@ -11,12 +11,29 @@ const ADMIN_API_VERSION = "2025-07";
 const ADMIN_API_URL = `https://${SHOP_DOMAIN}/admin/api/${ADMIN_API_VERSION}/graphql.json`;
 const STOREFRONT_API_URL = `https://${SHOP_DOMAIN}/api/${ADMIN_API_VERSION}/graphql.json`;
 
-// Admin API query to fetch a menu by handle
-const ADMIN_MENU_QUERY = `
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
+// Admin API: list all menus to find the right one
+const ADMIN_LIST_MENUS_QUERY = `
+  query ListMenus {
+    menus(first: 20) {
+      edges {
+        node {
+          id
+          handle
+          title
+          itemsCount
+        }
+      }
+    }
+  }
+`;
+
+// Admin API: get menu items by ID
+const ADMIN_MENU_BY_ID_QUERY = `
+  query GetMenu($id: ID!) {
+    menu(id: $id) {
       id
       title
+      handle
       items {
         id
         title
@@ -61,7 +78,6 @@ function extractPathFromShopifyUrl(url: string): string {
 
 function normalizeMenuItem(item: { id: string; title: string; url: string; items?: { id: string; title: string; url: string }[] }) {
   const path = extractPathFromShopifyUrl(item.url);
-  // Extract handle from path like /collections/reiter
   const handleMatch = path.match(/\/collections\/([^/?]+)/);
   return {
     id: item.id,
@@ -70,6 +86,18 @@ function normalizeMenuItem(item: { id: string; title: string; url: string; items
     handle: handleMatch?.[1] || null,
     items: (item.items || []).map(child => normalizeMenuItem(child)),
   };
+}
+
+async function adminApiFetch(adminToken: string, query: string, variables: Record<string, unknown> = {}) {
+  const response = await fetch(ADMIN_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": adminToken,
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  return response.json();
 }
 
 serve(async (req) => {
@@ -84,33 +112,35 @@ serve(async (req) => {
     const adminToken = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
     const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
 
-    // Try Admin API menu query first if handle is provided and admin token exists
+    // Try Admin API: first list menus, find by handle, then fetch items
     if (handle && adminToken) {
       try {
-        const response = await fetch(ADMIN_API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": adminToken,
-          },
-          body: JSON.stringify({
-            query: ADMIN_MENU_QUERY,
-            variables: { handle },
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data?.data?.menu) {
-          const menu = data.data.menu;
-          const items = (menu.items || []).map(normalizeMenuItem);
-          return new Response(JSON.stringify({ items }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+        // Step 1: List all menus to find the one with matching handle
+        const listData = await adminApiFetch(adminToken, ADMIN_LIST_MENUS_QUERY);
+        
+        if (listData.errors) {
+          console.error("Admin API list menus errors:", JSON.stringify(listData.errors));
+        } else {
+          const menus = listData?.data?.menus?.edges || [];
+          console.log("Available menus:", JSON.stringify(menus.map((e: any) => ({ handle: e.node.handle, title: e.node.title, id: e.node.id }))));
+          
+          const targetMenu = menus.find((e: any) => e.node.handle === handle);
+          
+          if (targetMenu) {
+            // Step 2: Fetch menu items by ID
+            const menuData = await adminApiFetch(adminToken, ADMIN_MENU_BY_ID_QUERY, { id: targetMenu.node.id });
+            
+            if (menuData?.data?.menu) {
+              const menu = menuData.data.menu;
+              const items = (menu.items || []).map(normalizeMenuItem);
+              return new Response(JSON.stringify({ items }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          } else {
+            console.log(`Menu with handle "${handle}" not found. Available handles: ${menus.map((e: any) => e.node.handle).join(', ')}`);
+          }
         }
-
-        // Menu not found – fall through to collections
-        console.log(`Menu "${handle}" not found via Admin API, falling back to collections`);
       } catch (err) {
         console.error("Admin API menu query failed:", err);
       }
