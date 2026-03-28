@@ -732,6 +732,33 @@ export type Database = {
         }
         Relationships: []
       }
+      shopify_menu_cache: {
+        Row: {
+          handle: string
+          id: string
+          items: Json
+          locale: string
+          synced_at: string
+          updated_at: string
+        }
+        Insert: {
+          handle: string
+          id?: string
+          items?: Json
+          locale?: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Update: {
+          handle?: string
+          id?: string
+          items?: Json
+          locale?: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string
