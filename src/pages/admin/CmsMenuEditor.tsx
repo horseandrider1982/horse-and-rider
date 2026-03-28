@@ -68,6 +68,7 @@ export default function CmsMenuEditor() {
   const { data: menus, isLoading: menusLoading } = useCmsMenus();
   const { data: allItems, isLoading: itemsLoading } = useCmsMenuItems();
   const { data: pages } = useAdminCmsPages();
+  const { data: shopifyMenus } = useShopifyMenuList();
   const saveItem = useSaveCmsMenuItem();
   const deleteItem = useDeleteCmsMenuItem();
   const bulkUpdate = useBulkUpdateMenuItems();
