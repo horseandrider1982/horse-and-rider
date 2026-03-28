@@ -9,28 +9,56 @@ const corsHeaders = {
 
 const SHOP_DOMAIN = "bpjvam-c1.myshopify.com";
 const API_VERSION = "2025-07";
-const STOREFRONT_API_URL = `https://${SHOP_DOMAIN}/api/${API_VERSION}/graphql.json`;
+const ADMIN_API_URL = `https://${SHOP_DOMAIN}/admin/api/${API_VERSION}/graphql.json`;
 
-const STOREFRONT_MENU_QUERY = `
-  query GetMenu($handle: String!, $language: LanguageCode) @inContext(language: $language) {
+// Admin API query – fetches a menu by handle with nested items
+const ADMIN_MENU_QUERY = `
+  query GetMenu($handle: String!) {
     menu(handle: $handle) {
       id
       title
-      items {
-        id
-        title
-        url
-        items {
+      handle
+      items(first: 50) {
+        nodes {
           id
           title
           url
+          tags
+          items(first: 50) {
+            nodes {
+              id
+              title
+              url
+              tags
+              items(first: 50) {
+                nodes {
+                  id
+                  title
+                  url
+                }
+              }
+            }
+          }
         }
       }
     }
   }
 `;
 
+// Admin API: fetch available translations for a menu
+const ADMIN_TRANSLATABLE_QUERY = `
+  query GetTranslations($resourceId: ID!, $locale: String!) {
+    translatableResource(resourceId: $resourceId) {
+      translations(locale: $locale) {
+        key
+        value
+      }
+    }
+  }
+`;
+
 function extractPathFromShopifyUrl(url: string): string {
+  if (!url) return "/";
   try {
     const u = new URL(url);
     if (u.hostname.includes("myshopify.com") || u.hostname.includes("shopify.com")) {
@@ -42,16 +70,40 @@ function extractPathFromShopifyUrl(url: string): string {
   }
 }
 
-function normalizeMenuItem(item: { id: string; title: string; url: string; items?: any[] }) {
+interface RawMenuItem {
+  id: string;
+  title: string;
+  url: string;
+  items?: { nodes?: RawMenuItem[] };
+}
+
+function normalizeMenuItem(item: RawMenuItem) {
   const path = extractPathFromShopifyUrl(item.url);
   const handleMatch = path.match(/\/collections\/([^/?]+)/);
+  const children = item.items?.nodes || [];
   return {
     id: item.id,
     title: item.title,
     url: path,
     handle: handleMatch?.[1] || null,
-    items: (item.items || []).map((child: any) => normalizeMenuItem(child)),
+    items: children.map((child) => normalizeMenuItem(child)),
   };
+}
+
+async function adminApiRequest(query: string, variables: Record<string, unknown>, accessToken: string) {
+  const response = await fetch(ADMIN_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": accessToken,
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Admin API ${response.status}: ${text}`);
+  }
+  return response.json();
 }
 
 serve(async (req) => {
@@ -60,12 +112,12 @@ serve(async (req) => {
   }
 
   try {
-    // Verify admin role
-    const authHeader = req.headers.get("Authorization");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Verify admin role if auth header present
+    const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
       const { data: { user }, error: authError } = await supabase.auth.getUser(token);
@@ -90,47 +142,87 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { handles, locales } = body;
 
-    const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN");
-    if (!storefrontToken) {
+    const accessToken = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
+    if (!accessToken) {
       return new Response(
-        JSON.stringify({ error: "SHOPIFY_STOREFRONT_ACCESS_TOKEN not set" }),
+        JSON.stringify({ error: "SHOPIFY_ACCESS_TOKEN not set" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const menuHandles = handles || ["kategoriemenu", "main-menu", "footer", "hauptmenu-kundenkonto"];
-    const menuLocales = locales || ["de", "en"];
+    const menuHandles: string[] = handles || ["kategoriemenu", "main-menu", "footer", "hauptmenu-kundenkonto"];
+    const menuLocales: string[] = locales || ["de", "en"];
     const results: Array<{ handle: string; locale: string; status: string; itemCount?: number }> = [];
 
     for (const handle of menuHandles) {
+      // Fetch the default (DE) menu via Admin API
+      let defaultItems: ReturnType<typeof normalizeMenuItem>[] = [];
+      let menuGid: string | null = null;
+
+      try {
+        const data = await adminApiRequest(ADMIN_MENU_QUERY, { handle }, accessToken);
+        const menu = data?.data?.menu;
+
+        if (!menu || !menu.items?.nodes?.length) {
+          for (const locale of menuLocales) {
+            results.push({ handle, locale, status: "skipped: menu not found or empty" });
+          }
+          continue;
+        }
+
+        menuGid = menu.id;
+        defaultItems = menu.items.nodes.map((item: RawMenuItem) => normalizeMenuItem(item));
+      } catch (err) {
+        for (const locale of menuLocales) {
+          results.push({ handle, locale, status: `error: ${err.message}` });
+        }
+        continue;
+      }
+
+      // Save default locale (de)
       for (const locale of menuLocales) {
         try {
-          const response = await fetch(STOREFRONT_API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Shopify-Storefront-Access-Token": storefrontToken,
-            },
-            body: JSON.stringify({
-              query: STOREFRONT_MENU_QUERY,
-              variables: { handle, language: locale.toUpperCase() },
-            }),
-          });
+          let items = defaultItems;
 
-          const data = await response.json();
-          const menu = data?.data?.menu;
+          // For non-default locales, try to get translations
+          if (locale !== "de" && menuGid) {
+            try {
+              // Attempt to fetch translations for menu items via Shopify Translate & Adapt
+              // For now, we store the same structure – titles can be overridden manually in the admin
+              // The Admin API translations endpoint requires the Translate & Adapt app
+              const transData = await adminApiRequest(ADMIN_TRANSLATABLE_QUERY, {
+                resourceId: menuGid,
+                locale,
+              }, accessToken);
 
-          if (menu && menu.items?.length) {
-            const items = menu.items.map(normalizeMenuItem);
-            await supabase.from("shopify_menu_cache").upsert(
-              { handle, locale, items, synced_at: new Date().toISOString() },
-              { onConflict: "handle,locale" }
-            );
-            results.push({ handle, locale, status: "synced", itemCount: items.length });
-          } else {
-            const errorMsg = data?.errors?.[0]?.message || "empty";
-            results.push({ handle, locale, status: `skipped: ${errorMsg}` });
+              const translations = transData?.data?.translatableResource?.translations;
+              if (translations && translations.length > 0) {
+                // Build a map of translation keys to values
+                const transMap = new Map<string, string>();
+                translations.forEach((t: { key: string; value: string }) => {
+                  if (t.value) transMap.set(t.key, t.value);
+                });
+
+                // Apply translations to items (title keys follow pattern)
+                items = defaultItems.map((item, idx) => ({
+                  ...item,
+                  title: transMap.get(`items.${idx}.title`) || transMap.get(item.title) || item.title,
+                  items: item.items.map((child: any, cidx: number) => ({
+                    ...child,
+                    title: transMap.get(`items.${idx}.items.${cidx}.title`) || child.title,
+                  })),
+                }));
+              }
+            } catch {
+              // Translation fetch failed – use default titles
+            }
           }
+
+          await supabase.from("shopify_menu_cache").upsert(
+            { handle, locale, items, synced_at: new Date().toISOString() },
+            { onConflict: "handle,locale" }
+          );
+          results.push({ handle, locale, status: "synced", itemCount: items.length });
         } catch (err) {
           results.push({ handle, locale, status: `error: ${err.message}` });
         }
