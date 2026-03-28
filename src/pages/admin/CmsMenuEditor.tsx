@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Loader2, Plus, GripVertical, Trash2, Pencil, ExternalLink, FileText, Link as LinkIcon, ShoppingBag, LayoutTemplate } from 'lucide-react';
 import { toast } from 'sonner';
+import { useShopifyMenuList } from '@/hooks/useShopifyMenuList';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent, DragOverlay, type DragStartEvent, useDroppable,
@@ -67,6 +68,7 @@ export default function CmsMenuEditor() {
   const { data: menus, isLoading: menusLoading } = useCmsMenus();
   const { data: allItems, isLoading: itemsLoading } = useCmsMenuItems();
   const { data: pages } = useAdminCmsPages();
+  const { data: shopifyMenus } = useShopifyMenuList();
   const saveItem = useSaveCmsMenuItem();
   const deleteItem = useDeleteCmsMenuItem();
   const bulkUpdate = useBulkUpdateMenuItems();
@@ -139,18 +141,19 @@ export default function CmsMenuEditor() {
     } catch { toast.error('Fehler'); }
   };
 
-  const handleAddShopifyPlaceholder = async (menuId: string) => {
+  const handleAddShopifyPlaceholder = async (shopifyHandle: string, shopifyTitle: string, menuId: string) => {
     const menuItems = menuItemsByMenu[menuId] || [];
     try {
       await saveItem.mutateAsync({
         menu_id: menuId,
         type: 'shopify_menu_placeholder',
-        label: 'Shopify Menü',
+        label: shopifyTitle,
+        url: shopifyHandle,
         target: '_self',
         sort_order: menuItems.length,
         is_active: true,
       });
-      toast.success('Shopify Platzhalter hinzugefügt');
+      toast.success(`Shopify-Menü "${shopifyTitle}" hinzugefügt`);
     } catch { toast.error('Fehler'); }
   };
 
@@ -315,14 +318,24 @@ export default function CmsMenuEditor() {
 
         {/* Shopify Placeholder */}
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Shopify Menü</CardTitle></CardHeader>
-          <CardContent>
-            <Select onValueChange={(menuId) => handleAddShopifyPlaceholder(menuId)}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Platzhalter einfügen in…" /></SelectTrigger>
-              <SelectContent>
-                {menus?.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Shopify Menüs</CardTitle></CardHeader>
+          <CardContent className="space-y-1">
+            {!shopifyMenus?.length && <p className="text-xs text-muted-foreground">Keine Shopify-Menüs gefunden</p>}
+            {shopifyMenus?.map(sm => (
+              <div key={sm.handle} className="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-muted/50 group">
+                <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <span className="truncate block">{sm.title}</span>
+                  <span className="text-xs text-muted-foreground">{sm.handle}</span>
+                </div>
+                <Select onValueChange={(menuId) => handleAddShopifyPlaceholder(sm.handle, sm.title, menuId)}>
+                  <SelectTrigger className="h-6 w-6 p-0 border-0 opacity-0 group-hover:opacity-100"><Plus className="h-3 w-3" /></SelectTrigger>
+                  <SelectContent>
+                    {menus?.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>
