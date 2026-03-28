@@ -220,6 +220,9 @@ function CmsSection({
           <TabsTrigger value="cms-menus" className="gap-2">
             <Layers className="h-4 w-4 hidden md:block" />Menüs
           </TabsTrigger>
+          <TabsTrigger value="shopify-cache" className="gap-2">
+            <Package className="h-4 w-4 hidden md:block" />Shopify Menü-Cache
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="cms-content">
@@ -254,6 +257,10 @@ function CmsSection({
               <CmsMenuEditor />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="shopify-cache">
+          <ShopifyMenuCache />
         </TabsContent>
       </Tabs>
     </>
