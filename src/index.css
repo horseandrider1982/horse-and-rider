@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent empty paragraphs from collapsing in CMS/prose content */
+.prose p:empty::before {
+  content: "\00a0";
+  display: block;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
