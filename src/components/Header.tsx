@@ -44,18 +44,8 @@ export const Header = () => {
             </LocaleLink>
           </div>
 
-          {/* Center: Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-foreground">
-            {topNavItems.length > 0 ? (
-              <CmsMenuItemRenderer items={topNavItems} linkClassName="hover:text-primary transition-colors" mode="inline" />
-            ) : (
-              <>
-                <LocaleLink to="/" className="hover:text-primary transition-colors">{t("nav.home")}</LocaleLink>
-                <LocaleLink to="/unsere-marken" className="hover:text-primary transition-colors">{t("nav.brands")}</LocaleLink>
-                <LocaleLink to="/news" className="hover:text-primary transition-colors">{t("nav.news")}</LocaleLink>
-              </>
-            )}
-          </nav>
+          {/* Center: Desktop Mega Menu */}
+          <MegaMenu />
 
           {/* Right: Search + Language (desktop) + Account (desktop) + Cart */}
           <div className="flex items-center gap-2 sm:gap-3">
