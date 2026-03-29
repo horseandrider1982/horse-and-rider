@@ -212,7 +212,7 @@ const ProductDetail = () => {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <LocaleLink to={`/marken/${brand.slug}`}>{brand.name}</LocaleLink>
+                      <LocaleLink to={`/unsere-marken/${brand.slug}`}>{brand.name}</LocaleLink>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </>
