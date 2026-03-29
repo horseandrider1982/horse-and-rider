@@ -268,6 +268,13 @@ const ProductDetail = () => {
                 </div>
               )}
 
+              {isEngravable && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-secondary/50 text-sm text-muted-foreground">
+                  <PenTool className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span>Dieses Produkt ist gegen Aufpreis gravierbar. Legen Sie die gewünschte Größe in den Warenkorb.</span>
+                </div>
+              )}
+
               <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart} className="w-full bg-primary text-primary-foreground hover:opacity-90" size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
                 {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
