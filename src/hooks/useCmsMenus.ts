@@ -79,11 +79,13 @@ export function useDeleteCmsMenuItem() {
 export function useBulkUpdateMenuItems() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (items: Array<{ id: string; menu_id: string; sort_order: number }>) => {
+    mutationFn: async (items: Array<{ id: string; menu_id: string; sort_order: number; parent_id?: string | null }>) => {
       for (const item of items) {
+        const update: any = { menu_id: item.menu_id, sort_order: item.sort_order };
+        if (item.parent_id !== undefined) update.parent_id = item.parent_id;
         const { error } = await supabase
           .from('cms_menu_items')
-          .update({ menu_id: item.menu_id, sort_order: item.sort_order })
+          .update(update)
           .eq('id', item.id);
         if (error) throw error;
       }
