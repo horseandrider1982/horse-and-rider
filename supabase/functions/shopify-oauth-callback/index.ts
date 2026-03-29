@@ -26,7 +26,8 @@ serve(async (req) => {
       });
     }
 
-    const redirectUri = `${url.origin}${url.pathname}`;
+    const publicBaseUrl = (Deno.env.get("SUPABASE_URL") || `${req.headers.get("x-forwarded-proto") || "https"}://${req.headers.get("x-forwarded-host") || url.host}`).replace(/\/$/, "");
+    const redirectUri = `${publicBaseUrl}/functions/v1/shopify-oauth-callback`;
     const scopes = "read_online_store_navigation,write_online_store_navigation";
     const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
