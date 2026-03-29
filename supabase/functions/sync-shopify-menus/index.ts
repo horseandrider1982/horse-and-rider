@@ -147,13 +147,15 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { handles, locales } = body;
 
-    const accessToken = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
+    // Prefer dedicated navigation token, fall back to general access token
+    const accessToken = Deno.env.get("SHOPIFY_NAVIGATION_TOKEN") || Deno.env.get("SHOPIFY_ACCESS_TOKEN");
     if (!accessToken) {
       return new Response(
-        JSON.stringify({ error: "SHOPIFY_ACCESS_TOKEN not set" }),
+        JSON.stringify({ error: "SHOPIFY_NAVIGATION_TOKEN or SHOPIFY_ACCESS_TOKEN not set" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    console.log("Using token:", accessToken.startsWith("shpat_") ? "shpat_***" : "***");
 
     const menuHandles: string[] = handles || ["kategoriemenu", "main-menu", "footer", "hauptmenu-kundenkonto"];
     const menuLocales: string[] = locales || ["de", "en"];
