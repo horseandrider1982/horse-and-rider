@@ -48,7 +48,8 @@ const ProductDetail = () => {
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
-  const isConfigurator = !!configuratorData && configuratorData.groups.length > 0;
+  const nonGravurGroups = configuratorData?.groups.filter(g => !g.name.toLowerCase().includes('gravur')) ?? [];
+  const isConfigurator = nonGravurGroups.length > 0;
   const isEngravable = !!configuratorData && configuratorData.groups.some(g => g.name.toLowerCase().includes('gravur'));
   const { data: brands } = useBrands();
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
@@ -314,7 +315,7 @@ const ProductDetail = () => {
       <Footer />
 
       {isConfigurator && configuratorData && (
-        <ConfiguratorWizard open={wizardOpen} onOpenChange={setWizardOpen} groups={configuratorData.groups} basePrice={basePrice} currencyCode={product.node.priceRange.minVariantPrice.currencyCode} productTitle={product.node.title} onComplete={handleWizardComplete} initialSelections={configState?.selections} />
+        <ConfiguratorWizard open={wizardOpen} onOpenChange={setWizardOpen} groups={nonGravurGroups} basePrice={basePrice} currencyCode={product.node.priceRange.minVariantPrice.currencyCode} productTitle={product.node.title} onComplete={handleWizardComplete} initialSelections={configState?.selections} />
       )}
       <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
       <ProductContactModal open={contactOpen} onOpenChange={setContactOpen} productTitle={product.node.title} productId={handle || ''} />
