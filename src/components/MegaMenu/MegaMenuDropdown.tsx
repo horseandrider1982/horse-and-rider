@@ -51,14 +51,11 @@ export function MegaMenuDropdown({ item }: MegaMenuDropdownProps) {
         <div className="flex gap-8">
           {/* LEFT: Category title + "View all" link */}
           <div className="flex-shrink-0 w-44">
-            <h3 className="font-heading text-base font-semibold text-foreground mb-2">
-              {item.title}
-            </h3>
             <LocaleLink
               to={item.url}
-              className="text-sm text-primary hover:underline font-medium"
+              className="font-heading text-base font-semibold text-foreground hover:text-primary transition-colors"
             >
-              {t('megamenu.view_all') || 'Alle anzeigen →'}
+              {item.title}
             </LocaleLink>
           </div>
 
