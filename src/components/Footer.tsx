@@ -275,13 +275,7 @@ export const Footer = () => {
         <div className="border-t border-background/20 mt-8 pt-6 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h5 className="font-semibold text-background text-sm mb-3">{t("footer.payment_methods")}</h5>
-            <div className="flex flex-wrap gap-2">
-              {paymentMethods && paymentMethods.length > 0 ? (
-                paymentMethods.map((method) => <PaymentBadge key={method} id={method} />)
-              ) : (
-                <span className="text-xs text-background/50">{t("footer.payment_loading")}</span>
-              )}
-            </div>
+            <PaymentIcons />
           </div>
           <div>
             <h5 className="font-semibold text-background text-sm mb-3">{t("footer.shipping")}</h5>
