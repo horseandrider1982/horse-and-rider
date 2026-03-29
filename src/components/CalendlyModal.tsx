@@ -1,14 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useCalendlyUrl } from "@/hooks/useCalendlyUrl";
+import { useBookingUrl } from "@/hooks/useCalendlyUrl";
 import { Loader2 } from "lucide-react";
 
-interface CalendlyModalProps {
+interface BookingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const CalendlyModal = ({ open, onOpenChange }: CalendlyModalProps) => {
-  const { data: calendlyUrl, isLoading } = useCalendlyUrl();
+export const CalendlyModal = ({ open, onOpenChange }: BookingModalProps) => {
+  const { data: bookingUrl, isLoading } = useBookingUrl();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -21,13 +21,13 @@ export const CalendlyModal = ({ open, onOpenChange }: CalendlyModalProps) => {
             <div className="flex items-center justify-center h-[500px]">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : calendlyUrl ? (
+          ) : bookingUrl ? (
             <iframe
-              src={calendlyUrl}
+              src={bookingUrl}
               width="100%"
               height="500"
               frameBorder="0"
-              title="Calendly Terminbuchung"
+              title="Online Beratung buchen"
               className="rounded-md"
             />
           ) : (
