@@ -64,6 +64,12 @@ const AppContent = () => {
           <Route path="widerrufsrecht" element={<CmsPage />} />
           <Route path="kontakt" element={<Kontakt />} />
           <Route path="versand" element={<CmsPage />} />
+          <Route path="service" element={<CmsPage />} />
+          <Route path="stickerei" element={<CmsPage />} />
+          <Route path="scherblaetter-schleifservice" element={<CmsPage />} />
+          <Route path="deckenwasche" element={<CmsPage />} />
+          <Route path="test-vor-kauf" element={<CmsPage />} />
+          <Route path="gravur" element={<CmsPage />} />
           <Route path="faq" element={<FAQ />} />
           <Route path="pages/:slug" element={<CmsPage />} />
           <Route path="*" element={<NotFound />} />
