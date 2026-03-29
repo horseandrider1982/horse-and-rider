@@ -16,7 +16,7 @@ serve(async (req) => {
   const code = url.searchParams.get("code");
   const shop = url.searchParams.get("shop") || SHOP_DOMAIN;
 
-  // Step 1: If no code, redirect to Shopify OAuth authorize
+  // Step 1: If no code, break out of Shopify iframe and redirect to OAuth
   if (!code) {
     const clientId = Deno.env.get("SHOPIFY_NAV_CLIENT_ID");
     if (!clientId) {
@@ -30,10 +30,22 @@ serve(async (req) => {
     const scopes = "read_online_store_navigation,write_online_store_navigation";
     const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
-    return new Response(null, {
-      status: 302,
-      headers: { Location: authUrl },
-    });
+    // Use JavaScript to break out of Shopify's iframe
+    return new Response(
+      `<!DOCTYPE html>
+<html><head><title>Redirecting...</title></head>
+<body>
+<script>
+  if (window.top !== window.self) {
+    window.top.location.href = "${authUrl}";
+  } else {
+    window.location.href = "${authUrl}";
+  }
+</script>
+<p>Weiterleitung zu Shopify OAuth...</p>
+</body></html>`,
+      { headers: { "Content-Type": "text/html" } }
+    );
   }
 
   // Step 2: Exchange code for access token
