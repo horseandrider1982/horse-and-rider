@@ -315,7 +315,7 @@ const ProductDetail = () => {
       <Footer />
 
       {isConfigurator && configuratorData && (
-        <ConfiguratorWizard open={wizardOpen} onOpenChange={setWizardOpen} groups={configuratorData.groups} basePrice={basePrice} currencyCode={product.node.priceRange.minVariantPrice.currencyCode} productTitle={product.node.title} onComplete={handleWizardComplete} initialSelections={configState?.selections} />
+        <ConfiguratorWizard open={wizardOpen} onOpenChange={setWizardOpen} groups={nonGravurGroups} basePrice={basePrice} currencyCode={product.node.priceRange.minVariantPrice.currencyCode} productTitle={product.node.title} onComplete={handleWizardComplete} initialSelections={configState?.selections} />
       )}
       <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
       <ProductContactModal open={contactOpen} onOpenChange={setContactOpen} productTitle={product.node.title} productId={handle || ''} />
