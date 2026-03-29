@@ -16,6 +16,8 @@ import { ConfiguratorWizard } from "@/components/configurator/ConfiguratorWizard
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
+import { EngravingDialog, ENGRAVING_PRICE } from "@/components/EngravingDialog";
+import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
@@ -42,10 +44,12 @@ const ProductDetail = () => {
   const [configState, setConfigState] = useState<ConfigurationState | null>(null);
   const [calendlyOpen, setCalendlyOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [engravingOpen, setEngravingOpen] = useState(false);
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
   const isConfigurator = !!configuratorData && configuratorData.groups.length > 0;
+  const isEngravable = !!configuratorData && configuratorData.groups.some(g => g.name.toLowerCase().includes('gravur'));
   const { data: brands } = useBrands();
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
 
@@ -95,7 +99,7 @@ const ProductDetail = () => {
     toast.success(t("product.config_complete"), { position: "top-center" });
   };
 
-  const handleAddToCart = async () => {
+  const addToCartWithAttributes = async (extraAttributes: Array<{ key: string; value: string }> = []) => {
     if (!selectedVariant) return;
     const attributes: Array<{ key: string; value: string }> = [];
     if (isConfigurator && configState?.isConfigured) {
@@ -123,6 +127,7 @@ const ProductDetail = () => {
         }
       });
     }
+    attributes.push(...extraAttributes);
     await addItem({
       product,
       variantId: selectedVariant.id,
@@ -133,6 +138,28 @@ const ProductDetail = () => {
       ...(attributes.length > 0 ? { attributes } : {}),
     });
     toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
+  };
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant) return;
+    if (isEngravable) {
+      setEngravingOpen(true);
+      return;
+    }
+    await addToCartWithAttributes();
+  };
+
+  const handleEngravingSkip = async () => {
+    await addToCartWithAttributes();
+  };
+
+  const handleEngravingConfirm = async (engraving: EngravingResult) => {
+    await addToCartWithAttributes([
+      { key: 'Gravur', value: `${engraving.text} (${engraving.fontLabel})` },
+      { key: '_gravur_text', value: engraving.text },
+      { key: '_gravur_font', value: engraving.fontLabel },
+      { key: '_gravur_price', value: ENGRAVING_PRICE.toFixed(2) },
+    ]);
   };
 
   const canAddToCart = !isConfigurator || configState?.isConfigured;
@@ -264,6 +291,15 @@ const ProductDetail = () => {
       )}
       <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
       <ProductContactModal open={contactOpen} onOpenChange={setContactOpen} productTitle={product.node.title} productId={handle || ''} />
+      {isEngravable && (
+        <EngravingDialog
+          open={engravingOpen}
+          onOpenChange={setEngravingOpen}
+          onSkip={handleEngravingSkip}
+          onConfirm={handleEngravingConfirm}
+          productTitle={product.node.title}
+        />
+      )}
     </div>
   );
 };
