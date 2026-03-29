@@ -38,12 +38,12 @@ const ADMIN_MENU_QUERY = `
         title
         url
         tags
-        items(limit: 250) {
+        items {
           id
           title
           url
           tags
-          items(limit: 250) {
+          items {
             id
             title
             url
