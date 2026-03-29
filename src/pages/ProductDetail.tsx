@@ -16,6 +16,8 @@ import { ConfiguratorWizard } from "@/components/configurator/ConfiguratorWizard
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
+import { EngravingDialog, ENGRAVING_PRICE } from "@/components/EngravingDialog";
+import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
