@@ -101,9 +101,14 @@ async function adminApiRequest(query: string, variables: Record<string, unknown>
   });
   if (!response.ok) {
     const text = await response.text();
+    console.error(`Admin API HTTP ${response.status}: ${text}`);
     throw new Error(`Admin API ${response.status}: ${text}`);
   }
-  return response.json();
+  const json = await response.json();
+  if (json.errors) {
+    console.error(`Admin API GraphQL errors:`, JSON.stringify(json.errors));
+  }
+  return json;
 }
 
 serve(async (req) => {
