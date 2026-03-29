@@ -170,28 +170,49 @@ serve(async (req) => {
     const menuLocales: string[] = locales || ["de", "en"];
     const results: Array<{ handle: string; locale: string; status: string; itemCount?: number }> = [];
 
+    // First, list all menus to build a handle→GID map
+    let handleToGid = new Map<string, string>();
+    try {
+      const listData = await adminApiRequest(ADMIN_MENUS_LIST_QUERY, {}, accessToken);
+      const menuEdges = listData?.data?.menus?.edges || [];
+      for (const edge of menuEdges) {
+        handleToGid.set(edge.node.handle, edge.node.id);
+      }
+      console.log("Available menus:", Array.from(handleToGid.keys()).join(", "));
+    } catch (err) {
+      return new Response(JSON.stringify({ error: `Failed to list menus: ${err.message}` }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     for (const handle of menuHandles) {
-      // Fetch the default (DE) menu via Admin API
       let defaultItems: ReturnType<typeof normalizeMenuItem>[] = [];
-      let menuGid: string | null = null;
+      let menuGid: string | null = handleToGid.get(handle) || null;
+
+      if (!menuGid) {
+        for (const locale of menuLocales) {
+          results.push({ handle, locale, status: `skipped: menu not found (no GID for handle)` });
+        }
+        continue;
+      }
 
       try {
-        const data = await adminApiRequest(ADMIN_MENU_QUERY, { handle }, accessToken);
-        console.log(`Menu "${handle}" response:`, JSON.stringify(data?.data?.menu ? { id: data.data.menu.id, title: data.data.menu.title, itemCount: data.data.menu.items?.nodes?.length } : null));
+        const data = await adminApiRequest(ADMIN_MENU_QUERY, { id: menuGid }, accessToken);
+        console.log(`Menu "${handle}" response:`, JSON.stringify(data?.data?.menu ? { id: data.data.menu.id, title: data.data.menu.title, itemCount: data.data.menu.items?.length } : null));
         if (data?.errors) {
           console.error(`GraphQL errors for "${handle}":`, JSON.stringify(data.errors));
         }
         const menu = data?.data?.menu;
 
-        if (!menu || !menu.items?.nodes?.length) {
+        if (!menu || !menu.items?.length) {
           for (const locale of menuLocales) {
             results.push({ handle, locale, status: `skipped: menu ${menu ? 'empty' : 'not found'}` });
           }
           continue;
         }
 
-        menuGid = menu.id;
-        defaultItems = menu.items.nodes.map((item: RawMenuItem) => normalizeMenuItem(item));
+        defaultItems = menu.items.map((item: RawMenuItem) => normalizeMenuItem(item));
       } catch (err) {
         for (const locale of menuLocales) {
           results.push({ handle, locale, status: `error: ${err.message}` });
