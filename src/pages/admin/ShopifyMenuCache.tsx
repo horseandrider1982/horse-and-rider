@@ -52,9 +52,24 @@ export default function ShopifyMenuCacheManager() {
       const results = data?.results || [];
       const synced = results.filter((r: any) => r.status === 'synced').length;
       const skipped = results.filter((r: any) => r.status.startsWith('skipped')).length;
+      const errors = results.filter((r: any) => r.status.startsWith('error'));
       toast.success(`Sync: ${synced} aktualisiert, ${skipped} übersprungen`);
-      if (skipped > 0) {
-        toast.info('Einige Menüs konnten nicht von Shopify geladen werden (fehlender Scope). Bearbeite sie manuell.');
+      if (errors.length > 0) {
+        toast.error(`Shopify-Sync Fehler: ${errors[0].status.replace(/^error:\s*/, '')}`);
+      } else if (skipped > 0) {
+        const skippedStatuses = results
+          .filter((r: any) => r.status.startsWith('skipped'))
+          .map((r: any) => r.status);
+        const hasScopeIssue = skippedStatuses.some((status: string) => status.toLowerCase().includes('scope'));
+        const hasNotFoundIssue = skippedStatuses.some((status: string) => status.toLowerCase().includes('not found'));
+
+        toast.info(
+          hasScopeIssue
+            ? 'Einige Menüs konnten nicht geladen werden, weil der Shopify-App ein benötigter Zugriff fehlt.'
+            : hasNotFoundIssue
+              ? 'Einige Menüs wurden in Shopify nicht gefunden. Bitte prüfe die Menü-Handles.'
+              : 'Einige Menüs wurden übersprungen. Bitte prüfe die Sync-Details im Cache.'
+        );
       }
     } catch (err: any) {
       toast.error(`Sync fehlgeschlagen: ${err.message}`);

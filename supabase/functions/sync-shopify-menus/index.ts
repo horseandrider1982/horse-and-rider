@@ -38,12 +38,12 @@ const ADMIN_MENU_QUERY = `
         title
         url
         tags
-        items(limit: 250) {
+        items {
           id
           title
           url
           tags
-          items(limit: 250) {
+          items {
             id
             title
             url
@@ -169,9 +169,10 @@ serve(async (req) => {
     const menuHandles: string[] = handles || ["kategoriemenu", "main-menu", "footer", "hauptmenu-kundenkonto"];
     const menuLocales: string[] = locales || ["de", "en"];
     const results: Array<{ handle: string; locale: string; status: string; itemCount?: number }> = [];
+    const handleAliases = new Map<string, string>([["hauptmenu-kundenkonto", "customer-account-main-menu"]]);
 
     // First, list all menus to build a handle→GID map
-    let handleToGid = new Map<string, string>();
+    const handleToGid = new Map<string, string>();
     try {
       const listData = await adminApiRequest(ADMIN_MENUS_LIST_QUERY, {}, accessToken);
       const menuEdges = listData?.data?.menus?.edges || [];
@@ -188,11 +189,12 @@ serve(async (req) => {
 
     for (const handle of menuHandles) {
       let defaultItems: ReturnType<typeof normalizeMenuItem>[] = [];
-      let menuGid: string | null = handleToGid.get(handle) || null;
+      const resolvedHandle = handleToGid.has(handle) ? handle : (handleAliases.get(handle) || handle);
+      let menuGid: string | null = handleToGid.get(resolvedHandle) || null;
 
       if (!menuGid) {
         for (const locale of menuLocales) {
-          results.push({ handle, locale, status: `skipped: menu not found (no GID for handle)` });
+          results.push({ handle, locale, status: `skipped: menu not found (${resolvedHandle})` });
         }
         continue;
       }
