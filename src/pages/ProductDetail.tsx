@@ -154,12 +154,39 @@ const ProductDetail = () => {
   };
 
   const handleEngravingConfirm = async (engraving: EngravingResult) => {
+    // 1. Add main product
     await addToCartWithAttributes([
       { key: 'Gravur', value: `${engraving.text} (${engraving.fontLabel})` },
       { key: '_gravur_text', value: engraving.text },
       { key: '_gravur_font', value: engraving.fontLabel },
-      { key: '_gravur_price', value: ENGRAVING_PRICE.toFixed(2) },
     ]);
+    // 2. Add engraving as separate line item
+    const engravingVariantId = 'gid://shopify/ProductVariant/57528290705733';
+    await addItem({
+      product: {
+        node: {
+          id: 'gid://shopify/Product/15777060782405',
+          title: 'Individuelle Gravur',
+          description: '',
+          handle: 'individuelle-gravur',
+          vendor: '',
+          priceRange: { minVariantPrice: { amount: ENGRAVING_PRICE.toFixed(2), currencyCode: 'EUR' } },
+          images: { edges: product.node.images.edges.length > 0 ? [product.node.images.edges[0]] : [] },
+          variants: { edges: [{ node: { id: engravingVariantId, title: 'Default Title', price: { amount: ENGRAVING_PRICE.toFixed(2), currencyCode: 'EUR' }, availableForSale: true, selectedOptions: [] } }] },
+          options: [],
+        },
+      },
+      variantId: engravingVariantId,
+      variantTitle: 'Default Title',
+      price: { amount: ENGRAVING_PRICE.toFixed(2), currencyCode: 'EUR' },
+      quantity: 1,
+      selectedOptions: [],
+      attributes: [
+        { key: '_gravur_text', value: engraving.text },
+        { key: '_gravur_font', value: engraving.fontLabel },
+        { key: '_gravur_fuer', value: product.node.title },
+      ],
+    });
   };
 
   const canAddToCart = !isConfigurator || configState?.isConfigured;
