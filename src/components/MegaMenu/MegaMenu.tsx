@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { useShopifyMenu, type ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 import { usePublicCmsMenus, type PublicMenuItem } from '@/hooks/usePublicCmsMenus';
 import { MegaMenuItem } from './MegaMenuItem';
-import { LocaleLink } from '@/components/LocaleLink';
+import { CmsMegaMenuItem } from './CmsMegaMenuItem';
 
 /**
  * Desktop-only Mega Menu.
@@ -45,7 +45,7 @@ export function MegaMenu() {
               />
             );
           }
-          return <CmsNavItem key={cmsItem.id} item={cmsItem} />;
+          return <CmsMegaMenuItem key={cmsItem.id} item={cmsItem} />;
         })}
       </ul>
     </nav>
@@ -65,32 +65,3 @@ function ShopifyMenuItems({ handle }: { handle: string }) {
   );
 }
 
-function CmsNavItem({ item }: { item: PublicMenuItem }) {
-  const isExternal = item.target === '_blank' || item.url?.startsWith('http');
-
-  if (isExternal) {
-    return (
-      <li>
-        <a
-          href={item.url || '#'}
-          target={item.target}
-          rel="noopener noreferrer"
-          className="flex items-center px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-        >
-          {item.label}
-        </a>
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <LocaleLink
-        to={item.url || '#'}
-        className="flex items-center px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-      >
-        {item.label}
-      </LocaleLink>
-    </li>
-  );
-}
