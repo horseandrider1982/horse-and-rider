@@ -10,6 +10,7 @@ export interface CmsMenu {
 export interface CmsMenuItem {
   id: string;
   menu_id: string;
+  parent_id: string | null;
   type: 'cms_page' | 'custom_link' | 'shopify_menu_placeholder';
   label: string;
   cms_page_id: string | null;
