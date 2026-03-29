@@ -230,10 +230,17 @@ export const Footer = () => {
           </div>
           <div>
             <h5 className="font-semibold text-background text-sm mb-3">{t("footer.buyer_protection")}</h5>
-            <a href="https://www.trustedshops.de/bewertung/info_XD9E26EDF6E35468A4F6C9BDFD0A6E540.html" target="_blank" rel="noopener noreferrer" className="inline-block">
-              <img src="https://widgets.trustedshops.com/images/seal/XD9E26EDF6E35468A4F6C9BDFD0A6E540/80/seal.png" alt="Trusted Shops" className="h-16 w-auto" onError={(e) => { const target = e.currentTarget; target.style.display = 'none'; const fallback = target.nextElementSibling as HTMLElement; if (fallback) fallback.style.display = 'flex'; }} />
-              <span className="items-center justify-center rounded px-3 py-2 text-xs font-bold border border-background/30 text-background hidden gap-1.5">✓ Trusted Shops</span>
-            </a>
+            <div id="trusted-shops-customer-voice" ref={(el) => {
+              if (el && !el.querySelector('script')) {
+                const script = document.createElement('script');
+                script.src = 'https://integrations.etrusted.com/applications/widget.js/v2';
+                script.async = true;
+                const widget = document.createElement('etrusted-widget');
+                widget.setAttribute('data-etrusted-widget-id', 'wdg-3af3c7a8-4921-4456-9d28-0feb56898812');
+                el.appendChild(widget);
+                el.appendChild(script);
+              }
+            }} />
           </div>
         </div>
 
