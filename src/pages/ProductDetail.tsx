@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
@@ -34,6 +34,7 @@ function loadConfig(productId: string): ConfigurationState | null {
 
 const ProductDetail = () => {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const { handle } = useParams<{ handle: string }>();
   const { data: product, isLoading, error } = useProductByHandle(handle || "");
   const addItem = useCartStore(state => state.addItem);
@@ -197,9 +198,9 @@ const ProductDetail = () => {
       <TopBar /><Header />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          <LocaleLink to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
             <ArrowLeft className="h-4 w-4" /> {t("product.back")}
-          </LocaleLink>
+          </button>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-3">
