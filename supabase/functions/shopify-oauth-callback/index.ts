@@ -30,22 +30,10 @@ serve(async (req) => {
     const scopes = "read_online_store_navigation,write_online_store_navigation";
     const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
-    // Use JavaScript to break out of Shopify's iframe
-    return new Response(
-      `<!DOCTYPE html>
-<html><head><title>Redirecting...</title></head>
-<body>
-<script>
-  if (window.top !== window.self) {
-    window.top.location.href = "${authUrl}";
-  } else {
-    window.location.href = "${authUrl}";
-  }
-</script>
-<p>Weiterleitung zu Shopify OAuth...</p>
-</body></html>`,
-      { headers: { "Content-Type": "text/html" } }
-    );
+    return new Response(null, {
+      status: 302,
+      headers: { Location: authUrl },
+    });
   }
 
   // Step 2: Exchange code for access token
