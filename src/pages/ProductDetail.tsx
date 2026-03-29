@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor } from "lucide-react";
+import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
 import { ProductContactModal } from "@/components/ProductContactModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
@@ -265,6 +265,13 @@ const ProductDetail = () => {
                       {configState.totalPriceDelta !== 0 && ` (Aufpreis: ${configState.totalPriceDelta > 0 ? '+' : ''}${configState.totalPriceDelta.toFixed(2)} €)`}
                     </div>
                   )}
+                </div>
+              )}
+
+              {isEngravable && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-secondary/50 text-sm text-muted-foreground">
+                  <PenTool className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span>Dieses Produkt ist gegen Aufpreis gravierbar. Legen Sie die gewünschte Größe in den Warenkorb.</span>
                 </div>
               )}
 
