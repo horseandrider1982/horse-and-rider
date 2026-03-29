@@ -34,6 +34,7 @@ function loadConfig(productId: string): ConfigurationState | null {
 
 const ProductDetail = () => {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const { handle } = useParams<{ handle: string }>();
   const { data: product, isLoading, error } = useProductByHandle(handle || "");
   const addItem = useCartStore(state => state.addItem);
