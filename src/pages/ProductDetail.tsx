@@ -12,6 +12,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { ConfiguratorWizard } from "@/components/configurator/ConfiguratorWizard";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
