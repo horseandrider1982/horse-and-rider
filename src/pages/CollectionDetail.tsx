@@ -142,9 +142,22 @@ export default function CollectionDetail() {
                 {collection.title}
               </h1>
               {collection.description && (
-                <p className="text-muted-foreground mb-6 max-w-2xl">
+                <p className="text-muted-foreground mb-4 max-w-2xl">
                   {collection.description}
                 </p>
+              )}
+              {subcategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {subcategories.map((sub) => (
+                    <LocaleLink
+                      key={sub.id}
+                      to={sub.url}
+                      className="inline-flex items-center px-4 py-2 rounded-full border border-border bg-card text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                    >
+                      {sub.title}
+                    </LocaleLink>
+                  ))}
+                </div>
               )}
               {products.length === 0 ? (
                 <p className="text-muted-foreground py-8">{t("products.empty")}</p>
