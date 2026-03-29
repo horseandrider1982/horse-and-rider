@@ -11,33 +11,42 @@ const SHOP_DOMAIN = "bpjvam-c1.myshopify.com";
 const API_VERSION = "2025-07";
 const ADMIN_API_URL = `https://${SHOP_DOMAIN}/admin/api/${API_VERSION}/graphql.json`;
 
-// Admin API query – fetches a menu by handle with nested items
+// Admin API: list all menus to find GIDs by handle
+const ADMIN_MENUS_LIST_QUERY = `
+  query ListMenus {
+    menus(first: 50) {
+      edges {
+        node {
+          id
+          handle
+          title
+        }
+      }
+    }
+  }
+`;
+
+// Admin API query – fetches a menu by ID with nested items
 const ADMIN_MENU_QUERY = `
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
+  query GetMenu($id: ID!) {
+    menu(id: $id) {
       id
       title
       handle
-      items(first: 50) {
-        nodes {
+      items(limit: 250) {
+        id
+        title
+        url
+        tags
+        items(limit: 250) {
           id
           title
           url
           tags
-          items(first: 50) {
-            nodes {
-              id
-              title
-              url
-              tags
-              items(first: 50) {
-                nodes {
-                  id
-                  title
-                  url
-                }
-              }
-            }
+          items(limit: 250) {
+            id
+            title
+            url
           }
         }
       }
