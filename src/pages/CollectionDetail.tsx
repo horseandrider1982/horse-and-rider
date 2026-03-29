@@ -71,6 +71,27 @@ export default function CollectionDetail() {
   const { t, locale } = useI18n();
   const addItem = useCartStore((s) => s.addItem);
 
+  // Find subcategories from Shopify menu cache
+  const { data: menuItems } = useShopifyMenu('kategoriemenu');
+  const { data: mainMenuItems } = useShopifyMenu('main-menu');
+
+  const subcategories = useMemo(() => {
+    if (!handle) return [];
+    const findChildren = (items: ShopifyMenuItem[]): ShopifyMenuItem[] => {
+      for (const item of items) {
+        if (item.handle === handle && item.items?.length) return item.items;
+        if (item.items?.length) {
+          const found = findChildren(item.items);
+          if (found.length) return found;
+        }
+      }
+      return [];
+    };
+    const fromKat = findChildren(menuItems || []);
+    if (fromKat.length) return fromKat;
+    return findChildren(mainMenuItems || []);
+  }, [handle, menuItems, mainMenuItems]);
+
   const { data: collection, isLoading, error } = useQuery({
     queryKey: ["collection", handle, locale],
     queryFn: async () => {
