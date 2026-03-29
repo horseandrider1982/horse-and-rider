@@ -17,6 +17,7 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { EngravingDialog, ENGRAVING_PRICE } from "@/components/EngravingDialog";
+import { PaymentIcons } from "@/components/PaymentIcons";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 
@@ -280,6 +281,8 @@ const ProductDetail = () => {
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
                 {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
+
+              <PaymentIcons />
 
               {/* Beratungs-Strip */}
               <div className="mt-6 pt-6 border-t border-border">
