@@ -161,11 +161,15 @@ serve(async (req) => {
 
       try {
         const data = await adminApiRequest(ADMIN_MENU_QUERY, { handle }, accessToken);
+        console.log(`Menu "${handle}" response:`, JSON.stringify(data?.data?.menu ? { id: data.data.menu.id, title: data.data.menu.title, itemCount: data.data.menu.items?.nodes?.length } : null));
+        if (data?.errors) {
+          console.error(`GraphQL errors for "${handle}":`, JSON.stringify(data.errors));
+        }
         const menu = data?.data?.menu;
 
         if (!menu || !menu.items?.nodes?.length) {
           for (const locale of menuLocales) {
-            results.push({ handle, locale, status: "skipped: menu not found or empty" });
+            results.push({ handle, locale, status: `skipped: menu ${menu ? 'empty' : 'not found'}` });
           }
           continue;
         }
