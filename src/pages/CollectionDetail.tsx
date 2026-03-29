@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { useI18n } from "@/i18n";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -7,6 +8,7 @@ import { TopBar } from "@/components/TopBar";
 import { LocaleLink } from "@/components/LocaleLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/stores/cartStore";
+import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { toast } from "sonner";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
@@ -69,6 +71,27 @@ export default function CollectionDetail() {
   const { t, locale } = useI18n();
   const addItem = useCartStore((s) => s.addItem);
 
+  // Find subcategories from Shopify menu cache
+  const { data: menuItems } = useShopifyMenu('kategoriemenu');
+  const { data: mainMenuItems } = useShopifyMenu('main-menu');
+
+  const subcategories = useMemo(() => {
+    if (!handle) return [];
+    const findChildren = (items: ShopifyMenuItem[]): ShopifyMenuItem[] => {
+      for (const item of items) {
+        if (item.handle === handle && item.items?.length) return item.items;
+        if (item.items?.length) {
+          const found = findChildren(item.items);
+          if (found.length) return found;
+        }
+      }
+      return [];
+    };
+    const fromKat = findChildren(menuItems || []);
+    if (fromKat.length) return fromKat;
+    return findChildren(mainMenuItems || []);
+  }, [handle, menuItems, mainMenuItems]);
+
   const { data: collection, isLoading, error } = useQuery({
     queryKey: ["collection", handle, locale],
     queryFn: async () => {
@@ -119,9 +142,22 @@ export default function CollectionDetail() {
                 {collection.title}
               </h1>
               {collection.description && (
-                <p className="text-muted-foreground mb-6 max-w-2xl">
+                <p className="text-muted-foreground mb-4 max-w-2xl">
                   {collection.description}
                 </p>
+              )}
+              {subcategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {subcategories.map((sub) => (
+                    <LocaleLink
+                      key={sub.id}
+                      to={sub.url}
+                      className="inline-flex items-center px-4 py-2 rounded-full border border-border bg-card text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                    >
+                      {sub.title}
+                    </LocaleLink>
+                  ))}
+                </div>
               )}
               {products.length === 0 ? (
                 <p className="text-muted-foreground py-8">{t("products.empty")}</p>
