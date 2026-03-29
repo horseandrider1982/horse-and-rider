@@ -6,7 +6,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MobileMenu } from "./MobileMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
-import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
+import { MegaMenu } from "@/components/MegaMenu";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, Search, LogIn, LogOut, UserCircle } from "lucide-react";
