@@ -282,6 +282,8 @@ const ProductDetail = () => {
                 {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
+              <PaymentIcons />
+
               {/* Beratungs-Strip */}
               <div className="mt-6 pt-6 border-t border-border">
                 <div className="flex items-center gap-4 mb-4">
