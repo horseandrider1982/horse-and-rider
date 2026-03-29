@@ -12,66 +12,6 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import logo from "@/assets/logo.png";
 
-const PAYMENT_SETTINGS_QUERY = `
-  query ShopPaymentSettings {
-    shop {
-      paymentSettings {
-        acceptedCardBrands
-        supportedDigitalWallets
-      }
-    }
-  }
-`;
-
-const PAYMENT_ICON_MAP: Record<string, { label: string; bg: string; textColor: string; icon?: string }> = {
-  VISA: { label: "VISA", bg: "#1A1F71", textColor: "white" },
-  MASTERCARD: { label: "Mastercard", bg: "#FF5F00", textColor: "white" },
-  AMERICAN_EXPRESS: { label: "Amex", bg: "#006FCF", textColor: "white" },
-  DISCOVER: { label: "Discover", bg: "#FF6000", textColor: "white" },
-  JCB: { label: "JCB", bg: "#0B7CBE", textColor: "white" },
-  DINERS_CLUB: { label: "Diners", bg: "#006BA6", textColor: "white" },
-  APPLE_PAY: { label: "Apple Pay", bg: "#000000", textColor: "white" },
-  GOOGLE_PAY: { label: "Google Pay", bg: "#4285F4", textColor: "white" },
-  SHOPIFY_PAY: { label: "Shop Pay", bg: "#5A31F4", textColor: "white" },
-  PAYPAL: { label: "PayPal", bg: "#003087", textColor: "white" },
-  KLARNA: { label: "Klarna", bg: "#FFB3C7", textColor: "#0A0B09" },
-  GIROPAY: { label: "Giropay", bg: "#003A7D", textColor: "white" },
-  IDEAL: { label: "iDEAL", bg: "#CC0066", textColor: "white" },
-  SOFORT: { label: "Sofort", bg: "#EF6C00", textColor: "white" },
-  SEPA: { label: "SEPA", bg: "#2E4057", textColor: "white" },
-};
-
-function PaymentBadge({ id }: { id: string }) {
-  const info = PAYMENT_ICON_MAP[id];
-  if (!info) return (
-    <span className="inline-flex items-center justify-center rounded px-2 py-1 text-[10px] font-semibold bg-muted text-muted-foreground border border-border min-w-[56px] h-8">
-      {id}
-    </span>
-  );
-  return (
-    <span
-      className="inline-flex items-center justify-center rounded px-2 py-1 text-[10px] font-bold min-w-[56px] h-8 border border-border/30"
-      style={{ backgroundColor: info.bg, color: info.textColor }}
-    >
-      {info.label}
-    </span>
-  );
-}
-
-function usePaymentSettings() {
-  return useQuery({
-    queryKey: ["shopify-payment-settings"],
-    queryFn: async () => {
-      const data = await storefrontApiRequest(PAYMENT_SETTINGS_QUERY);
-      const settings = data?.data?.shop?.paymentSettings;
-      const methods: string[] = [];
-      if (settings?.acceptedCardBrands) methods.push(...settings.acceptedCardBrands);
-      if (settings?.supportedDigitalWallets) methods.push(...settings.supportedDigitalWallets);
-      return methods;
-    },
-    staleTime: 1000 * 60 * 60,
-  });
-}
 
 function NewsletterSignup() {
   const { t } = useI18n();
