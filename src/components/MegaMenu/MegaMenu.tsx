@@ -65,32 +65,3 @@ function ShopifyMenuItems({ handle }: { handle: string }) {
   );
 }
 
-function CmsNavItem({ item }: { item: PublicMenuItem }) {
-  const isExternal = item.target === '_blank' || item.url?.startsWith('http');
-
-  if (isExternal) {
-    return (
-      <li>
-        <a
-          href={item.url || '#'}
-          target={item.target}
-          rel="noopener noreferrer"
-          className="flex items-center px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-        >
-          {item.label}
-        </a>
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <LocaleLink
-        to={item.url || '#'}
-        className="flex items-center px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-      >
-        {item.label}
-      </LocaleLink>
-    </li>
-  );
-}
