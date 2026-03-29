@@ -17,6 +17,7 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { EngravingDialog, ENGRAVING_PRICE } from "@/components/EngravingDialog";
+import { PaymentIcons } from "@/components/PaymentIcons";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 
