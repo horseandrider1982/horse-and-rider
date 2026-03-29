@@ -48,7 +48,8 @@ const ProductDetail = () => {
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
-  const isConfigurator = !!configuratorData && configuratorData.groups.length > 0;
+  const nonGravurGroups = configuratorData?.groups.filter(g => !g.name.toLowerCase().includes('gravur')) ?? [];
+  const isConfigurator = nonGravurGroups.length > 0;
   const isEngravable = !!configuratorData && configuratorData.groups.some(g => g.name.toLowerCase().includes('gravur'));
   const { data: brands } = useBrands();
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
