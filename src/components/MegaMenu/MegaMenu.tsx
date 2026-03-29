@@ -16,8 +16,10 @@ export function MegaMenu() {
   // Calculate top position for mega dropdown
   useEffect(() => {
     const updateTop = () => {
-      if (navRef.current) {
-        const rect = navRef.current.getBoundingClientRect();
+      // Use the parent <header> element so the dropdown starts below the full header
+      const header = navRef.current?.closest('header');
+      if (header) {
+        const rect = header.getBoundingClientRect();
         document.documentElement.style.setProperty(
           '--mega-menu-top',
           `${rect.bottom}px`
