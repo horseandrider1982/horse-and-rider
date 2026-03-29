@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, ArrowLeft, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool } from "lucide-react";
+import { Loader2, ShoppingCart, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
 import { ProductContactModal } from "@/components/ProductContactModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
@@ -12,6 +12,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { ConfiguratorWizard } from "@/components/configurator/ConfiguratorWizard";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
@@ -199,9 +200,29 @@ const ProductDetail = () => {
       <TopBar /><Header />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
-            <ArrowLeft className="h-4 w-4" /> {t("product.back")}
-          </button>
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <LocaleLink to="/">{t("nav.home")}</LocaleLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {brand && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <LocaleLink to={`/marken/${brand.slug}`}>{brand.name}</LocaleLink>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{product.node.title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-3">
