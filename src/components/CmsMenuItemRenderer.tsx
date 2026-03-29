@@ -53,9 +53,30 @@ function ShopifyMenuPlaceholder({ handle, className, mode }: { handle?: string; 
   );
 }
 
-function SingleMenuLink({ item, className }: { item: PublicMenuItem; className?: string }) {
+function SingleMenuLink({ item, className, mode }: { item: PublicMenuItem; className?: string; mode: 'inline' | 'block' }) {
+  const [open, setOpen] = useState(false);
   const isExternal = item.target === '_blank' || item.url?.startsWith('http');
   const cls = className || '';
+  const hasChildren = item.children && item.children.length > 0;
+
+  if (hasChildren && mode === 'inline') {
+    return (
+      <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+        <button className={`${cls} flex items-center gap-1`}>
+          {item.label}
+          <ChevronDown className="h-3 w-3" />
+        </button>
+        {open && (
+          <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg py-1 min-w-[180px] z-50">
+            {item.children!.map(child => (
+              <SingleMenuLink key={child.id} item={child} className="block px-3 py-1.5 text-sm text-foreground hover:bg-muted transition-colors" mode="block" />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (isExternal) {
     return <a href={item.url || '#'} target={item.target} rel="noopener noreferrer" className={cls}>{item.label}</a>;
   }
@@ -69,7 +90,7 @@ export function CmsMenuItemRenderer({ items, linkClassName, mode = 'inline' }: C
         if (item.type === 'shopify_menu_placeholder') {
           return <ShopifyMenuPlaceholder key={item.id} handle={item.url || undefined} className={linkClassName} mode={mode} />;
         }
-        return <SingleMenuLink key={item.id} item={item} className={linkClassName} />;
+        return <SingleMenuLink key={item.id} item={item} className={linkClassName} mode={mode} />;
       })}
     </>
   );

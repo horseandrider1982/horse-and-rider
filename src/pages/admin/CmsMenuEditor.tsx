@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Plus, GripVertical, Trash2, Pencil, ExternalLink, FileText, Link as LinkIcon, ShoppingBag, LayoutTemplate } from 'lucide-react';
+import { Loader2, Plus, GripVertical, Trash2, Pencil, ExternalLink, FileText, Link as LinkIcon, ShoppingBag, LayoutTemplate, ChevronRight, CornerDownRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useShopifyMenuList } from '@/hooks/useShopifyMenuList';
 import {
@@ -20,7 +20,10 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-function SortableMenuItem({ item, onEdit, onDelete }: { item: CmsMenuItem; onEdit: (item: CmsMenuItem) => void; onDelete: (id: string) => void }) {
+function SortableMenuItem({ item, onEdit, onDelete, onIndent, onOutdent, isChild, hasChildren }: {
+  item: CmsMenuItem; onEdit: (item: CmsMenuItem) => void; onDelete: (id: string) => void;
+  onIndent?: () => void; onOutdent?: () => void; isChild?: boolean; hasChildren?: boolean;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
 
@@ -29,32 +32,78 @@ function SortableMenuItem({ item, onEdit, onDelete }: { item: CmsMenuItem; onEdi
     <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" />;
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-2 p-2 rounded border bg-background text-sm group">
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-2 p-2 rounded border bg-background text-sm group ${isChild ? 'ml-6 border-l-2 border-l-primary/30' : ''}`}>
       <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-0.5"><GripVertical className="h-4 w-4 text-muted-foreground" /></button>
+      {isChild && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
       {typeIcon}
       <span className="flex-1 truncate">{item.label}</span>
+      {hasChildren && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Gruppe</span>}
       {item.target === '_blank' && <ExternalLink className="h-3 w-3 text-muted-foreground" />}
-      <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => onEdit(item)}><Pencil className="h-3 w-3" /></Button>
-      <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive" onClick={() => onDelete(item.id)}><Trash2 className="h-3 w-3" /></Button>
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
+        {!isChild && onIndent && (
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onIndent} title="Einrücken (Unterkategorie)">
+            <ChevronRight className="h-3 w-3" />
+          </Button>
+        )}
+        {isChild && onOutdent && (
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onOutdent} title="Ausrücken (Hauptebene)">
+            <ChevronRight className="h-3 w-3 rotate-180" />
+          </Button>
+        )}
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEdit(item)}><Pencil className="h-3 w-3" /></Button>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => onDelete(item.id)}><Trash2 className="h-3 w-3" /></Button>
+      </div>
     </div>
   );
 }
 
-function DroppableMenu({ menuId, menuName, items, onEdit, onDelete }: {
-  menuId: string; menuName: string; items: CmsMenuItem[];
+function DroppableMenu({ menuId, menuName, items, allItems, onEdit, onDelete, onIndent, onOutdent }: {
+  menuId: string; menuName: string; items: CmsMenuItem[]; allItems: CmsMenuItem[];
   onEdit: (item: CmsMenuItem) => void; onDelete: (id: string) => void;
+  onIndent: (itemId: string, menuId: string) => void; onOutdent: (itemId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `menu-${menuId}` });
-  const ids = items.map(i => i.id);
+
+  // Build tree: top-level items, then their children
+  const topLevel = items.filter(i => !i.parent_id);
+  const childrenOf = (parentId: string) => items.filter(i => i.parent_id === parentId).sort((a, b) => a.sort_order - b.sort_order);
+
+  // Flat list of IDs for sortable context
+  const flatIds: string[] = [];
+  topLevel.forEach(item => {
+    flatIds.push(item.id);
+    childrenOf(item.id).forEach(child => flatIds.push(child.id));
+  });
 
   return (
     <Card className={isOver ? 'ring-2 ring-primary' : ''}>
       <CardHeader className="pb-2"><CardTitle className="text-sm">{menuName}</CardTitle></CardHeader>
       <CardContent>
         <div ref={setNodeRef} className="space-y-1.5 min-h-[40px]">
-          <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-            {items.map(item => (
-              <SortableMenuItem key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />
+          <SortableContext items={flatIds} strategy={verticalListSortingStrategy}>
+            {topLevel.map((item, idx) => (
+              <div key={item.id}>
+                <SortableMenuItem
+                  item={item}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  hasChildren={childrenOf(item.id).length > 0}
+                />
+                {childrenOf(item.id).map(child => (
+                  <SortableMenuItem
+                    key={child.id}
+                    item={child}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    isChild
+                    onOutdent={() => onOutdent(child.id)}
+                  />
+                ))}
+                {/* Show indent button on items that follow a top-level item */}
+                {idx > 0 && !items.find(i => i.parent_id === item.id)?.id && (
+                  <></>
+                )}
+              </div>
             ))}
           </SortableContext>
           {items.length === 0 && <p className="text-xs text-muted-foreground text-center py-3">Elemente hierher ziehen</p>}
@@ -77,6 +126,7 @@ export default function CmsMenuEditor() {
   const [editLabel, setEditLabel] = useState('');
   const [editUrl, setEditUrl] = useState('');
   const [editTarget, setEditTarget] = useState<'_self' | '_blank'>('_self');
+  const [editParentId, setEditParentId] = useState<string | null>(null);
   const [customLinkDialog, setCustomLinkDialog] = useState(false);
   const [newLinkName, setNewLinkName] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
@@ -168,6 +218,7 @@ export default function CmsMenuEditor() {
     setEditLabel(item.label);
     setEditUrl(item.url || '');
     setEditTarget(item.target);
+    setEditParentId(item.parent_id || null);
   };
 
   const handleEditSave = async () => {
@@ -179,8 +230,53 @@ export default function CmsMenuEditor() {
         ...(editItem.type === 'custom_link' ? { url: editUrl.trim() } : {}),
         target: editTarget,
       });
+      // Update parent if changed
+      if (editParentId !== (editItem.parent_id || null)) {
+        await bulkUpdate.mutateAsync([{
+          id: editItem.id,
+          menu_id: editItem.menu_id,
+          sort_order: editItem.sort_order,
+          parent_id: editParentId,
+        }]);
+      }
       toast.success('Gespeichert');
       setEditItem(null);
+    } catch { toast.error('Fehler'); }
+  };
+
+  // Indent: make item a child of the previous top-level item
+  const handleIndent = async (itemId: string, menuId: string) => {
+    const menuItems = (menuItemsByMenu[menuId] || []).filter(i => !i.parent_id);
+    const item = allItems?.find(i => i.id === itemId);
+    if (!item) return;
+    const idx = menuItems.findIndex(i => i.id === itemId);
+    if (idx <= 0) { toast.error('Kein übergeordnetes Element vorhanden'); return; }
+    const parentItem = menuItems[idx - 1];
+    const siblings = (menuItemsByMenu[menuId] || []).filter(i => i.parent_id === parentItem.id);
+    try {
+      await bulkUpdate.mutateAsync([{
+        id: itemId,
+        menu_id: menuId,
+        sort_order: siblings.length,
+        parent_id: parentItem.id,
+      }]);
+      toast.success('Als Unterkategorie eingerückt');
+    } catch { toast.error('Fehler'); }
+  };
+
+  // Outdent: make child a top-level item again
+  const handleOutdent = async (itemId: string) => {
+    const item = allItems?.find(i => i.id === itemId);
+    if (!item || !item.parent_id) return;
+    const menuItems = (menuItemsByMenu[item.menu_id] || []).filter(i => !i.parent_id);
+    try {
+      await bulkUpdate.mutateAsync([{
+        id: itemId,
+        menu_id: item.menu_id,
+        sort_order: menuItems.length,
+        parent_id: null,
+      }]);
+      toast.success('Auf Hauptebene verschoben');
     } catch { toast.error('Fehler'); }
   };
 
@@ -194,7 +290,6 @@ export default function CmsMenuEditor() {
     const activeItem = allItems.find(i => i.id === active.id);
     if (!activeItem) return;
 
-    // Determine target menu
     let targetMenuId: string;
     const overId = over.id as string;
     if (overId.startsWith('menu-')) {
@@ -205,7 +300,6 @@ export default function CmsMenuEditor() {
       targetMenuId = overItem.menu_id;
     }
 
-    // Build new order
     const menuItems = [...(menuItemsByMenu[targetMenuId] || [])];
     const fromSameMenu = activeItem.menu_id === targetMenuId;
 
@@ -217,23 +311,22 @@ export default function CmsMenuEditor() {
       menuItems.splice(oldIdx, 1);
       menuItems.splice(newIdx < 0 ? menuItems.length : newIdx, 0, activeItem);
     } else {
-      // Remove from old menu items and add to new
       const overItem = allItems.find(i => i.id === overId);
       const newIdx = overItem ? menuItems.findIndex(i => i.id === overItem.id) : menuItems.length;
       menuItems.splice(newIdx < 0 ? menuItems.length : newIdx, 0, { ...activeItem, menu_id: targetMenuId });
     }
 
-    // Also update old menu if moving between menus
     const updates = menuItems.map((item, idx) => ({
       id: item.id,
       menu_id: targetMenuId,
       sort_order: idx,
+      parent_id: item.parent_id,
     }));
 
     if (!fromSameMenu) {
       const oldMenuItems = (menuItemsByMenu[activeItem.menu_id] || []).filter(i => i.id !== activeItem.id);
       oldMenuItems.forEach((item, idx) => {
-        updates.push({ id: item.id, menu_id: activeItem.menu_id, sort_order: idx });
+        updates.push({ id: item.id, menu_id: activeItem.menu_id, sort_order: idx, parent_id: item.parent_id });
       });
     }
 
@@ -242,13 +335,16 @@ export default function CmsMenuEditor() {
     } catch { toast.error('Fehler beim Sortieren'); }
   };
 
+  // Get top-level items for a menu (for parent selection in edit dialog)
+  const getTopLevelItems = (menuId: string) =>
+    (menuItemsByMenu[menuId] || []).filter(i => !i.parent_id);
+
   return (
     <div className="grid lg:grid-cols-4 gap-6">
       {/* Left: Content Sources */}
       <div className="space-y-4">
         <h3 className="font-semibold text-sm">Inhalte hinzufügen</h3>
 
-        {/* CMS Pages */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Statische Seiten</CardTitle></CardHeader>
           <CardContent className="space-y-1">
@@ -268,7 +364,6 @@ export default function CmsMenuEditor() {
           </CardContent>
         </Card>
 
-        {/* Custom Link */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Custom Link</CardTitle></CardHeader>
           <CardContent>
@@ -278,7 +373,6 @@ export default function CmsMenuEditor() {
           </CardContent>
         </Card>
 
-        {/* Predefined Pages */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Vordefinierte Seiten</CardTitle></CardHeader>
           <CardContent className="space-y-1">
@@ -316,7 +410,6 @@ export default function CmsMenuEditor() {
           </CardContent>
         </Card>
 
-        {/* Shopify Placeholder */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Shopify Menüs</CardTitle></CardHeader>
           <CardContent className="space-y-1">
@@ -342,7 +435,10 @@ export default function CmsMenuEditor() {
 
       {/* Right: Menus */}
       <div className="lg:col-span-3 space-y-4">
-        <h3 className="font-semibold text-sm">Menüs</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm">Menüs</h3>
+          <p className="text-xs text-muted-foreground">Tipp: Hover über ein Element → <ChevronRight className="h-3 w-3 inline" /> um es als Unterkategorie einzurücken</p>
+        </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="grid md:grid-cols-2 gap-4">
             {menus?.map(menu => (
@@ -351,8 +447,11 @@ export default function CmsMenuEditor() {
                 menuId={menu.id}
                 menuName={menu.name}
                 items={menuItemsByMenu[menu.id] || []}
+                allItems={allItems || []}
                 onEdit={handleEditOpen}
                 onDelete={handleDeleteItem}
+                onIndent={handleIndent}
+                onOutdent={handleOutdent}
               />
             ))}
           </div>
@@ -383,6 +482,19 @@ export default function CmsMenuEditor() {
             {editItem?.type === 'cms_page' && (
               <p className="text-sm text-muted-foreground">Verlinkte Seite: {editItem.url}</p>
             )}
+            <div className="space-y-1.5">
+              <Label>Übergeordnetes Element</Label>
+              <Select value={editParentId || '__none__'} onValueChange={(v) => setEditParentId(v === '__none__' ? null : v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Hauptebene —</SelectItem>
+                  {editItem && getTopLevelItems(editItem.menu_id)
+                    .filter(i => i.id !== editItem.id)
+                    .map(i => <SelectItem key={i.id} value={i.id}>{i.label}</SelectItem>)
+                  }
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5">
               <Label>Ziel</Label>
               <Select value={editTarget} onValueChange={(v) => setEditTarget(v as '_self' | '_blank')}>
