@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { useShopifyMenu, type ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 import { usePublicCmsMenus, type PublicMenuItem } from '@/hooks/usePublicCmsMenus';
 import { MegaMenuItem } from './MegaMenuItem';
-import { LocaleLink } from '@/components/LocaleLink';
+import { CmsMegaMenuItem } from './CmsMegaMenuItem';
 
 /**
  * Desktop-only Mega Menu.
