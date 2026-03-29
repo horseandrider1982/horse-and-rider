@@ -83,13 +83,13 @@ interface RawMenuItem {
   id: string;
   title: string;
   url: string;
-  items?: { nodes?: RawMenuItem[] };
+  items?: RawMenuItem[];
 }
 
 function normalizeMenuItem(item: RawMenuItem) {
   const path = extractPathFromShopifyUrl(item.url);
   const handleMatch = path.match(/\/collections\/([^/?]+)/);
-  const children = item.items?.nodes || [];
+  const children = item.items || [];
   return {
     id: item.id,
     title: item.title,
