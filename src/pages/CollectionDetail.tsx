@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { useI18n } from "@/i18n";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -7,6 +8,7 @@ import { TopBar } from "@/components/TopBar";
 import { LocaleLink } from "@/components/LocaleLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/stores/cartStore";
+import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { toast } from "sonner";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
