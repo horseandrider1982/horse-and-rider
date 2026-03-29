@@ -45,7 +45,7 @@ export function MegaMenu() {
               />
             );
           }
-          return <CmsNavItem key={cmsItem.id} item={cmsItem} />;
+          return <CmsMegaMenuItem key={cmsItem.id} item={cmsItem} />;
         })}
       </ul>
     </nav>
