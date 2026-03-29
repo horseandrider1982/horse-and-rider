@@ -1,0 +1,2 @@
+UPDATE public.site_settings SET value = 'https://meet.brevo.com/horseandrider', updated_at = now() WHERE key = 'calendly_url';
+UPDATE public.site_settings SET key = 'booking_url' WHERE key = 'calendly_url';
