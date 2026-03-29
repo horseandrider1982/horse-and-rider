@@ -230,13 +230,13 @@ export const Footer = () => {
           </div>
           <div>
             <h5 className="font-semibold text-background text-sm mb-3">{t("footer.buyer_protection")}</h5>
-            <div id="trusted-shops-customer-voice" ref={(el) => {
+            <div id="trusted-shops-stars" ref={(el) => {
               if (el && !el.querySelector('script')) {
                 const script = document.createElement('script');
                 script.src = 'https://integrations.etrusted.com/applications/widget.js/v2';
                 script.async = true;
                 const widget = document.createElement('etrusted-widget');
-                widget.setAttribute('data-etrusted-widget-id', 'wdg-3af3c7a8-4921-4456-9d28-0feb56898812');
+                widget.setAttribute('data-etrusted-widget-id', 'wdg-3940f691-0353-4681-aab2-f4a37f8fc92f');
                 el.appendChild(widget);
                 el.appendChild(script);
               }
