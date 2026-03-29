@@ -184,7 +184,7 @@ function NewsletterSignup() {
 
 export const Footer = () => {
   const { t } = useI18n();
-  const { data: paymentMethods } = usePaymentSettings();
+  
   const { data: menus } = usePublicCmsMenus();
 
   const infoItems = menus?.information || [];
