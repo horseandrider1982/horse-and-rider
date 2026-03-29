@@ -11,33 +11,42 @@ const SHOP_DOMAIN = "bpjvam-c1.myshopify.com";
 const API_VERSION = "2025-07";
 const ADMIN_API_URL = `https://${SHOP_DOMAIN}/admin/api/${API_VERSION}/graphql.json`;
 
-// Admin API query – fetches a menu by handle with nested items
+// Admin API: list all menus to find GIDs by handle
+const ADMIN_MENUS_LIST_QUERY = `
+  query ListMenus {
+    menus(first: 50) {
+      edges {
+        node {
+          id
+          handle
+          title
+        }
+      }
+    }
+  }
+`;
+
+// Admin API query – fetches a menu by ID with nested items
 const ADMIN_MENU_QUERY = `
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
+  query GetMenu($id: ID!) {
+    menu(id: $id) {
       id
       title
       handle
-      items(first: 50) {
-        nodes {
+      items(limit: 250) {
+        id
+        title
+        url
+        tags
+        items(limit: 250) {
           id
           title
           url
           tags
-          items(first: 50) {
-            nodes {
-              id
-              title
-              url
-              tags
-              items(first: 50) {
-                nodes {
-                  id
-                  title
-                  url
-                }
-              }
-            }
+          items(limit: 250) {
+            id
+            title
+            url
           }
         }
       }
@@ -74,13 +83,13 @@ interface RawMenuItem {
   id: string;
   title: string;
   url: string;
-  items?: { nodes?: RawMenuItem[] };
+  items?: RawMenuItem[];
 }
 
 function normalizeMenuItem(item: RawMenuItem) {
   const path = extractPathFromShopifyUrl(item.url);
   const handleMatch = path.match(/\/collections\/([^/?]+)/);
-  const children = item.items?.nodes || [];
+  const children = item.items || [];
   return {
     id: item.id,
     title: item.title,
@@ -161,28 +170,49 @@ serve(async (req) => {
     const menuLocales: string[] = locales || ["de", "en"];
     const results: Array<{ handle: string; locale: string; status: string; itemCount?: number }> = [];
 
+    // First, list all menus to build a handle→GID map
+    let handleToGid = new Map<string, string>();
+    try {
+      const listData = await adminApiRequest(ADMIN_MENUS_LIST_QUERY, {}, accessToken);
+      const menuEdges = listData?.data?.menus?.edges || [];
+      for (const edge of menuEdges) {
+        handleToGid.set(edge.node.handle, edge.node.id);
+      }
+      console.log("Available menus:", Array.from(handleToGid.keys()).join(", "));
+    } catch (err) {
+      return new Response(JSON.stringify({ error: `Failed to list menus: ${err.message}` }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     for (const handle of menuHandles) {
-      // Fetch the default (DE) menu via Admin API
       let defaultItems: ReturnType<typeof normalizeMenuItem>[] = [];
-      let menuGid: string | null = null;
+      let menuGid: string | null = handleToGid.get(handle) || null;
+
+      if (!menuGid) {
+        for (const locale of menuLocales) {
+          results.push({ handle, locale, status: `skipped: menu not found (no GID for handle)` });
+        }
+        continue;
+      }
 
       try {
-        const data = await adminApiRequest(ADMIN_MENU_QUERY, { handle }, accessToken);
-        console.log(`Menu "${handle}" response:`, JSON.stringify(data?.data?.menu ? { id: data.data.menu.id, title: data.data.menu.title, itemCount: data.data.menu.items?.nodes?.length } : null));
+        const data = await adminApiRequest(ADMIN_MENU_QUERY, { id: menuGid }, accessToken);
+        console.log(`Menu "${handle}" response:`, JSON.stringify(data?.data?.menu ? { id: data.data.menu.id, title: data.data.menu.title, itemCount: data.data.menu.items?.length } : null));
         if (data?.errors) {
           console.error(`GraphQL errors for "${handle}":`, JSON.stringify(data.errors));
         }
         const menu = data?.data?.menu;
 
-        if (!menu || !menu.items?.nodes?.length) {
+        if (!menu || !menu.items?.length) {
           for (const locale of menuLocales) {
             results.push({ handle, locale, status: `skipped: menu ${menu ? 'empty' : 'not found'}` });
           }
           continue;
         }
 
-        menuGid = menu.id;
-        defaultItems = menu.items.nodes.map((item: RawMenuItem) => normalizeMenuItem(item));
+        defaultItems = menu.items.map((item: RawMenuItem) => normalizeMenuItem(item));
       } catch (err) {
         for (const locale of menuLocales) {
           results.push({ handle, locale, status: `error: ${err.message}` });
