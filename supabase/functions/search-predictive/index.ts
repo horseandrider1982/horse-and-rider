@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         query: PRODUCTS_SEARCH_QUERY,
-        variables: { query: q, first: 6 },
+        variables: { query: q, first: 24 },
       }),
     });
 
