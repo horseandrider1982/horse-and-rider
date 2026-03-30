@@ -23,6 +23,7 @@ const PRODUCTS_SEARCH_QUERY = `
           title
           handle
           vendor
+          productType
           featuredImage {
             url
             altText
@@ -31,13 +32,21 @@ const PRODUCTS_SEARCH_QUERY = `
             minVariantPrice { amount currencyCode }
             maxVariantPrice { amount currencyCode }
           }
+          collections(first: 5) {
+            edges {
+              node {
+                id
+                title
+                handle
+              }
+            }
+          }
         }
       }
     }
   }
 `;
 
-// Simple in-memory cache (30s TTL)
 const cache = new Map<string, { data: unknown; ts: number }>();
 const CACHE_TTL = 30_000;
 
@@ -71,6 +80,24 @@ function buildPriceText(
   const maxVal = parseFloat(max.amount);
   const formatted = formatPrice(min.amount, min.currencyCode);
   return minVal < maxVal ? `ab ${formatted}` : formatted;
+}
+
+interface ShopifyEdge {
+  node: {
+    id: string;
+    title: string;
+    handle: string;
+    vendor: string | null;
+    productType: string | null;
+    featuredImage: { url: string; altText: string | null } | null;
+    priceRange: {
+      minVariantPrice: { amount: string; currencyCode: string };
+      maxVariantPrice: { amount: string; currencyCode: string };
+    };
+    collections: {
+      edges: Array<{ node: { id: string; title: string; handle: string } }>;
+    };
+  };
 }
 
 Deno.serve(async (req) => {
@@ -116,6 +143,7 @@ Deno.serve(async (req) => {
     query: q,
     groups: { products: [], articles: [], pages: [] },
     pageInfo: { hasNextPage: false, endCursor: null },
+    facets: { vendors: [], collections: [] },
   };
 
   try {
@@ -144,38 +172,53 @@ Deno.serve(async (req) => {
     }
 
     const productsData = shopifyData.data?.products;
-    const edges = productsData?.edges || [];
+    const edges: ShopifyEdge[] = productsData?.edges || [];
     const pageInfo = productsData?.pageInfo || { hasNextPage: false, endCursor: null };
+
+    // Build facets
+    const vendorCounts = new Map<string, number>();
+    const collectionMap = new Map<string, { title: string; handle: string; count: number }>();
+
+    for (const edge of edges) {
+      const v = edge.node.vendor;
+      if (v) vendorCounts.set(v, (vendorCounts.get(v) || 0) + 1);
+
+      for (const ce of edge.node.collections?.edges || []) {
+        const existing = collectionMap.get(ce.node.handle);
+        if (existing) {
+          existing.count++;
+        } else {
+          collectionMap.set(ce.node.handle, { title: ce.node.title, handle: ce.node.handle, count: 1 });
+        }
+      }
+    }
+
+    const vendors = [...vendorCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const collections = [...collectionMap.values()]
+      .sort((a, b) => b.count - a.count);
 
     const result = {
       query: q,
       groups: {
-        products: edges.map(
-          (edge: {
-            node: {
-              id: string;
-              title: string;
-              handle: string;
-              vendor: string | null;
-              featuredImage: { url: string; altText: string | null } | null;
-              priceRange: {
-                minVariantPrice: { amount: string; currencyCode: string };
-                maxVariantPrice: { amount: string; currencyCode: string };
-              };
-            };
-          }) => ({
-            id: edge.node.id,
-            title: edge.node.title,
-            url: `/product/${edge.node.handle}`,
-            imageUrl: edge.node.featuredImage?.url || null,
-            imageAlt: edge.node.featuredImage?.altText || null,
-            priceText: buildPriceText(
-              edge.node.priceRange.minVariantPrice,
-              edge.node.priceRange.maxVariantPrice
-            ),
-            vendor: edge.node.vendor || null,
-          })
-        ),
+        products: edges.map((edge) => ({
+          id: edge.node.id,
+          title: edge.node.title,
+          url: `/product/${edge.node.handle}`,
+          imageUrl: edge.node.featuredImage?.url || null,
+          imageAlt: edge.node.featuredImage?.altText || null,
+          priceText: buildPriceText(
+            edge.node.priceRange.minVariantPrice,
+            edge.node.priceRange.maxVariantPrice
+          ),
+          vendor: edge.node.vendor || null,
+          collections: (edge.node.collections?.edges || []).map((ce) => ({
+            title: ce.node.title,
+            handle: ce.node.handle,
+          })),
+        })),
         articles: [],
         pages: [],
       },
@@ -183,6 +226,7 @@ Deno.serve(async (req) => {
         hasNextPage: pageInfo.hasNextPage,
         endCursor: pageInfo.endCursor,
       },
+      facets: { vendors, collections },
     };
 
     setCache(cacheKey, result);
