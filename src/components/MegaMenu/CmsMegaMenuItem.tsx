@@ -109,7 +109,7 @@ function CmsMegaMenuDropdown({ item }: { item: PublicMenuItem }) {
 
         {/* Menu columns in 4-column grid */}
         <div className="grid grid-cols-4 gap-x-8 gap-y-2">
-          {columnGroups.map((group, gi) => (
+          {filteredGroups.map((group, gi) => (
             <div key={gi} className="space-y-4">
               {group.map((child) => (
                 <CmsMenuColumn key={child.id} item={child} />
