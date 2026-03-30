@@ -87,12 +87,12 @@ export function CmsMegaMenuItem({ item }: CmsMegaMenuItemProps) {
 function CmsMegaMenuDropdown({ item }: { item: PublicMenuItem }) {
   const children = item.children || [];
 
-  // Split into column groups of ~3-4
-  const columnGroups: PublicMenuItem[][] = [];
-  const perGroup = Math.max(3, Math.ceil(children.length / 4));
-  for (let i = 0; i < children.length; i += perGroup) {
-    columnGroups.push(children.slice(i, i + perGroup));
-  }
+  const numCols = 4;
+  const columnGroups: PublicMenuItem[][] = Array.from({ length: numCols }, () => []);
+  children.forEach((child, i) => {
+    columnGroups[i % numCols].push(child);
+  });
+  const filteredGroups = columnGroups.filter(g => g.length > 0);
 
   return (
     <div className="w-full bg-background border-b border-border shadow-lg">
@@ -109,7 +109,7 @@ function CmsMegaMenuDropdown({ item }: { item: PublicMenuItem }) {
 
         {/* Menu columns in 4-column grid */}
         <div className="grid grid-cols-4 gap-x-8 gap-y-2">
-          {columnGroups.map((group, gi) => (
+          {filteredGroups.map((group, gi) => (
             <div key={gi} className="space-y-4">
               {group.map((child) => (
                 <CmsMenuColumn key={child.id} item={child} />
