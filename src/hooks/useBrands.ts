@@ -71,9 +71,11 @@ export function useBrands() {
     queryFn: async () => {
       const [vendors, cmsBrands] = await Promise.all([fetchAllVendors(), fetchCmsBrands()]);
       const cmsMap = new Map(cmsBrands.map((b) => [b.name.toLowerCase().trim(), b]));
+      const matchedCmsNames = new Set<string>();
 
       const brands: Brand[] = vendors.map((vendor) => {
         const cms = cmsMap.get(vendor.toLowerCase().trim());
+        if (cms) matchedCmsNames.add(cms.name.toLowerCase().trim());
         return {
           name: cms?.name || vendor,
           slug: cms?.slug || slugify(vendor),
@@ -83,7 +85,20 @@ export function useBrands() {
         };
       });
 
-      return brands;
+      // Add CMS-only brands (no matching Shopify vendor)
+      for (const cms of cmsBrands) {
+        if (!matchedCmsNames.has(cms.name.toLowerCase().trim())) {
+          brands.push({
+            name: cms.name,
+            slug: cms.slug,
+            logoUrl: cms.logo_url,
+            seoText: cms.seo_text,
+            featured: cms.featured,
+          });
+        }
+      }
+
+      return brands.sort((a, b) => a.name.localeCompare(b.name, 'de'));
     },
   });
 }
