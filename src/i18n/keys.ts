@@ -285,6 +285,10 @@ export const defaultTranslations: Record<string, string> = {
   "search.ai_advice": "KI-Beratung",
   "search.load_more": "Mehr Ergebnisse laden",
   "search.loading_more": "Laden…",
+  "search.filter_collections": "Kategorien",
+  "search.filter_vendors": "Hersteller",
+  "search.clear_filters": "Filter zurücksetzen",
+  "search.filters": "Filter",
 
   // General
   "general.loading": "Wird geladen…",
