@@ -44,7 +44,7 @@ export const defaultTranslations: Record<string, string> = {
   "services.store.title": "Reitsportfachgeschäft",
   "services.store.desc": "Über 10.000 Artikel vor Ort. Kompetente Beratung in Luhmühlen.",
   "services.online.title": "Online-Shop",
-  "services.online.desc": "Über 30.000 Artikel online verfügbar. Schneller Versand.",
+  "services.online.desc": "Über 20.000 Artikel online verfügbar. Schneller Versand.",
   "services.saddle.title": "Sattel-Service",
   "services.saddle.desc": "Mobiler Sattelservice im Umkreis von 50 km. Beratung & Anpassung.",
   "services.embroidery.title": "Stickerei",
