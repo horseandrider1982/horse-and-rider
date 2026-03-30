@@ -61,7 +61,7 @@ export const SearchProductGrid: React.FC<SearchProductGridProps> = ({ results, i
               </div>
               <div className="p-3">
                 {product.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.vendor}</p>}
-                <p className="text-sm font-medium text-foreground line-clamp-2 leading-snug min-h-[2.5rem]">{highlightMatch(product.title, trimmed)}</p>
+                <p className="text-sm font-medium text-foreground leading-snug">{highlightMatch(product.title, trimmed)}</p>
                 <p className="text-sm font-bold text-primary mt-2">{product.priceText}</p>
               </div>
             </button>

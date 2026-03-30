@@ -64,7 +64,7 @@ export const SmartSearchItem = React.forwardRef<
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate text-foreground">
+        <p className="text-sm font-medium text-foreground">
           {highlightMatch(item.title, query)}
         </p>
         {item.type === "product" && (
