@@ -48,19 +48,19 @@ export function MegaMenuDropdown({ item }: MegaMenuDropdownProps) {
   return (
     <div className="w-full bg-background border-b border-border shadow-lg">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex gap-8">
-          {/* LEFT: Category title + "View all" link */}
-          <div className="flex-shrink-0 w-44">
-            <LocaleLink
-              to={item.url}
-              className="font-heading text-base font-semibold text-foreground hover:text-primary transition-colors"
-            >
-              {item.title}
-            </LocaleLink>
-          </div>
+        {/* TOP: Category title centered */}
+        <div className="mb-4">
+          <LocaleLink
+            to={item.url}
+            className="font-heading text-base font-semibold text-foreground hover:text-primary transition-colors"
+          >
+            {item.title}
+          </LocaleLink>
+        </div>
 
-          {/* CENTER: Menu columns */}
-          <div className="flex-1 grid grid-cols-3 gap-6">
+        <div className="flex gap-8">
+          {/* Menu columns in 4-column grid */}
+          <div className="flex-1 grid grid-cols-4 gap-x-8 gap-y-2">
             {columnGroups.map((group, gi) => (
               <div key={gi} className="space-y-4">
                 {group.map((col) => (
