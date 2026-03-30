@@ -28,7 +28,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { query, results, isLoading, aiResult, aiLoading, handleQueryChange, reset, isAdvisory } = useSearchOverlay();
+  const { query, results, isLoading, isLoadingMore, aiResult, aiLoading, hasNextPage, handleQueryChange, loadMore, reset, isAdvisory } = useSearchOverlay();
 
   const hasResults = (results?.groups?.products?.length ?? 0) > 0;
   const hasQuery = query.trim().length >= 2;
