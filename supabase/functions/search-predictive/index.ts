@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
     const result: NormalizedResult = {
       query: q,
       groups: {
-        products: edges.slice(0, 6).map(
+        products: edges.map(
           (edge: {
             node: {
               id: string;
