@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         query: PRODUCTS_SEARCH_QUERY,
-        variables: { query: q, first: 6 },
+        variables: { query: q, first: 24 },
       }),
     });
 
@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
     const result: NormalizedResult = {
       query: q,
       groups: {
-        products: edges.slice(0, 6).map(
+        products: edges.map(
           (edge: {
             node: {
               id: string;
