@@ -1,11 +1,14 @@
-import { MapPin, Phone } from "lucide-react";
-import { LocaleLink } from "./LocaleLink";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { MapPin, Phone, MessageSquare, Smartphone, Monitor } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { CalendlyModal } from "./CalendlyModal";
+import { ProductContactModal } from "./ProductContactModal";
 import storeImg from "@/assets/store-interior.jpg";
 
 export const AboutTeamSection = () => {
   const { t } = useI18n();
+  const [calendlyOpen, setCalendlyOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   return (
     <section className="py-14 bg-background">
@@ -41,17 +44,29 @@ export const AboutTeamSection = () => {
                 <a href="tel:+4941726403" className="hover:text-primary transition-colors">04172 - 6403</a>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Button asChild>
-                <LocaleLink to="/kontakt">{t("about_section.cta_contact")}</LocaleLink>
-              </Button>
-              <Button variant="outline" asChild>
-                <LocaleLink to="/unsere-marken">{t("about_section.cta_about")}</LocaleLink>
-              </Button>
+            <div className="flex items-center justify-between gap-3">
+              <a href="tel:+4941726403" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                <Phone className="h-10 w-10" />
+                <span className="text-sm font-medium">{t("product.phone")}</span>
+              </a>
+              <button onClick={() => setContactOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                <MessageSquare className="h-10 w-10" />
+                <span className="text-sm font-medium">{t("product.contact_form")}</span>
+              </button>
+              <button onClick={() => setCalendlyOpen(true)} className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                <Monitor className="h-10 w-10" />
+                <span className="text-sm font-medium">{t("product.online_advice")}</span>
+              </button>
+              <a href="https://wa.me/4941726403" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 text-primary hover:text-primary/80 transition-colors flex-1">
+                <Smartphone className="h-10 w-10" />
+                <span className="text-sm font-medium">WhatsApp</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
+      <CalendlyModal open={calendlyOpen} onOpenChange={setCalendlyOpen} />
+      <ProductContactModal open={contactOpen} onOpenChange={setContactOpen} productTitle="Allgemeine Anfrage" productId="homepage" />
     </section>
   );
 };
