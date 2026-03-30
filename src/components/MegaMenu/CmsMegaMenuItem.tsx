@@ -87,9 +87,9 @@ export function CmsMegaMenuItem({ item }: CmsMegaMenuItemProps) {
 function CmsMegaMenuDropdown({ item }: { item: PublicMenuItem }) {
   const children = item.children || [];
 
-  // Split into column groups of ~4
+  // Split into column groups of ~3-4
   const columnGroups: PublicMenuItem[][] = [];
-  const perGroup = Math.max(4, Math.ceil(children.length / 3));
+  const perGroup = Math.max(3, Math.ceil(children.length / 4));
   for (let i = 0; i < children.length; i += perGroup) {
     columnGroups.push(children.slice(i, i + perGroup));
   }
@@ -97,27 +97,25 @@ function CmsMegaMenuDropdown({ item }: { item: PublicMenuItem }) {
   return (
     <div className="w-full bg-background border-b border-border shadow-lg">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex gap-8">
-          {/* LEFT: Category title */}
-          <div className="flex-shrink-0 w-44">
-            <LocaleLink
-              to={item.url || '#'}
-              className="font-heading text-base font-semibold text-foreground hover:text-primary transition-colors"
-            >
-              {item.label}
-            </LocaleLink>
-          </div>
+        {/* TOP: Category title */}
+        <div className="mb-4">
+          <LocaleLink
+            to={item.url || '#'}
+            className="font-heading text-base font-semibold text-foreground hover:text-primary transition-colors"
+          >
+            {item.label}
+          </LocaleLink>
+        </div>
 
-          {/* CENTER: Menu columns */}
-          <div className="flex-1 grid grid-cols-3 gap-6">
-            {columnGroups.map((group, gi) => (
-              <div key={gi} className="space-y-4">
-                {group.map((child) => (
-                  <CmsMenuColumn key={child.id} item={child} />
-                ))}
-              </div>
-            ))}
-          </div>
+        {/* Menu columns in 4-column grid */}
+        <div className="grid grid-cols-4 gap-x-8 gap-y-2">
+          {columnGroups.map((group, gi) => (
+            <div key={gi} className="space-y-4">
+              {group.map((child) => (
+                <CmsMenuColumn key={child.id} item={child} />
+              ))}
+            </div>
+          ))}
         </div>
       </div>
     </div>

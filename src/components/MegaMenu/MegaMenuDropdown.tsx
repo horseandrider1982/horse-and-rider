@@ -36,7 +36,7 @@ export function MegaMenuDropdown({ item }: MegaMenuDropdownProps) {
   // Split columns into groups of ~4 for multi-column layout
   const columnGroups = useMemo(() => {
     const groups: ShopifyMenuItem[][] = [];
-    const perGroup = Math.max(4, Math.ceil(columns.length / 3));
+    const perGroup = Math.max(3, Math.ceil(columns.length / 4));
     for (let i = 0; i < columns.length; i += perGroup) {
       groups.push(columns.slice(i, i + perGroup));
     }
