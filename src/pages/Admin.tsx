@@ -24,6 +24,7 @@ import type { CmsPage } from "@/hooks/useCmsPages";
 
 const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: BarChart3 },
+  { key: "homepage", label: "Startseite", icon: Home },
   { key: "cms", label: "CMS", icon: FileText },
   { key: "news", label: "News", icon: Newspaper },
   { key: "brands", label: "Marken", icon: Tag },
