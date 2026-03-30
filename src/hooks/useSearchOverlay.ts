@@ -176,6 +176,8 @@ export function useSearchOverlay() {
       }
 
       setIsLoading(true);
+      setResults(null);
+      setAllProducts([]);
       clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         fetchProducts(value);
