@@ -6,7 +6,7 @@
 export const defaultTranslations: Record<string, string> = {
   // TopBar
   "topbar.free_shipping": "Kostenloser Versand ab € 50,-",
-  "topbar.products_count": "Über 30.000 Produkte",
+  "topbar.products_count": "Über 20.000 Produkte",
   "topbar.money_back": "30 Tage Geld-Zurück-Garantie",
   "topbar.phone_advisory": "Fachberatung: +49 4172 6403",
 
