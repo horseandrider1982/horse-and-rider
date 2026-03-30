@@ -136,6 +136,20 @@ export default function Admin() {
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="p-6">
           {activeSection === "dashboard" && <DashboardSection userCount={userCount} />}
+          {activeSection === "homepage" && (
+            <div>
+              <h1 className="text-2xl font-heading font-bold mb-6">Startseite</h1>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Startseiten-Produkte</CardTitle>
+                  <CardDescription>Wählen Sie bis zu 4 Produkte für die Startseite aus.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <HomepageProducts />
+                </CardContent>
+              </Card>
+            </div>
+          )}
           {activeSection === "cms" && (
             <CmsSection
               cmsView={cmsView}
