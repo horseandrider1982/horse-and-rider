@@ -174,12 +174,12 @@ export default function CollectionDetail() {
                         className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow"
                       >
                         <LocaleLink to={`/product/${product.handle}`}>
-                          <div className="aspect-square bg-muted overflow-hidden">
+                          <div className="aspect-square bg-white overflow-hidden">
                             {image ? (
                               <img
                                 src={image.url}
                                 alt={image.altText || product.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                 loading="lazy"
                               />
                             ) : (
