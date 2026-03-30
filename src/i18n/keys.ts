@@ -290,6 +290,25 @@ export const defaultTranslations: Record<string, string> = {
   "search.clear_filters": "Filter zurücksetzen",
   "search.filters": "Filter",
 
+  // Brand Logos Bar
+  "brands_bar.title": "Unsere Top-Marken",
+
+  // Newsletter Section
+  "newsletter_section.title": "Newsletter abonnieren & 5% beim ersten Einkauf sparen",
+  "newsletter_section.subtitle": "Erhalten Sie exklusive Angebote, Neuheiten und Tipps rund um den Reitsport direkt in Ihr Postfach.",
+  "newsletter_section.cta": "Anmelden & sparen",
+
+  // Trusted Shops Section
+  "trusted_section.title": "Zufriedene Kunden",
+  "trusted_section.subtitle": "Überzeugen Sie sich selbst von den Bewertungen unserer Kunden.",
+
+  // About Team Section
+  "about_section.title": "Ihr Reitsport-Fachgeschäft in Luhmühlen",
+  "about_section.text_1": "Seit über 30 Jahren sind wir Ihr kompetenter Partner für Reitsportbedarf. In unserem Fachgeschäft in Luhmühlen beraten wir Sie persönlich und finden gemeinsam die perfekte Ausrüstung für Sie und Ihr Pferd.",
+  "about_section.text_2": "Unser erfahrenes Team besteht aus aktiven Reiterinnen und Reitern, die die Bedürfnisse von Pferd und Reiter aus erster Hand kennen. Ob Sättel, Trensen, Reitbekleidung oder Stallbedarf — wir führen über 30.000 Artikel namhafter Marken.",
+  "about_section.cta_contact": "Kontakt aufnehmen",
+  "about_section.cta_about": "Über uns",
+
   // General
   "general.loading": "Wird geladen…",
   "general.yes": "Ja",
