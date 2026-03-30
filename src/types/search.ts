@@ -6,6 +6,7 @@ export interface SearchProductResult {
   imageAlt: string | null;
   priceText: string;
   vendor: string | null;
+  collections?: Array<{ title: string; handle: string }>;
 }
 
 export interface SearchArticleResult {
@@ -29,6 +30,22 @@ export interface SearchPageInfo {
   endCursor: string | null;
 }
 
+export interface SearchFacetVendor {
+  name: string;
+  count: number;
+}
+
+export interface SearchFacetCollection {
+  title: string;
+  handle: string;
+  count: number;
+}
+
+export interface SearchFacets {
+  vendors: SearchFacetVendor[];
+  collections: SearchFacetCollection[];
+}
+
 export interface SearchResults {
   query: string;
   groups: {
@@ -37,6 +54,7 @@ export interface SearchResults {
     pages: SearchPageResult[];
   };
   pageInfo?: SearchPageInfo;
+  facets?: SearchFacets;
 }
 
 export type SearchItem =
