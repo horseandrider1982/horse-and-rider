@@ -18,6 +18,7 @@ import CmsMenuEditor from "@/pages/admin/CmsMenuEditor";
 import ShopifyMenuCache from "@/pages/admin/ShopifyMenuCache";
 import CalendlySettings from "@/pages/admin/CalendlySettings";
 import SearchSettings from "@/pages/admin/SearchSettings";
+import HomepageProducts from "@/pages/admin/HomepageProducts";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
