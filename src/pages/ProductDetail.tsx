@@ -225,7 +225,7 @@ const ProductDetail = () => {
           </Breadcrumb>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-3">
+              <div className="aspect-square rounded-lg overflow-hidden bg-white mb-3">
                 {images[mainImage] ? (
                   <img src={images[mainImage].node.url} alt={images[mainImage].node.altText || product.node.title} className="w-full h-full object-contain" />
                 ) : (
