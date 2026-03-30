@@ -57,7 +57,7 @@ export const SearchProductGrid: React.FC<SearchProductGridProps> = ({ results, i
           return (
             <button key={product.id} onClick={() => onProductClick(handle)} className={cn("group text-left rounded-xl border border-border bg-background", "hover:shadow-lg hover:border-primary/30 transition-all duration-200", "overflow-hidden")}>
               <div className="aspect-square bg-muted overflow-hidden">
-                {product.imageUrl ? <img src={product.imageUrl} alt={product.imageAlt || product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>}
+                {product.imageUrl ? <img src={product.imageUrl} alt={product.imageAlt || product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>}
               </div>
               <div className="p-3">
                 {product.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.vendor}</p>}
