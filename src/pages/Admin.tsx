@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
@@ -18,11 +18,13 @@ import CmsMenuEditor from "@/pages/admin/CmsMenuEditor";
 import ShopifyMenuCache from "@/pages/admin/ShopifyMenuCache";
 import CalendlySettings from "@/pages/admin/CalendlySettings";
 import SearchSettings from "@/pages/admin/SearchSettings";
+import HomepageProducts from "@/pages/admin/HomepageProducts";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
 const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: BarChart3 },
+  { key: "homepage", label: "Startseite", icon: Home },
   { key: "cms", label: "CMS", icon: FileText },
   { key: "news", label: "News", icon: Newspaper },
   { key: "brands", label: "Marken", icon: Tag },
@@ -134,6 +136,20 @@ export default function Admin() {
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="p-6">
           {activeSection === "dashboard" && <DashboardSection userCount={userCount} />}
+          {activeSection === "homepage" && (
+            <div>
+              <h1 className="text-2xl font-heading font-bold mb-6">Startseite</h1>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Startseiten-Produkte</CardTitle>
+                  <CardDescription>Wählen Sie bis zu 4 Produkte für die Startseite aus.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <HomepageProducts />
+                </CardContent>
+              </Card>
+            </div>
+          )}
           {activeSection === "cms" && (
             <CmsSection
               cmsView={cmsView}
