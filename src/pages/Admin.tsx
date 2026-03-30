@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon } from "lucide-react";
+import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
