@@ -275,9 +275,19 @@ Deno.serve(async (req) => {
     const edges: ShopifyEdge[] = productsData?.edges || [];
     const pageInfo = productsData?.pageInfo || { hasNextPage: false, endCursor: null };
 
+    // Deduplicate by product ID (OR queries can return duplicates)
+    const seen = new Set<string>();
+    const uniqueEdges: ShopifyEdge[] = [];
+    for (const edge of edges) {
+      if (!seen.has(edge.node.id)) {
+        seen.add(edge.node.id);
+        uniqueEdges.push(edge);
+      }
+    }
+
     // Score and re-sort products by title relevance
     const queryWords = q.trim().toLowerCase().split(/\s+/);
-    const scored = edges.map((edge) => ({
+    const scored = uniqueEdges.map((edge) => ({
       edge,
       score: scoreProduct(edge.node, queryWords),
     }));
