@@ -36,7 +36,7 @@ export const defaultTranslations: Record<string, string> = {
 
   // HeroSection
   "hero_section.title": "Ihr kompetenter Partner rund um den Reitsport",
-  "hero_section.subtitle": "Über 30.000 Produkte für Reiter und Pferd. Fachberatung vor Ort in Luhmühlen oder online.",
+  "hero_section.subtitle": "Über 20.000 Produkte für Reiter und Pferd. Fachberatung vor Ort in Luhmühlen oder online.",
   "hero_section.cta_shop": "Jetzt Shoppen",
   "hero_section.cta_phone": "Beratung: 04172-6403",
 
