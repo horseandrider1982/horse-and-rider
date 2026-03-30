@@ -29,7 +29,7 @@ const ProductCard = ({ product }: { product: ShopifyProduct }) => {
 
   return (
     <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
-      <div className="aspect-square overflow-hidden bg-muted">
+      <div className="aspect-square overflow-hidden bg-white">
         {image ? (
           <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
         ) : (
