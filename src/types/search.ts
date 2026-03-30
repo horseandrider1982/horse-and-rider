@@ -24,6 +24,11 @@ export interface SearchPageResult {
   excerpt: string | null;
 }
 
+export interface SearchPageInfo {
+  hasNextPage: boolean;
+  endCursor: string | null;
+}
+
 export interface SearchResults {
   query: string;
   groups: {
@@ -31,6 +36,7 @@ export interface SearchResults {
     articles: SearchArticleResult[];
     pages: SearchPageResult[];
   };
+  pageInfo?: SearchPageInfo;
 }
 
 export type SearchItem =

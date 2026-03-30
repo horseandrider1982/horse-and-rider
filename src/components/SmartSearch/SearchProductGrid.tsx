@@ -3,12 +3,16 @@ import type { SearchResults } from "@/types/search";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n";
+import { Button } from "@/components/ui/button";
 
 interface SearchProductGridProps {
   results: SearchResults | null;
   isLoading: boolean;
+  isLoadingMore?: boolean;
+  hasNextPage?: boolean;
   query: string;
   onProductClick: (handle: string) => void;
+  onLoadMore?: () => void;
 }
 
 function highlightMatch(text: string, query: string): React.ReactNode {
@@ -18,7 +22,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   return <>{text.slice(0, idx)}<mark className="bg-primary/20 text-foreground rounded-sm px-0.5">{text.slice(idx, idx + query.length)}</mark>{text.slice(idx + query.length)}</>;
 }
 
-export const SearchProductGrid: React.FC<SearchProductGridProps> = ({ results, isLoading, query, onProductClick }) => {
+export const SearchProductGrid: React.FC<SearchProductGridProps> = ({ results, isLoading, isLoadingMore, hasNextPage, query, onProductClick, onLoadMore }) => {
   const { t } = useI18n();
   const products = results?.groups?.products || [];
   const hasResults = products.length > 0;
@@ -64,6 +68,17 @@ export const SearchProductGrid: React.FC<SearchProductGridProps> = ({ results, i
           );
         })}
       </div>
+      {hasNextPage && onLoadMore && (
+        <div className="flex justify-center mt-8">
+          <Button variant="outline" size="lg" onClick={onLoadMore} disabled={isLoadingMore} className="min-w-[200px]">
+            {isLoadingMore ? (
+              <><Loader2 className="w-4 h-4 animate-spin mr-2" />{t("search.loading_more")}</>
+            ) : (
+              t("search.load_more")
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

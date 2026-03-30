@@ -28,7 +28,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { query, results, isLoading, aiResult, aiLoading, handleQueryChange, reset, isAdvisory } = useSearchOverlay();
+  const { query, results, isLoading, isLoadingMore, aiResult, aiLoading, hasNextPage, handleQueryChange, loadMore, reset, isAdvisory } = useSearchOverlay();
 
   const hasResults = (results?.groups?.products?.length ?? 0) > 0;
   const hasQuery = query.trim().length >= 2;
@@ -94,7 +94,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
           ) : (
             <div className={cn("px-4 sm:px-8 lg:px-12 py-6", "flex flex-col gap-6")}>
               {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} />}
-              <SearchProductGrid results={results} isLoading={isLoading} query={query} onProductClick={handleProductClick} />
+              <SearchProductGrid results={results} isLoading={isLoading} isLoadingMore={isLoadingMore} hasNextPage={hasNextPage} query={query} onProductClick={handleProductClick} onLoadMore={loadMore} />
             </div>
           )}
         </div>
