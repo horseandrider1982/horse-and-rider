@@ -283,6 +283,8 @@ export const defaultTranslations: Record<string, string> = {
   "search.try_different": "Versuche einen anderen Suchbegriff oder stelle eine Frage.",
   "search.searching": "Suche läuft…",
   "search.ai_advice": "KI-Beratung",
+  "search.load_more": "Mehr Ergebnisse laden",
+  "search.loading_more": "Laden…",
 
   // General
   "general.loading": "Wird geladen…",
