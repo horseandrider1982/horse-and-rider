@@ -276,18 +276,55 @@ Deno.serve(async (req) => {
     const pageInfo = productsData?.pageInfo || { hasNextPage: false, endCursor: null };
 
     // Deduplicate by product ID (OR queries can return duplicates)
-    const seen = new Set<string>();
+    const seenIds = new Set<string>();
     const uniqueEdges: ShopifyEdge[] = [];
     for (const edge of edges) {
-      if (!seen.has(edge.node.id)) {
-        seen.add(edge.node.id);
+      if (!seenIds.has(edge.node.id)) {
+        seenIds.add(edge.node.id);
         uniqueEdges.push(edge);
+      }
+    }
+
+    // Deduplicate "variant-as-product" entries:
+    // Products like "Trense Mia schwarz Vollblut" / "Trense Mia schwarz Warmblut"
+    // are the same article in different sizes stored as separate Shopify products.
+    // Group by base title (strip trailing size words) and keep only the first.
+    const SIZE_SUFFIXES = new Set([
+      "pony", "pony i", "pony ii", "vollblut", "warmblut", "kaltblut",
+      "warmblut extra", "cob", "full", "extra full", "mini shetty",
+      "shetty", "xs", "s", "m", "l", "xl", "xxl",
+    ]);
+
+    function getBaseTitle(title: string): string {
+      let t = title.toLowerCase().trim();
+      // Repeatedly strip known size suffixes from the end
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const suffix of SIZE_SUFFIXES) {
+          if (t.endsWith(` ${suffix}`)) {
+            t = t.slice(0, -(suffix.length + 1)).trim();
+            changed = true;
+            break;
+          }
+        }
+      }
+      return t;
+    }
+
+    const seenBaseTitles = new Map<string, ShopifyEdge>();
+    const deduplicatedEdges: ShopifyEdge[] = [];
+    for (const edge of uniqueEdges) {
+      const base = getBaseTitle(edge.node.title);
+      if (!seenBaseTitles.has(base)) {
+        seenBaseTitles.set(base, edge);
+        deduplicatedEdges.push(edge);
       }
     }
 
     // Score and re-sort products by title relevance
     const queryWords = q.trim().toLowerCase().split(/\s+/);
-    const scored = uniqueEdges.map((edge) => ({
+    const scored = deduplicatedEdges.map((edge) => ({
       edge,
       score: scoreProduct(edge.node, queryWords),
     }));
