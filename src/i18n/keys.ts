@@ -304,8 +304,8 @@ export const defaultTranslations: Record<string, string> = {
 
   // About Team Section
   "about_section.title": "Ihr Reitsport-Fachgeschäft in Luhmühlen",
-  "about_section.text_1": "Seit über 30 Jahren sind wir Ihr kompetenter Partner für Reitsportbedarf. In unserem Fachgeschäft in Luhmühlen beraten wir Sie persönlich und finden gemeinsam die perfekte Ausrüstung für Sie und Ihr Pferd.",
-  "about_section.text_2": "Unser erfahrenes Team besteht aus aktiven Reiterinnen und Reitern, die die Bedürfnisse von Pferd und Reiter aus erster Hand kennen. Ob Sättel, Trensen, Reitbekleidung oder Stallbedarf — wir führen über 30.000 Artikel namhafter Marken.",
+  "about_section.text_1": "Seit über 40 Jahren sind wir Ihr kompetenter Partner für Reitsportbedarf. In unserem Fachgeschäft in Luhmühlen beraten wir Sie persönlich und finden gemeinsam die perfekte Ausrüstung für Sie und Ihr Pferd.",
+  "about_section.text_2": "Unser erfahrenes Team besteht aus aktiven Reiterinnen und Reitern, die die Bedürfnisse von Pferd und Reiter aus erster Hand kennen. Ob Sättel, Trensen, Reitbekleidung oder Stallbedarf — wir führen über 20.000 Artikel namhafter Marken.",
   "about_section.cta_contact": "Kontakt aufnehmen",
   "about_section.cta_about": "Über uns",
 
