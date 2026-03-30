@@ -11,8 +11,12 @@ const SHOPIFY_STORE_DOMAIN = "bpjvam-c1.myshopify.com";
 const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
 const PRODUCTS_SEARCH_QUERY = `
-  query SearchProducts($query: String!, $first: Int!) {
-    products(first: $first, query: $query) {
+  query SearchProducts($query: String!, $first: Int!, $after: String) {
+    products(first: $first, query: $query, after: $after) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       edges {
         node {
           id
@@ -69,23 +73,6 @@ function buildPriceText(
   return minVal < maxVal ? `ab ${formatted}` : formatted;
 }
 
-interface NormalizedResult {
-  query: string;
-  groups: {
-    products: Array<{
-      id: string;
-      title: string;
-      url: string;
-      imageUrl: string | null;
-      imageAlt: string | null;
-      priceText: string;
-      vendor: string | null;
-    }>;
-    articles: Array<never>;
-    pages: Array<never>;
-  };
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -100,18 +87,16 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const q = (url.searchParams.get("q") || "").trim();
+  const after = url.searchParams.get("after") || null;
 
   if (q.length < 2) {
     return new Response(
       JSON.stringify({ error: "Query must be at least 2 characters" }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
-  const cacheKey = q.toLowerCase();
+  const cacheKey = `${q.toLowerCase()}|${after || ""}`;
   const cached = getCached(cacheKey);
   if (cached) {
     return new Response(JSON.stringify(cached), {
@@ -119,34 +104,31 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Publishable storefront token - safe to include directly
   const storefrontToken = Deno.env.get("SHOPIFY_STOREFRONT_ACCESS_TOKEN") || "d69c81decdb58ced137c44fa1b033aa3";
   if (!storefrontToken) {
     return new Response(
       JSON.stringify({ error: "Server configuration error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
-  const emptyResult: NormalizedResult = {
+  const emptyResult = {
     query: q,
     groups: { products: [], articles: [], pages: [] },
+    pageInfo: { hasNextPage: false, endCursor: null },
   };
 
   try {
+    const variables: Record<string, unknown> = { query: q, first: 24 };
+    if (after) variables.after = after;
+
     const shopifyRes = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Shopify-Storefront-Access-Token": storefrontToken,
       },
-      body: JSON.stringify({
-        query: PRODUCTS_SEARCH_QUERY,
-        variables: { query: q, first: 24 },
-      }),
+      body: JSON.stringify({ query: PRODUCTS_SEARCH_QUERY, variables }),
     });
 
     if (!shopifyRes.ok) {
@@ -157,14 +139,15 @@ Deno.serve(async (req) => {
     }
 
     const shopifyData = await shopifyRes.json();
-
     if (shopifyData.errors) {
       console.error("Shopify GraphQL errors:", shopifyData.errors);
     }
 
-    const edges = shopifyData.data?.products?.edges || [];
+    const productsData = shopifyData.data?.products;
+    const edges = productsData?.edges || [];
+    const pageInfo = productsData?.pageInfo || { hasNextPage: false, endCursor: null };
 
-    const result: NormalizedResult = {
+    const result = {
       query: q,
       groups: {
         products: edges.map(
@@ -195,6 +178,10 @@ Deno.serve(async (req) => {
         ),
         articles: [],
         pages: [],
+      },
+      pageInfo: {
+        hasNextPage: pageInfo.hasNextPage,
+        endCursor: pageInfo.endCursor,
       },
     };
 
