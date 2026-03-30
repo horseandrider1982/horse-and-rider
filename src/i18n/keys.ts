@@ -6,7 +6,7 @@
 export const defaultTranslations: Record<string, string> = {
   // TopBar
   "topbar.free_shipping": "Kostenloser Versand ab € 50,-",
-  "topbar.products_count": "Über 30.000 Produkte",
+  "topbar.products_count": "Über 20.000 Produkte",
   "topbar.money_back": "30 Tage Geld-Zurück-Garantie",
   "topbar.phone_advisory": "Fachberatung: +49 4172 6403",
 
@@ -36,7 +36,7 @@ export const defaultTranslations: Record<string, string> = {
 
   // HeroSection
   "hero_section.title": "Ihr kompetenter Partner rund um den Reitsport",
-  "hero_section.subtitle": "Über 30.000 Produkte für Reiter und Pferd. Fachberatung vor Ort in Luhmühlen oder online.",
+  "hero_section.subtitle": "Über 20.000 Produkte für Reiter und Pferd. Fachberatung vor Ort in Luhmühlen oder online.",
   "hero_section.cta_shop": "Jetzt Shoppen",
   "hero_section.cta_phone": "Beratung: 04172-6403",
 
@@ -44,7 +44,7 @@ export const defaultTranslations: Record<string, string> = {
   "services.store.title": "Reitsportfachgeschäft",
   "services.store.desc": "Über 10.000 Artikel vor Ort. Kompetente Beratung in Luhmühlen.",
   "services.online.title": "Online-Shop",
-  "services.online.desc": "Über 30.000 Artikel online verfügbar. Schneller Versand.",
+  "services.online.desc": "Über 20.000 Artikel online verfügbar. Schneller Versand.",
   "services.saddle.title": "Sattel-Service",
   "services.saddle.desc": "Mobiler Sattelservice im Umkreis von 50 km. Beratung & Anpassung.",
   "services.embroidery.title": "Stickerei",
@@ -304,8 +304,8 @@ export const defaultTranslations: Record<string, string> = {
 
   // About Team Section
   "about_section.title": "Ihr Reitsport-Fachgeschäft in Luhmühlen",
-  "about_section.text_1": "Seit über 30 Jahren sind wir Ihr kompetenter Partner für Reitsportbedarf. In unserem Fachgeschäft in Luhmühlen beraten wir Sie persönlich und finden gemeinsam die perfekte Ausrüstung für Sie und Ihr Pferd.",
-  "about_section.text_2": "Unser erfahrenes Team besteht aus aktiven Reiterinnen und Reitern, die die Bedürfnisse von Pferd und Reiter aus erster Hand kennen. Ob Sättel, Trensen, Reitbekleidung oder Stallbedarf — wir führen über 30.000 Artikel namhafter Marken.",
+  "about_section.text_1": "Seit über 40 Jahren sind wir Ihr kompetenter Partner für Reitsportbedarf. In unserem Fachgeschäft in Luhmühlen beraten wir Sie persönlich und finden gemeinsam die perfekte Ausrüstung für Sie und Ihr Pferd.",
+  "about_section.text_2": "Unser erfahrenes Team besteht aus aktiven Reiterinnen und Reitern, die die Bedürfnisse von Pferd und Reiter aus erster Hand kennen. Ob Sättel, Trensen, Reitbekleidung oder Stallbedarf — wir führen über 20.000 Artikel namhafter Marken.",
   "about_section.cta_contact": "Kontakt aufnehmen",
   "about_section.cta_about": "Über uns",
 
