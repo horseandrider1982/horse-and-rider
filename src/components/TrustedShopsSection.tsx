@@ -10,7 +10,7 @@ export const TrustedShopsSection = () => {
     if (!el || el.querySelector("script")) return;
 
     const widget = document.createElement("etrusted-widget");
-    widget.setAttribute("data-etrusted-widget-id", "wdg-3af3c7a8-4921-4456-9d28-0feb56898812");
+    widget.setAttribute("data-etrusted-widget-id", "wdg-1496fed3-572c-4bc9-b9f5-4c0fd5e6fa25");
     el.appendChild(widget);
 
     const script = document.createElement("script");
