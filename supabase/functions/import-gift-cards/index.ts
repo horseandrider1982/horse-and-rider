@@ -75,31 +75,19 @@ Deno.serve(async (req) => {
 
     for (const gc of giftCards) {
       try {
-        // Create gift card with initial value
-        const data = await shopifyAdmin('/gift_cards.json', 'POST', {
+        const noteText = gc.balance < gc.initialValue
+          ? `${gc.note} | Originalwert: ${gc.initialValue.toFixed(2)} EUR`
+          : gc.note;
+
+        await shopifyAdmin('/gift_cards.json', 'POST', {
           gift_card: {
             code: gc.code,
-            initial_value: gc.initialValue.toFixed(2),
+            initial_value: gc.balance.toFixed(2),
             expires_on: gc.expiresOn,
-            note: gc.note,
+            note: noteText,
             currency: 'EUR',
           },
         });
-
-        const giftCardId = data?.gift_card?.id;
-
-        // If balance differs from initial value, update the gift card balance
-        // by disabling/adjusting — Shopify doesn't allow direct balance set on creation
-        // Actually the API sets initial_value and balance starts at that value.
-        // We need to adjust if Restwert < Gutscheinwert
-        if (giftCardId && gc.balance < gc.initialValue) {
-          // We need to create a "debit" adjustment
-          // Shopify doesn't have a direct balance adjustment API for gift cards
-          // The workaround: disable and recreate, or just set initial_value = balance
-          // Actually, let's just create with initial_value = balance (Restwert)
-          // and store the original value in the note
-          // This is handled below by re-creating with correct value
-        }
 
         results.created++;
       } catch (e) {
