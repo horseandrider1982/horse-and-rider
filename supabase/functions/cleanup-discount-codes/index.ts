@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
           await shopifyAdmin(`/price_rules/${rule.id}.json`, 'DELETE');
           deleted++;
           // Rate limit
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, 1000));
         } catch (e) {
           errors++;
           console.error(`Failed to delete ${rule.id}: ${(e as Error).message}`);
