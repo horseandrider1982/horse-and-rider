@@ -153,6 +153,8 @@ export const PRODUCT_BY_HANDLE_QUERY = `
               currencyCode
             }
             availableForSale
+            sku
+            barcode
             selectedOptions {
               name
               value
