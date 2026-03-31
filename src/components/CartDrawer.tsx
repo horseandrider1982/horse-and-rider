@@ -17,7 +17,7 @@ export const CartDrawer = () => {
 
   const handleCheckout = () => {
     const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) { window.open(checkoutUrl, '_blank'); setIsOpen(false); }
+    if (checkoutUrl) { window.location.href = checkoutUrl; }
   };
 
   const itemsDesc = totalItems === 0
