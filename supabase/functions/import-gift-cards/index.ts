@@ -52,10 +52,20 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { giftCards, dryRun } = (await req.json()) as {
-      giftCards: GiftCardRow[];
+    const body = await req.json();
+    const { giftCards, dryRun, action } = body as {
+      giftCards?: GiftCardRow[];
       dryRun?: boolean;
+      action?: string;
     };
+
+    // Count gift cards in Shopify
+    if (action === 'count') {
+      const data = await shopifyAdmin('/gift_cards/count.json', 'GET');
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!giftCards?.length) {
       return new Response(JSON.stringify({ error: 'No gift cards provided' }), {
