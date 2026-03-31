@@ -1,12 +1,10 @@
-import { useBrands } from "@/hooks/useBrands";
+import { useFeaturedBrands } from "@/hooks/useFeaturedBrands";
 import { LocaleLink } from "./LocaleLink";
 import { useI18n } from "@/i18n";
 
 export const BrandLogosBar = () => {
-  const { data: brands } = useBrands();
+  const { data: featured = [] } = useFeaturedBrands();
   const { t } = useI18n();
-
-  const featured = brands?.filter((b) => b.featured && b.logoUrl) || [];
   if (featured.length === 0) return null;
 
   return (
