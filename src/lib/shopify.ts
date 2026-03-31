@@ -36,6 +36,8 @@ export interface ShopifyProduct {
             currencyCode: string;
           };
           availableForSale: boolean;
+          sku?: string;
+          barcode?: string;
           selectedOptions: Array<{
             name: string;
             value: string;
@@ -84,6 +86,8 @@ export const STOREFRONT_QUERY = `
                   currencyCode
                 }
                 availableForSale
+                sku
+                barcode
                 selectedOptions {
                   name
                   value
@@ -151,6 +155,8 @@ export const PRODUCT_BY_HANDLE_QUERY = `
               currencyCode
             }
             availableForSale
+            sku
+            barcode
             selectedOptions {
               name
               value

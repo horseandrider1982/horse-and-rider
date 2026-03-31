@@ -342,6 +342,19 @@ const ProductDetail = () => {
               <p className="text-base text-muted-foreground leading-relaxed">{product.node.description}</p>
             </div>
           )}
+
+          {(selectedVariant?.sku || selectedVariant?.barcode) && (
+            <div className="mt-6 pt-4 border-t border-border">
+              <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                {selectedVariant.sku && (
+                  <span><span className="font-medium text-foreground">Artikelnummer:</span> {selectedVariant.sku}</span>
+                )}
+                {selectedVariant.barcode && (
+                  <span><span className="font-medium text-foreground">EAN/GTIN:</span> {selectedVariant.barcode}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
