@@ -16,8 +16,8 @@ interface GiftCardRow {
 }
 
 async function shopifyAdmin(path: string, method: string, body?: unknown, retries = 3): Promise<any> {
-  const token = Deno.env.get('SHOPIFY_ACCESS_TOKEN');
-  if (!token) throw new Error('SHOPIFY_ACCESS_TOKEN not set');
+  const token = Deno.env.get('SHOPIFY_GIFTCARD_TOKEN');
+  if (!token) throw new Error('SHOPIFY_GIFTCARD_TOKEN not set');
 
   for (let attempt = 0; attempt < retries; attempt++) {
     const res = await fetch(`${ADMIN_URL}${path}`, {
