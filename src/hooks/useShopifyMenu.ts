@@ -19,6 +19,22 @@ export function useShopifyMenu(handle: string = 'main-menu') {
   return useQuery({
     queryKey: ['shopify-menu', handle, locale],
     queryFn: async () => {
+      // Try cached data first (instant)
+      const { data: cached } = await supabase
+        .from('shopify_menu_cache')
+        .select('items')
+        .eq('handle', handle)
+        .eq('locale', locale)
+        .maybeSingle();
+
+      if (cached?.items) {
+        const items = (typeof cached.items === 'string' ? JSON.parse(cached.items) : cached.items) as ShopifyMenuItem[];
+        return items
+          .filter(item => !EXCLUDED_HANDLES.includes(item.handle || ''))
+          .map(normalizeItem);
+      }
+
+      // Fallback to edge function
       const { data, error } = await supabase.functions.invoke('shopify-menu', {
         body: { handle, language: locale },
       });
