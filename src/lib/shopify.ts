@@ -36,6 +36,8 @@ export interface ShopifyProduct {
             currencyCode: string;
           };
           availableForSale: boolean;
+          sku?: string;
+          barcode?: string;
           selectedOptions: Array<{
             name: string;
             value: string;
