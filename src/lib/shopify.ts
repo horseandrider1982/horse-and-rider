@@ -86,6 +86,8 @@ export const STOREFRONT_QUERY = `
                   currencyCode
                 }
                 availableForSale
+                sku
+                barcode
                 selectedOptions {
                   name
                   value
