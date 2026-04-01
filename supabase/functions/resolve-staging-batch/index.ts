@@ -189,8 +189,7 @@ Deno.serve(async (req) => {
             .eq("id", row.id);
           errors++;
         }
-      })
-    );
+      })();
   }
 
   const summary = {
