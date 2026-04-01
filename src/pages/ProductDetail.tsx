@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { EngravingDialog, ENGRAVING_PRICE } from "@/components/EngravingDialog";
 import { PaymentIcons } from "@/components/PaymentIcons";
 import { trackViewItem, trackAddToCart } from "@/lib/ga4";
+import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 
