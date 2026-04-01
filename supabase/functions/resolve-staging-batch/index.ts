@@ -68,10 +68,12 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const token = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
+  // Try SHOPIFY_NAVIGATION_TOKEN first (Custom App with Admin API access),
+  // fall back to SHOPIFY_ACCESS_TOKEN
+  const token = Deno.env.get("SHOPIFY_NAVIGATION_TOKEN") || Deno.env.get("SHOPIFY_ACCESS_TOKEN");
   if (!token) {
     return new Response(
-      JSON.stringify({ error: "SHOPIFY_ACCESS_TOKEN not configured" }),
+      JSON.stringify({ error: "No Shopify Admin API token configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
