@@ -51,6 +51,7 @@ const AppContent = () => {
           <Route index element={<Index />} />
           <Route path="product/:handle" element={<ProductDetail />} />
           <Route path="danke" element={<ThankYou />} />
+          <Route path="thank-you" element={<ThankYou />} />
           <Route path="collections/:handle" element={<CollectionDetail />} />
           <Route path="auth" element={<Auth />} />
           <Route path="account" element={<Account />} />
