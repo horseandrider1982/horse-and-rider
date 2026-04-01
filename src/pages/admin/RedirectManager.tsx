@@ -216,22 +216,39 @@ export default function RedirectManager() {
       return;
     }
 
+    toast.info(`Löse ${rows.length} SKUs über Shopify auf…`);
+
+    // Step 1: Resolve all SKUs via edge function (batches of 200)
+    const skuToProduct = new Map<string, { handle: string; title: string }>();
+    const allSkus = rows.map(r => r.sku);
+    
+    for (let i = 0; i < allSkus.length; i += 200) {
+      const batch = allSkus.slice(i, i + 200);
+      const { data, error } = await supabase.functions.invoke("resolve-skus", {
+        body: { skus: batch },
+      });
+      if (error) {
+        toast.error(`SKU-Auflösung fehlgeschlagen: ${error.message}`);
+        if (fileRef.current) fileRef.current.value = "";
+        return;
+      }
+      if (data?.results) {
+        for (const [sku, product] of Object.entries(data.results)) {
+          if (product) skuToProduct.set(sku, product as { handle: string; title: string });
+        }
+      }
+    }
+
+    // Step 2: Create redirects
     let success = 0;
     const notFound: string[] = [];
     const conflicts: string[] = [];
 
     for (const row of rows) {
       const normalized = normalizeUrl(row.old_url);
+      const product = skuToProduct.get(row.sku);
 
-      // Check if SKU exists
-      const { data: existing } = await supabase
-        .from("redirects")
-        .select("id, new_url")
-        .or(`sku.eq.${row.sku},article_number.eq.${row.sku}`)
-        .limit(1)
-        .maybeSingle();
-
-      if (!existing) {
+      if (!product) {
         notFound.push(row.sku);
         await supabase.from("redirect_issues").insert({
           type: "import_sku_not_found" as any,
@@ -241,12 +258,14 @@ export default function RedirectManager() {
         continue;
       }
 
+      const newPath = `/product/${product.handle}`;
+
       // Check for duplicate old_path
       const { data: dup } = await supabase
         .from("redirects")
         .select("id")
         .eq("old_path", normalized)
-        .neq("id", existing.id)
+        .limit(1)
         .maybeSingle();
 
       if (dup) {
@@ -261,12 +280,14 @@ export default function RedirectManager() {
 
       const { error } = await supabase
         .from("redirects")
-        .update({
+        .insert({
           old_url: row.old_url,
+          new_url: newPath,
+          sku: row.sku,
+          entity_type: "product" as any,
           is_active: true,
           source: "import_csv" as any,
-        })
-        .eq("id", existing.id);
+        });
 
       if (!error) success++;
     }
@@ -274,7 +295,7 @@ export default function RedirectManager() {
     setImportReport({ success, notFound, conflicts });
     fetchAll();
     if (fileRef.current) fileRef.current.value = "";
-    toast.success(`Import: ${success} von ${rows.length} erfolgreich`);
+    toast.success(`Import: ${success} von ${rows.length} erfolgreich (${notFound.length} SKUs nicht gefunden)`);
   };
 
   // Export CSV
@@ -491,7 +512,7 @@ export default function RedirectManager() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        CSV-Format: <code>SKU;Alte URL</code> – Die alte URL wird per SKU/Artikelnummer zugeordnet.
+        CSV-Format: <code>SKU;Alte URL</code> – SKU wird über Shopify aufgelöst. Varianten-SKUs werden automatisch auf den Vaterartikel umgeleitet.
       </p>
 
       {/* Add new row */}
