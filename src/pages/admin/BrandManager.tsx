@@ -17,6 +17,13 @@ interface BrandRow {
   website_url: string | null;
   featured: boolean;
   is_active: boolean;
+  gpsr_street: string | null;
+  gpsr_housenumber: string | null;
+  gpsr_postalcode: string | null;
+  gpsr_city: string | null;
+  gpsr_country: string | null;
+  gpsr_email: string | null;
+  gpsr_homepage: string | null;
 }
 
 function slugify(name: string): string {
