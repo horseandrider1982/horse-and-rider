@@ -54,12 +54,19 @@ function DefaultSeoText({ brand }: { brand: string }) {
 }
 
 export default function MarkenDetail() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { slug } = useParams<{ slug: string }>();
   const { data: brands, isLoading: brandsLoading } = useBrands();
   const brand = brands?.find((b) => b.slug === slug);
   const vendorName = brand?.name || "";
   const { data: products, isLoading: productsLoading } = useBrandProducts(vendorName, !!vendorName);
+
+  usePageMeta({
+    title: brand?.name,
+    description: brand?.seoText?.replace(/<[^>]*>/g, '').slice(0, 160) || `${brand?.name} Produkte bei Horse & Rider kaufen`,
+    ogImage: brand?.logoUrl || undefined,
+    canonicalPath: slug ? `/${locale}/unsere-marken/${slug}` : undefined,
+  });
 
   if (brandsLoading) {
     return <div className="min-h-screen flex flex-col"><TopBar /><Header /><main className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></main><Footer /></div>;
