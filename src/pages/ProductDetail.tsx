@@ -204,8 +204,28 @@ const ProductDetail = () => {
 
   const canAddToCart = !isConfigurator || configState?.isConfigured;
 
+  const productImages = images.map(e => e.node.url);
+  const firstVariantSku = variants[0]?.node?.sku;
+
   return (
     <div className="min-h-screen flex flex-col">
+      <ProductJsonLd
+        name={product.node.title}
+        description={product.node.description}
+        handle={product.node.handle}
+        images={productImages}
+        price={selectedVariant?.price.amount || product.node.priceRange.minVariantPrice.amount}
+        currency={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode}
+        available={selectedVariant?.availableForSale ?? true}
+        sku={firstVariantSku}
+        brand={product.node.vendor}
+        locale={locale}
+      />
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: `https://www.horse-and-rider.de/${locale}` },
+        ...(brand ? [{ name: brand.name, url: `https://www.horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
+        { name: product.node.title, url: `https://www.horse-and-rider.de/${locale}/product/${product.node.handle}` },
+      ]} />
       <TopBar /><Header />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
