@@ -49,6 +49,8 @@ async function resolveSkuViaShopify(
   );
 
   if (!res.ok) {
+    const body = await res.text();
+    console.error(`Shopify API ${res.status} for SKU ${sku}: ${body.substring(0, 300)}`);
     throw new Error(`Shopify API ${res.status}`);
   }
 
@@ -66,13 +68,17 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const token = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
+  // Try SHOPIFY_NAVIGATION_TOKEN first (Custom App with Admin API access),
+  // fall back to SHOPIFY_ACCESS_TOKEN
+  const token = Deno.env.get("SHOPIFY_NAVIGATION_TOKEN") || Deno.env.get("SHOPIFY_ACCESS_TOKEN");
   if (!token) {
     return new Response(
-      JSON.stringify({ error: "SHOPIFY_ACCESS_TOKEN not configured" }),
+      JSON.stringify({ error: "No Shopify Admin API token configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
+
+  console.log(`Token prefix: ${token.substring(0, 8)}...`, `Token length: ${token.length}`);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -107,13 +113,9 @@ Deno.serve(async (req) => {
   let errors = 0;
   let redirectsCreated = 0;
 
-  // Process in parallel chunks of 10 to respect rate limits
-  const chunkSize = 10;
-  for (let i = 0; i < pending.length; i += chunkSize) {
-    const chunk = pending.slice(i, i + chunkSize);
-
-    const results = await Promise.allSettled(
-      chunk.map(async (row) => {
+  // Process sequentially to respect Shopify rate limits
+  for (const row of pending) {
+    await (async () => {
         try {
           const result = await resolveSkuViaShopify(row.sku, token);
           const now = new Date().toISOString();
@@ -193,8 +195,7 @@ Deno.serve(async (req) => {
             .eq("id", row.id);
           errors++;
         }
-      })
-    );
+      })();
   }
 
   const summary = {
