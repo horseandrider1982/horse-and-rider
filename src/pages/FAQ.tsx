@@ -147,5 +147,6 @@ const FAQ = () => {
     <Footer />
   </div>
 );
+};
 
 export default FAQ;

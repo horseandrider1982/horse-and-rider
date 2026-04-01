@@ -75,15 +75,18 @@ function MoreNews({ currentSlug, category }: { currentSlug: string; category: st
 }
 
 export default function NewsDetail() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { slug } = useParams<{ slug: string }>();
   const { data: article, isLoading, error } = useArticleBySlug(slug || '');
   const { data: articleProducts } = useArticleProducts(article?.id || '');
 
-  useEffect(() => {
-    if (article) document.title = `${article.seo_title || article.title} \u2013 Horse & Rider`;
-    return () => { document.title = 'Horse & Rider'; };
-  }, [article]);
+  usePageMeta({
+    title: article?.seo_title || article?.title,
+    description: article?.seo_description || article?.excerpt?.slice(0, 160),
+    ogImage: article?.og_image_url || article?.cover_image_url || undefined,
+    ogType: "article",
+    canonicalPath: slug ? `/${locale}/news/${slug}` : undefined,
+  });
 
   const relatedHandles = (articleProducts || []).map(p => p.shopify_handle);
 
