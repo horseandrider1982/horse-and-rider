@@ -50,6 +50,7 @@ const AppContent = () => {
         <Route path="/:locale" element={<><I18nLayout /><HreflangTags /></>}>
           <Route index element={<Index />} />
           <Route path="product/:handle" element={<ProductDetail />} />
+          <Route path="danke" element={<ThankYou />} />
           <Route path="collections/:handle" element={<CollectionDetail />} />
           <Route path="auth" element={<Auth />} />
           <Route path="account" element={<Account />} />
