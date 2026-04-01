@@ -21,7 +21,7 @@ export const ServiceCards = () => {
           {services.map((s) => (
             <div key={s.titleKey} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
               <div className="aspect-[4/3] overflow-hidden">
-                <img src={s.image} alt={t(s.titleKey)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src={s.image} alt={t(s.titleKey)} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
               <div className="p-4">
                 <h3 className="font-heading text-lg font-semibold mb-1">{t(s.titleKey)}</h3>
