@@ -26,6 +26,7 @@ import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
 import CmsPage from "./pages/CmsPage";
 import CollectionDetail from "./pages/CollectionDetail";
+import ThankYou from "./pages/ThankYou";
 import { CookieBanner } from "./components/CookieBanner";
 
 const queryClient = new QueryClient();
