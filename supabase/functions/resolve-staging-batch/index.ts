@@ -49,6 +49,8 @@ async function resolveSkuViaShopify(
   );
 
   if (!res.ok) {
+    const body = await res.text();
+    console.error(`Shopify API ${res.status} for SKU ${sku}: ${body.substring(0, 300)}`);
     throw new Error(`Shopify API ${res.status}`);
   }
 
