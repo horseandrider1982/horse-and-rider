@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import NotFound from './NotFound';
 import { useI18n } from '@/i18n';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 export default function CmsPage() {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -37,6 +38,10 @@ export default function CmsPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12 md:py-16 max-w-3xl font-sans">
+        <Breadcrumbs items={[
+          { label: "Home", to: "/" },
+          { label: page.title },
+        ]} />
         <article className="prose prose-sm md:prose-base dark:prose-invert max-w-none
           prose-headings:text-foreground prose-headings:font-semibold
           prose-h1:text-2xl prose-h1:md:text-3xl prose-h1:mb-6 prose-h1:pb-3 prose-h1:border-b prose-h1:border-border

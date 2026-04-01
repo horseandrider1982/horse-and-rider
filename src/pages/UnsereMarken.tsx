@@ -8,6 +8,7 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands } from "@/hooks/useBrands";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const ALPHABET = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -57,6 +58,10 @@ export default function UnsereMarken() {
       <main className="flex-1">
         <section className="bg-card py-10 md:py-14">
           <div className="container mx-auto px-4 text-center">
+            <Breadcrumbs items={[
+              { label: "Home", to: "/" },
+              { label: t("brands.title") },
+            ]} className="mb-4 justify-center" />
             <h1 className="font-heading text-3xl md:text-4xl font-bold mb-3">{t("brands.title")}</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">{t("brands.subtitle")}</p>
           </div>

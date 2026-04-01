@@ -9,6 +9,7 @@ import {
 import { FaqJsonLd } from "@/components/JsonLd";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useI18n } from "@/i18n";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const faqs = [
   {
@@ -96,6 +97,10 @@ const FAQ = () => {
     <FaqJsonLd items={allFaqItems} />
     <Header />
     <main className="flex-1 container mx-auto px-4 py-12 md:py-16 max-w-3xl">
+      <Breadcrumbs items={[
+        { label: "Home", to: "/" },
+        { label: "FAQ" },
+      ]} />
       <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-2">
         Häufig gestellte Fragen
       </h1>
