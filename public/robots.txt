@@ -2,3 +2,12 @@ User-agent: *
 Allow: /
 
 Sitemap: https://horse-and-rider.de/sitemap.xml
+Sitemap: https://horse-and-rider.de/sitemap-static.xml
+Sitemap: https://horse-and-rider.de/sitemap-product-1.xml
+Sitemap: https://horse-and-rider.de/sitemap-product-2.xml
+Sitemap: https://horse-and-rider.de/sitemap-product-3.xml
+Sitemap: https://horse-and-rider.de/sitemap-product-4.xml
+Sitemap: https://horse-and-rider.de/sitemap-collection.xml
+Sitemap: https://horse-and-rider.de/sitemap-brand.xml
+Sitemap: https://horse-and-rider.de/sitemap-news.xml
+Sitemap: https://horse-and-rider.de/sitemap-page.xml
