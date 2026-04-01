@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/stores/cartStore";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { toast } from "sonner";
+import { CollectionJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
@@ -116,6 +117,27 @@ export default function CollectionDetail() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {collection && (
+        <>
+          <CollectionJsonLd
+            name={collection.title}
+            description={collection.description}
+            handle={handle || ""}
+            products={products.map((e: any) => ({
+              name: e.node.title,
+              handle: e.node.handle,
+              image: e.node.images?.edges?.[0]?.node?.url,
+              price: e.node.priceRange?.minVariantPrice?.amount || "0",
+              currency: e.node.priceRange?.minVariantPrice?.currencyCode || "EUR",
+            }))}
+            locale={locale}
+          />
+          <BreadcrumbJsonLd items={[
+            { name: "Home", url: `https://www.horse-and-rider.de/${locale}` },
+            { name: collection.title, url: `https://www.horse-and-rider.de/${locale}/collections/${handle}` },
+          ]} />
+        </>
+      )}
       <TopBar />
       <Header />
       <main className="flex-1">

@@ -9,10 +9,13 @@ import { NewsletterSection } from "@/components/NewsletterSection";
 import { TrustedShopsSection } from "@/components/TrustedShopsSection";
 import { AboutTeamSection } from "@/components/AboutTeamSection";
 import { Footer } from "@/components/Footer";
+import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/JsonLd";
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <OrganizationJsonLd />
+      <WebSiteJsonLd />
       <TopBar />
       <Header />
       <main className="flex-1">

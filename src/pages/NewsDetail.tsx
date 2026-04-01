@@ -7,6 +7,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import { LocaleLink } from '@/components/LocaleLink';
 import { useI18n } from '@/i18n';
 import { useArticleBySlug, useArticleProducts, CATEGORY_LABELS, usePublishedArticles } from '@/hooks/useNewsArticles';
+import { NewsArticleJsonLd } from '@/components/JsonLd';
 import { useProducts } from '@/hooks/useProducts';
 import { useCartStore } from '@/stores/cartStore';
 import type { ShopifyProduct } from '@/lib/shopify';
@@ -102,6 +103,13 @@ export default function NewsDetail() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <NewsArticleJsonLd
+        title={article.title}
+        slug={article.slug}
+        excerpt={article.excerpt || undefined}
+        coverImage={article.cover_image_url || undefined}
+        publishedAt={article.published_at || undefined}
+      />
       <Header />
       <main className="flex-1">
         {article.cover_image_url && <div className="w-full max-h-[400px] overflow-hidden"><img src={article.cover_image_url} alt={article.cover_image_alt || article.title} className="w-full h-full object-cover" /></div>}
