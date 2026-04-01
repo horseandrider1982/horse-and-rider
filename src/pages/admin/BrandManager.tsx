@@ -99,7 +99,7 @@ export default function BrandManager() {
 
   const handleNew = () => {
     setIsNew(true);
-    setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, website_url: null, featured: false, is_active: true });
+    setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, website_url: null, featured: false, is_active: true, gpsr_street: null, gpsr_housenumber: null, gpsr_postalcode: null, gpsr_city: null, gpsr_country: null, gpsr_email: null, gpsr_homepage: null });
   };
 
   const handleSave = async () => {
