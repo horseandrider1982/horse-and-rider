@@ -107,13 +107,9 @@ Deno.serve(async (req) => {
   let errors = 0;
   let redirectsCreated = 0;
 
-  // Process in parallel chunks of 10 to respect rate limits
-  const chunkSize = 10;
-  for (let i = 0; i < pending.length; i += chunkSize) {
-    const chunk = pending.slice(i, i + chunkSize);
-
-    const results = await Promise.allSettled(
-      chunk.map(async (row) => {
+  // Process sequentially to respect Shopify rate limits
+  for (const row of pending) {
+    await (async () => {
         try {
           const result = await resolveSkuViaShopify(row.sku, token);
           const now = new Date().toISOString();
