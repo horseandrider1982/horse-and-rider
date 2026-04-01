@@ -30,7 +30,7 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
   return (
     <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
       <div className="aspect-square overflow-hidden bg-white">
-        {image ? <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><ShoppingCart className="h-12 w-12" /></div>}
+         {image ? <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><ShoppingCart className="h-12 w-12" /></div>}
       </div>
       <div className="p-4">
         <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
@@ -93,7 +93,7 @@ export default function MarkenDetail() {
               <span>/</span><span className="text-foreground">{brand.name}</span>
             </div>
             <div className="flex items-center gap-5">
-              {brand.logoUrl && <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-10 w-auto max-w-[140px] object-contain brightness-0" />}
+               {brand.logoUrl && <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-10 w-auto max-w-[140px] object-contain brightness-0" loading="lazy" decoding="async" />}
               <h1 className="font-heading text-3xl md:text-4xl font-bold">{brand.name}</h1>
             </div>
           </div>
