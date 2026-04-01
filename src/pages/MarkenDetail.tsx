@@ -9,6 +9,7 @@ import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 function ProductCard({ product }: { product: ShopifyProduct }) {
