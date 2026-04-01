@@ -116,9 +116,15 @@ export default function CollectionDetail() {
 
   const products = collection?.products?.edges || [];
 
+  const collectionMetaDesc = collection
+    ? collection.description?.slice(0, 120)
+      ? `${collection.title} – ${collection.description.replace(/\s+/g, ' ').trim().slice(0, 120)}. Jetzt bei Horse & Rider kaufen.`.slice(0, 160)
+      : `${collection.title} – Kollektion bei Horse & Rider Luhmühlen. Über 20.000 Reitsport-Produkte online bestellen.`
+    : undefined;
+
   usePageMeta({
     title: collection?.title,
-    description: collection?.description?.slice(0, 160) || `${collection?.title} – Kollektion bei Horse & Rider`,
+    description: collectionMetaDesc,
     canonicalPath: handle ? `/${locale}/collections/${handle}` : undefined,
   });
 

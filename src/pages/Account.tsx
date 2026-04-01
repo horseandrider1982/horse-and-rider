@@ -12,12 +12,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
 import { Loader2, User, MapPin, CreditCard, Package, Truck, LogOut, Shield } from "lucide-react";
 
 export default function Account() {
   const { t, localePath } = useI18n();
   const { user, loading: authLoading, isAdmin, signOut } = useAuth();
+
+  usePageMeta({
+    title: "Mein Kundenkonto",
+    description: "Verwalten Sie Ihr Kundenkonto bei Horse & Rider Luhmühlen – Bestellungen, Adressdaten und persönliche Einstellungen.",
+    noIndex: true,
+  });
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ first_name: string; last_name: string; phone: string }>({ first_name: "", last_name: "", phone: "" });
   const [saving, setSaving] = useState(false);

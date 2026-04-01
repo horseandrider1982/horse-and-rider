@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
 import type { ShopifyProduct } from "@/lib/shopify";
 
@@ -70,6 +71,14 @@ const Search = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const { data: products, isLoading, error } = useProducts(50, query);
+
+  usePageMeta({
+    title: query ? `Suche: ${query}` : "Suche",
+    description: query
+      ? `Suchergebnisse für „${query}" im Reitsport Online Shop Horse & Rider – über 20.000 Produkte für Reiter und Pferd.`
+      : "Durchsuchen Sie über 20.000 Reitsport-Produkte bei Horse & Rider Luhmühlen.",
+    noIndex: true,
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

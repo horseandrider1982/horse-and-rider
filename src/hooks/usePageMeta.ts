@@ -44,7 +44,7 @@ export function usePageMeta(options: PageMetaOptions) {
     const fullTitle = options.title
       ? `${options.title} – ${SITE_NAME}`
       : SITE_NAME;
-    const description = options.description || "";
+    const description = options.description || "Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte für Reiter und Pferd bei Horse & Rider Luhmühlen.";
     const ogImage = options.ogImage || DEFAULT_OG_IMAGE;
     const ogType = options.ogType || "website";
 

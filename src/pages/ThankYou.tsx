@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { supabase } from "@/integrations/supabase/client";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -17,6 +18,12 @@ const ThankYou = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [showConsent, setShowConsent] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+
+  usePageMeta({
+    title: "Vielen Dank für Ihre Bestellung",
+    description: "Ihre Bestellung bei Horse & Rider Luhmühlen wurde erfolgreich aufgegeben.",
+    noIndex: true,
+  });
 
   // GA4 purchase + Google Ads conversion – fire once on page load
   useEffect(() => {

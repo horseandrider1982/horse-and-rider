@@ -62,9 +62,15 @@ export default function MarkenDetail() {
   const vendorName = brand?.name || "";
   const { data: products, isLoading: productsLoading } = useBrandProducts(vendorName, !!vendorName);
 
+  const brandMetaDesc = brand
+    ? brand.seoText
+      ? brand.seoText.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 130) + ' – bei Horse & Rider kaufen.'
+      : `${brand.name} Reitsport-Produkte günstig online kaufen bei Horse & Rider Luhmühlen. Große Auswahl, schneller Versand.`
+    : undefined;
+
   usePageMeta({
     title: brand?.name,
-    description: brand?.seoText?.replace(/<[^>]*>/g, '').slice(0, 160) || `${brand?.name} Produkte bei Horse & Rider kaufen`,
+    description: brandMetaDesc?.slice(0, 160),
     ogImage: brand?.logoUrl || undefined,
     canonicalPath: slug ? `/${locale}/unsere-marken/${slug}` : undefined,
   });

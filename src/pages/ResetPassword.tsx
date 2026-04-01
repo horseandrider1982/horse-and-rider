@@ -9,6 +9,7 @@ import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/i18n";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -18,6 +19,12 @@ export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+
+  usePageMeta({
+    title: "Passwort zurücksetzen",
+    description: "Setzen Sie Ihr Passwort für Ihr Horse & Rider Kundenkonto zurück.",
+    noIndex: true,
+  });
 
   useEffect(() => {
     if (window.location.hash.includes("type=recovery")) setIsRecovery(true);

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeUrl } from "@/lib/urlNormalize";
 import { Loader2 } from "lucide-react";
@@ -16,6 +17,12 @@ const NotFound = () => {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [checking, setChecking] = useState(true);
+
+  usePageMeta({
+    title: "Seite nicht gefunden (404)",
+    description: "Die angeforderte Seite wurde nicht gefunden. Entdecken Sie stattdessen über 20.000 Reitsport-Produkte bei Horse & Rider.",
+    noIndex: true,
+  });
 
   useEffect(() => {
     let cancelled = false;
