@@ -512,7 +512,7 @@ export default function RedirectManager() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        CSV-Format: <code>SKU;Alte URL</code> – Die alte URL wird per SKU/Artikelnummer zugeordnet.
+        CSV-Format: <code>SKU;Alte URL</code> – SKU wird über Shopify aufgelöst. Varianten-SKUs werden automatisch auf den Vaterartikel umgeleitet.
       </p>
 
       {/* Add new row */}
