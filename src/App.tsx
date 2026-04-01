@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,35 +9,43 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { RedirectGuard } from "@/components/RedirectGuard";
 import { I18nLayout, DEFAULT_LOCALE } from "@/i18n";
 import { HreflangTags } from "@/components/HreflangTags";
-import Index from "./pages/Index";
-import ProductDetail from "./pages/ProductDetail";
-import Auth from "./pages/Auth";
-import Account from "./pages/Account";
-import Admin from "./pages/Admin";
-import ResetPassword from "./pages/ResetPassword";
-import Search from "./pages/Search";
-import RedirectMonitoring from "./pages/admin/RedirectMonitoring";
-import RedirectConflicts from "./pages/admin/RedirectConflicts";
-import UnsereMarken from "./pages/UnsereMarken";
-import MarkenDetail from "./pages/MarkenDetail";
-import Kontakt from "./pages/Kontakt";
-import FAQ from "./pages/FAQ";
-import News from "./pages/News";
-import NewsDetail from "./pages/NewsDetail";
-import NotFound from "./pages/NotFound";
-import CmsPage from "./pages/CmsPage";
-import CollectionDetail from "./pages/CollectionDetail";
-import ThankYou from "./pages/ThankYou";
-import { CookieBanner } from "./components/CookieBanner";
+// Lazy-loaded pages for code-splitting
+const Index = lazy(() => import("./pages/Index"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Account = lazy(() => import("./pages/Account"));
+const Admin = lazy(() => import("./pages/Admin"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Search = lazy(() => import("./pages/Search"));
+const RedirectMonitoring = lazy(() => import("./pages/admin/RedirectMonitoring"));
+const RedirectConflicts = lazy(() => import("./pages/admin/RedirectConflicts"));
+const UnsereMarken = lazy(() => import("./pages/UnsereMarken"));
+const MarkenDetail = lazy(() => import("./pages/MarkenDetail"));
+const Kontakt = lazy(() => import("./pages/Kontakt"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const News = lazy(() => import("./pages/News"));
+const NewsDetail = lazy(() => import("./pages/NewsDetail"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const CmsPage = lazy(() => import("./pages/CmsPage"));
+const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
+const ThankYou = lazy(() => import("./pages/ThankYou"));
+const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({ default: m.CookieBanner })));
 
 const queryClient = new QueryClient();
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  </div>
+);
 
 const AppContent = () => {
   useCartSync();
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ScrollToTop />
       <RedirectGuard />
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Root → redirect to default locale */}
         <Route path="/" element={<Navigate to={`/${DEFAULT_LOCALE}`} replace />} />
@@ -78,7 +87,10 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-      <CookieBanner />
+      </Suspense>
+      <Suspense fallback={null}>
+        <CookieBanner />
+      </Suspense>
     </BrowserRouter>
   );
 };
