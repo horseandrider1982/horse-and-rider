@@ -83,7 +83,15 @@ const faqs = [
 
 const allFaqItems = faqs.flatMap(s => s.items.map(i => ({ question: i.q, answer: i.a })));
 
-const FAQ = () => (
+const FAQ = () => {
+  const { locale } = useI18n();
+  usePageMeta({
+    title: "Häufig gestellte Fragen (FAQ)",
+    description: "Antworten auf die häufigsten Fragen rund um Bestellung, Versand, Retouren und unsere Services bei Horse & Rider.",
+    canonicalPath: `/${locale}/faq`,
+  });
+
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <FaqJsonLd items={allFaqItems} />
     <Header />
