@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  const supabase = createClient(
+  console.log(`Token prefix: ${token.substring(0, 8)}...`, `Token length: ${token.length}`);
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
