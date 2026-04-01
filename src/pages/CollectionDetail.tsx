@@ -11,6 +11,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { toast } from "sonner";
 import { CollectionJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
@@ -114,6 +115,12 @@ export default function CollectionDetail() {
   });
 
   const products = collection?.products?.edges || [];
+
+  usePageMeta({
+    title: collection?.title,
+    description: collection?.description?.slice(0, 160) || `${collection?.title} – Kollektion bei Horse & Rider`,
+    canonicalPath: handle ? `/${locale}/collections/${handle}` : undefined,
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

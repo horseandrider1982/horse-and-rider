@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands } from "@/hooks/useBrands";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const ALPHABET = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -17,9 +18,15 @@ function getLetterKey(name: string): string {
 }
 
 export default function UnsereMarken() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { data: brands, isLoading, error } = useBrands();
   const [searchParams] = useSearchParams();
+
+  usePageMeta({
+    title: "Unsere Marken",
+    description: "Entdecken Sie alle Reitsport-Marken bei Horse & Rider – von Premiumherstellern bis Spezialisten.",
+    canonicalPath: `/${locale}/unsere-marken`,
+  });
 
   const grouped = useMemo(() => {
     if (!brands) return new Map<string, typeof brands>();

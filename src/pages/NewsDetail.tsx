@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -8,6 +7,7 @@ import { LocaleLink } from '@/components/LocaleLink';
 import { useI18n } from '@/i18n';
 import { useArticleBySlug, useArticleProducts, CATEGORY_LABELS, usePublishedArticles } from '@/hooks/useNewsArticles';
 import { NewsArticleJsonLd } from '@/components/JsonLd';
+import { usePageMeta } from '@/hooks/usePageMeta';
 import { useProducts } from '@/hooks/useProducts';
 import { useCartStore } from '@/stores/cartStore';
 import type { ShopifyProduct } from '@/lib/shopify';
@@ -74,15 +74,18 @@ function MoreNews({ currentSlug, category }: { currentSlug: string; category: st
 }
 
 export default function NewsDetail() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { slug } = useParams<{ slug: string }>();
   const { data: article, isLoading, error } = useArticleBySlug(slug || '');
   const { data: articleProducts } = useArticleProducts(article?.id || '');
 
-  useEffect(() => {
-    if (article) document.title = `${article.seo_title || article.title} \u2013 Horse & Rider`;
-    return () => { document.title = 'Horse & Rider'; };
-  }, [article]);
+  usePageMeta({
+    title: article?.seo_title || article?.title,
+    description: article?.seo_description || article?.excerpt?.slice(0, 160),
+    ogImage: article?.og_image_url || article?.cover_image_url || undefined,
+    ogType: "article",
+    canonicalPath: slug ? `/${locale}/news/${slug}` : undefined,
+  });
 
   const relatedHandles = (articleProducts || []).map(p => p.shopify_handle);
 

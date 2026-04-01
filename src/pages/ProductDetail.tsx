@@ -21,6 +21,7 @@ import { EngravingDialog, ENGRAVING_PRICE } from "@/components/EngravingDialog";
 import { PaymentIcons } from "@/components/PaymentIcons";
 import { trackViewItem, trackAddToCart } from "@/lib/ga4";
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 
@@ -65,6 +66,15 @@ const ProductDetail = () => {
       if (saved) setConfigState(saved);
     }
   }, [shopifyProductId]);
+
+  // Dynamic meta tags
+  usePageMeta({
+    title: product?.node?.title,
+    description: product?.node?.description?.slice(0, 160),
+    ogImage: product?.node?.images?.edges?.[0]?.node?.url,
+    ogType: "product",
+    canonicalPath: handle ? `/${locale}/product/${handle}` : undefined,
+  });
 
   // GA4 view_item event – fires once per product
   useEffect(() => {

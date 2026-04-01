@@ -10,6 +10,7 @@ import {
   usePublishedArticles, useAvailableMonths,
   CATEGORY_LABELS, type NewsCategory,
 } from '@/hooks/useNewsArticles';
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Neueste zuerst' },
@@ -29,12 +30,18 @@ function formatMonth(ym: string): string {
 }
 
 export default function News() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [sort, setSort] = useState<string>('newest');
   const [category, setCategory] = useState<string>('all');
   const [month, setMonth] = useState<string>('all');
   const [page, setPage] = useState(1);
   const perPage = 10;
+
+  usePageMeta({
+    title: "News & Aktuelles",
+    description: "Neuigkeiten, Produktnews und Events rund um den Reitsport bei Horse & Rider Luhmühlen.",
+    canonicalPath: `/${locale}/news`,
+  });
 
   const { data, isLoading } = usePublishedArticles({ category: category !== 'all' ? (category as NewsCategory) : undefined, month: month !== 'all' ? month : undefined, sort: sort as any, page, perPage });
   const { data: months } = useAvailableMonths();

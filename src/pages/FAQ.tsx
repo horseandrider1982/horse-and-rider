@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { FaqJsonLd } from "@/components/JsonLd";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useI18n } from "@/i18n";
 
 const faqs = [
   {
@@ -81,7 +83,15 @@ const faqs = [
 
 const allFaqItems = faqs.flatMap(s => s.items.map(i => ({ question: i.q, answer: i.a })));
 
-const FAQ = () => (
+const FAQ = () => {
+  const { locale } = useI18n();
+  usePageMeta({
+    title: "Häufig gestellte Fragen (FAQ)",
+    description: "Antworten auf die häufigsten Fragen rund um Bestellung, Versand, Retouren und unsere Services bei Horse & Rider.",
+    canonicalPath: `/${locale}/faq`,
+  });
+
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <FaqJsonLd items={allFaqItems} />
     <Header />
@@ -137,5 +147,6 @@ const FAQ = () => (
     <Footer />
   </div>
 );
+};
 
 export default FAQ;
