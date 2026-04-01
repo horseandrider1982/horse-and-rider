@@ -17,7 +17,7 @@ export const BrandLogosBar = () => {
           {featured.slice(0, 8).map((brand) => (
             <LocaleLink
               key={brand.slug}
-              to={`/marken/${brand.slug}`}
+              to={`/unsere-marken/${brand.slug}`}
               className="opacity-60 hover:opacity-100 transition-all duration-300"
             >
               <img
