@@ -64,6 +64,28 @@ const ProductDetail = () => {
     }
   }, [shopifyProductId]);
 
+  // GA4 view_item event – fires once per product
+  useEffect(() => {
+    if (!product) return;
+    const price = parseFloat(product.node.priceRange.minVariantPrice.amount);
+    const sku = product.node.variants.edges[0]?.node?.sku || product.node.handle;
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push({ ecommerce: null }); // clear previous ecommerce
+    (window as any).dataLayer.push({
+      event: "view_item",
+      ecommerce: {
+        currency: product.node.priceRange.minVariantPrice.currencyCode || "EUR",
+        value: price,
+        items: [{
+          item_id: sku,
+          item_name: product.node.title,
+          item_brand: product.node.vendor || "",
+          price: price,
+        }],
+      },
+    });
+  }, [product?.node?.id]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
