@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { FaqJsonLd } from "@/components/JsonLd";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useI18n } from "@/i18n";
 
 const faqs = [
   {
