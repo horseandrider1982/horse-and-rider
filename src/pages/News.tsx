@@ -10,6 +10,7 @@ import {
   usePublishedArticles, useAvailableMonths,
   CATEGORY_LABELS, type NewsCategory,
 } from '@/hooks/useNewsArticles';
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Neueste zuerst' },
