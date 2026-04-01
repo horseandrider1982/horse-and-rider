@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,11 @@ const contactSchema = z.object({
 type ContactForm = z.infer<typeof contactSchema>;
 
 const Kontakt = () => {
+  usePageMeta({
+    title: "Kontakt",
+    description: "Kontaktieren Sie Horse & Rider Luhmühlen – wir beraten Sie gerne persönlich rund um den Reitsport.",
+  });
+
   const [form, setForm] = useState<ContactForm>({
     firstName: "", lastName: "", email: "", phone: "", subject: "", message: "",
   });

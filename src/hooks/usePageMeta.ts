@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
 
 const SITE_NAME = "Horse & Rider Luhmühlen";
@@ -10,6 +11,7 @@ interface PageMetaOptions {
   description?: string;
   ogImage?: string;
   ogType?: string;
+  /** Explicit canonical path (e.g. /de/product/foo). If omitted, auto-derived from current route. */
   canonicalPath?: string;
   noIndex?: boolean;
 }
@@ -36,6 +38,7 @@ function setCanonical(href: string) {
 
 export function usePageMeta(options: PageMetaOptions) {
   const { locale } = useI18n();
+  const location = useLocation();
 
   useEffect(() => {
     const fullTitle = options.title
@@ -44,9 +47,11 @@ export function usePageMeta(options: PageMetaOptions) {
     const description = options.description || "";
     const ogImage = options.ogImage || DEFAULT_OG_IMAGE;
     const ogType = options.ogType || "website";
+
+    // Auto-derive canonical from current pathname if not explicitly provided
     const canonicalUrl = options.canonicalPath
       ? `${BASE_URL}${options.canonicalPath}`
-      : `${BASE_URL}/${locale}`;
+      : `${BASE_URL}${location.pathname}`;
 
     // Title
     document.title = fullTitle;
@@ -95,5 +100,6 @@ export function usePageMeta(options: PageMetaOptions) {
     options.canonicalPath,
     options.noIndex,
     locale,
+    location.pathname,
   ]);
 }
