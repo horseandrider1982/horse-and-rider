@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const SITE_URL = "https://www.horse-and-rider.de";
+const SITE_URL = "https://horse-and-rider.de";
 const ORG_NAME = "Horse & Rider Luhmühlen";
 const ORG_LOGO = `${SITE_URL}/favicon.ico`;
 

@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const BASE_URL = "https://www.horse-and-rider.de";
+const BASE_URL = "https://horse-and-rider.de";
 const MAX_URLS_PER_SITEMAP = 10000;
 
 const PRIORITY_MAP: Record<string, string> = {

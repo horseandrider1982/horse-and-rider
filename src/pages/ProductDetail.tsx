@@ -232,9 +232,9 @@ const ProductDetail = () => {
         locale={locale}
       />
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: `https://www.horse-and-rider.de/${locale}` },
-        ...(brand ? [{ name: brand.name, url: `https://www.horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
-        { name: product.node.title, url: `https://www.horse-and-rider.de/${locale}/product/${product.node.handle}` },
+        { name: "Home", url: `https://horse-and-rider.de/${locale}` },
+        ...(brand ? [{ name: brand.name, url: `https://horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
+        { name: product.node.title, url: `https://horse-and-rider.de/${locale}/product/${product.node.handle}` },
       ]} />
       <TopBar /><Header />
       <main className="flex-1">
