@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeUrl } from "@/lib/urlNormalize";
 import { Loader2 } from "lucide-react";
