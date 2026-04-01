@@ -23,7 +23,16 @@ export const CartDrawer = () => {
 
   const handleCheckout = () => {
     const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) { window.location.href = checkoutUrl; }
+    if (checkoutUrl) {
+      trackBeginCheckout(items);
+      window.location.href = checkoutUrl;
+    }
+  };
+
+  const handleRemoveItem = (variantId: string) => {
+    const item = items.find(i => i.variantId === variantId);
+    if (item) trackRemoveFromCart(item.product, item.variantId, item.quantity);
+    removeItem(variantId);
   };
 
   const itemsDesc = totalItems === 0
