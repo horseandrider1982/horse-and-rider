@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const BASE_URL = "https://www.horse-and-rider.de";
+const BASE_URL = "https://horse-and-rider.de";
 
 const PRIORITY_MAP: Record<string, string> = {
   homepage: "1.0",
@@ -29,7 +29,6 @@ const CHANGEFREQ_MAP: Record<string, string> = {
   custom: "monthly",
 };
 
-// Static pages that always appear in the sitemap
 const STATIC_PAGES = [
   { path: "/de", type: "homepage" },
   { path: "/de/unsere-marken", type: "collection" },
@@ -44,7 +43,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  if (req.method !== "GET") {
+  if (req.method !== "GET" && req.method !== "HEAD") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
 
@@ -54,7 +53,6 @@ Deno.serve(async (req) => {
   );
 
   try {
-    // Fetch all public routes (paginated to avoid 1000 limit)
     const allRoutes: Array<{ current_path: string; entity_type: string; updated_at: string }> = [];
     let from = 0;
     const pageSize = 1000;
@@ -76,35 +74,31 @@ Deno.serve(async (req) => {
     }
 
     const today = new Date().toISOString().split("T")[0];
-
-    // Build URL entries from static pages
     const urlEntries: string[] = STATIC_PAGES.map((sp) => {
       const priority = PRIORITY_MAP[sp.type] || "0.5";
       const changefreq = CHANGEFREQ_MAP[sp.type] || "monthly";
       return urlEntry(BASE_URL + sp.path, today, changefreq, priority);
     });
 
-    // Build URL entries from dynamic routes
     const seenPaths = new Set(STATIC_PAGES.map((sp) => sp.path));
 
-    for (const r of allRoutes) {
-      const path = r.current_path;
+    for (const route of allRoutes) {
+      const path = route.current_path;
       if (seenPaths.has(path)) continue;
       seenPaths.add(path);
 
-      const lastmod = r.updated_at ? r.updated_at.split("T")[0] : today;
-      const priority = PRIORITY_MAP[r.entity_type] || "0.5";
-      const changefreq = CHANGEFREQ_MAP[r.entity_type] || "monthly";
+      const lastmod = route.updated_at ? route.updated_at.split("T")[0] : today;
+      const priority = PRIORITY_MAP[route.entity_type] || "0.5";
+      const changefreq = CHANGEFREQ_MAP[route.entity_type] || "monthly";
       urlEntries.push(urlEntry(BASE_URL + path, lastmod, changefreq, priority));
     }
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urlEntries.join("\n")}
 </urlset>`;
 
-    return new Response(xml, {
+    return new Response(req.method === "HEAD" ? null : xml, {
       status: 200,
       headers: {
         ...corsHeaders,

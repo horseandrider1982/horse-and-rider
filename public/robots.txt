@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ehiemefjuylqfkrkfqgs.supabase.co/functions/v1/sitemap
+Sitemap: https://horse-and-rider.de/sitemap.xml

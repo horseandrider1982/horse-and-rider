@@ -40,7 +40,6 @@ const AppContent = () => {
       <Routes>
         {/* Root → redirect to default locale */}
         <Route path="/" element={<Navigate to={`/${DEFAULT_LOCALE}`} replace />} />
-        <Route path="/sitemap.xml" element={<SitemapRedirect />} />
 
         {/* Admin routes (no locale prefix) */}
         <Route path="/admin" element={<Admin />} />
