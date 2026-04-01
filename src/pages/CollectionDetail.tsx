@@ -140,8 +140,8 @@ export default function CollectionDetail() {
             locale={locale}
           />
           <BreadcrumbJsonLd items={[
-            { name: "Home", url: `https://www.horse-and-rider.de/${locale}` },
-            { name: collection.title, url: `https://www.horse-and-rider.de/${locale}/collections/${handle}` },
+            { name: "Home", url: `https://horse-and-rider.de/${locale}` },
+            { name: collection.title, url: `https://horse-and-rider.de/${locale}/collections/${handle}` },
           ]} />
         </>
       )}

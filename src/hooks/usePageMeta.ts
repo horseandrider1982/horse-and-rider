@@ -4,7 +4,7 @@ import { useI18n } from "@/i18n";
 
 const SITE_NAME = "Horse & Rider Luhmühlen";
 const DEFAULT_OG_IMAGE = "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/52810b40-f9f0-4dc1-9ba9-5078f2d53884/id-preview-f0f69fdf--add53e30-ccfb-46be-8dec-8c7d10749009.lovable.app-1771889069297.png";
-const BASE_URL = "https://www.horse-and-rider.de";
+const BASE_URL = "https://horse-and-rider.de";
 
 interface PageMetaOptions {
   title?: string;

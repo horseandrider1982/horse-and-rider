@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useI18n, DEFAULT_LOCALE } from "@/i18n";
 
-const PRODUCTION_ORIGIN = "https://www.horse-and-rider.de";
+const PRODUCTION_ORIGIN = "https://horse-and-rider.de";
 
 /**
  * Injects <link rel="alternate" hreflang="..." /> tags
