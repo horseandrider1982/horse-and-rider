@@ -148,6 +148,7 @@ const ProductDetail = () => {
       selectedOptions: selectedVariant.selectedOptions || [],
       ...(attributes.length > 0 ? { attributes } : {}),
     });
+    trackAddToCart(product, selectedVariant.id, 1);
     toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
   };
 

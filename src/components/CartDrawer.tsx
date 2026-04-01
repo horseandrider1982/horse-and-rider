@@ -84,7 +84,7 @@ export const CartDrawer = () => {
                         <p className="font-semibold text-sm mt-1">{parseFloat(item.price.amount).toFixed(2)} €</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(item.variantId)}><Trash2 className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveItem(item.variantId)}><Trash2 className="h-3 w-3" /></Button>
                         <div className="flex items-center gap-1">
                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.variantId, item.quantity - 1)}><Minus className="h-3 w-3" /></Button>
                           <span className="w-8 text-center text-xs">{item.quantity}</span>

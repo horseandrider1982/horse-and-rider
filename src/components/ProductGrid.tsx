@@ -25,6 +25,7 @@ const ProductCard = ({ product }: { product: ShopifyProduct }) => {
       product, variantId: variant.id, variantTitle: variant.title,
       price: variant.price, quantity: 1, selectedOptions: variant.selectedOptions || [],
     });
+    trackAddToCart(product, variant.id, 1);
     toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
   };
 
