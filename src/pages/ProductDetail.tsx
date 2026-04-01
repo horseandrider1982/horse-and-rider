@@ -37,7 +37,7 @@ function loadConfig(productId: string): ConfigurationState | null {
 }
 
 const ProductDetail = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const { handle } = useParams<{ handle: string }>();
   const { data: product, isLoading, error } = useProductByHandle(handle || "");
