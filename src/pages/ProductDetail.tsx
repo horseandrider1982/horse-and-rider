@@ -67,10 +67,22 @@ const ProductDetail = () => {
     }
   }, [shopifyProductId]);
 
-  // Dynamic meta tags
+  // Dynamic meta tags – build keyword-rich description
+  const metaDescription = product?.node
+    ? (() => {
+        const title = product.node.title;
+        const vendor = product.node.vendor;
+        const price = parseFloat(product.node.priceRange.minVariantPrice.amount).toFixed(2);
+        const currency = product.node.priceRange.minVariantPrice.currencyCode === 'EUR' ? '€' : product.node.priceRange.minVariantPrice.currencyCode;
+        const rawDesc = product.node.description?.replace(/\s+/g, ' ').trim() || '';
+        const snippet = rawDesc.slice(0, 80);
+        return `${title} von ${vendor} ab ${price} ${currency} kaufen. ${snippet}…`.slice(0, 160);
+      })()
+    : undefined;
+
   usePageMeta({
     title: product?.node?.title,
-    description: product?.node?.description?.slice(0, 160),
+    description: metaDescription,
     ogImage: product?.node?.images?.edges?.[0]?.node?.url,
     ogType: "product",
     canonicalPath: handle ? `/${locale}/product/${handle}` : undefined,
