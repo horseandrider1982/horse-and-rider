@@ -6,6 +6,7 @@ import { useProducts, useProductByHandle } from "@/hooks/useProducts";
 import { useHomepageProductHandles } from "@/hooks/useHomepageProducts";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
+import { trackAddToCart } from "@/lib/ga4";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 const ProductCard = ({ product }: { product: ShopifyProduct }) => {
