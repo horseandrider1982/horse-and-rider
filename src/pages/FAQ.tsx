@@ -79,8 +79,11 @@ const faqs = [
   },
 ];
 
+const allFaqItems = faqs.flatMap(s => s.items.map(i => ({ question: i.q, answer: i.a })));
+
 const FAQ = () => (
   <div className="min-h-screen flex flex-col bg-background">
+    <FaqJsonLd items={allFaqItems} />
     <Header />
     <main className="flex-1 container mx-auto px-4 py-12 md:py-16 max-w-3xl">
       <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-2">
