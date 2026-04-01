@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const contactSchema = z.object({
   firstName: z.string().trim().min(1, "Vorname ist erforderlich").max(50),
@@ -69,6 +70,10 @@ const Kontakt = () => {
         {/* Hero */}
         <section className="bg-muted/40 py-12 md:py-16">
           <div className="container mx-auto px-4 text-center">
+            <Breadcrumbs items={[
+              { label: "Home", to: "/" },
+              { label: "Kontakt" },
+            ]} className="mb-4 justify-center" />
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Kontakt</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Wir freuen uns auf Ihre Nachricht! Besuchen Sie uns vor Ort oder schreiben Sie uns.
