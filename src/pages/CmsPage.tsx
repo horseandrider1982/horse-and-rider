@@ -5,25 +5,21 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Loader2 } from 'lucide-react';
 import NotFound from './NotFound';
-import { useEffect } from 'react';
 import { useI18n } from '@/i18n';
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 export default function CmsPage() {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const location = useLocation();
   const { locale } = useI18n();
-  // Support both /pages/:slug and direct routes like /:locale/impressum
-  // Strip locale prefix (2 lowercase letters) from pathname
   const slug = paramSlug || location.pathname.replace(/^\/[a-z]{2}\//, '').replace(/^\//, '');
   const { data: page, isLoading, error } = usePublicCmsPage(slug, locale);
 
-  useEffect(() => {
-    if (page) {
-      document.title = page.seo_title || page.title;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc && page.seo_description) metaDesc.setAttribute('content', page.seo_description);
-    }
-  }, [page]);
+  usePageMeta({
+    title: page?.seo_title || page?.title,
+    description: page?.seo_description || undefined,
+    canonicalPath: slug ? `/${locale}/${slug}` : undefined,
+  });
 
   if (isLoading) {
     return (

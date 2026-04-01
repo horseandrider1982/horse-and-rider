@@ -116,6 +116,12 @@ export default function CollectionDetail() {
 
   const products = collection?.products?.edges || [];
 
+  usePageMeta({
+    title: collection?.title,
+    description: collection?.description?.slice(0, 160) || `${collection?.title} – Kollektion bei Horse & Rider`,
+    canonicalPath: handle ? `/${locale}/collections/${handle}` : undefined,
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {collection && (

@@ -67,6 +67,15 @@ const ProductDetail = () => {
     }
   }, [shopifyProductId]);
 
+  // Dynamic meta tags
+  usePageMeta({
+    title: product?.node?.title,
+    description: product?.node?.description?.slice(0, 160),
+    ogImage: product?.node?.images?.edges?.[0]?.node?.url,
+    ogType: "product",
+    canonicalPath: handle ? `/${locale}/product/${handle}` : undefined,
+  });
+
   // GA4 view_item event – fires once per product
   useEffect(() => {
     if (!product) return;

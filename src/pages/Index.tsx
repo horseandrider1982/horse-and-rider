@@ -10,8 +10,17 @@ import { TrustedShopsSection } from "@/components/TrustedShopsSection";
 import { AboutTeamSection } from "@/components/AboutTeamSection";
 import { Footer } from "@/components/Footer";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/JsonLd";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useI18n } from "@/i18n";
 
 const Index = () => {
+  const { locale } = useI18n();
+  usePageMeta({
+    title: "Reitsport Online Shop",
+    description: "Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte für Reiter und Pferd – Sättel, Trensen, Reitbekleidung und mehr.",
+    canonicalPath: `/${locale}`,
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <OrganizationJsonLd />
