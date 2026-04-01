@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { FaqJsonLd } from "@/components/JsonLd";
 
 const faqs = [
   {
