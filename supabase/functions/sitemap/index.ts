@@ -8,6 +8,8 @@ const corsHeaders = {
 };
 
 const BASE_URL = "https://horse-and-rider.de";
+const SITEMAP_BASE = "https://horse-and-rider.de";
+const MAX_URLS_PER_SITEMAP = 10000;
 
 const PRIORITY_MAP: Record<string, string> = {
   homepage: "1.0",
@@ -38,65 +40,37 @@ const STATIC_PAGES = [
   { path: "/de/search", type: "custom" },
 ];
 
+// Entity types that get their own sub-sitemaps
+const ENTITY_TYPES = ["product", "collection", "brand", "news", "page", "custom"] as const;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
   if (req.method !== "GET" && req.method !== "HEAD") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
 
+  const url = new URL(req.url);
+  const type = url.searchParams.get("type"); // null = index, or entity type
+  const pageParam = url.searchParams.get("p");  // page number for paginated types
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
   try {
-    const allRoutes: Array<{ current_path: string; entity_type: string; updated_at: string }> = [];
-    let from = 0;
-    const pageSize = 1000;
+    let xml: string;
 
-    while (true) {
-      const { data, error } = await supabase
-        .from("public_routes")
-        .select("current_path, entity_type, updated_at")
-        .eq("is_public", true)
-        .order("entity_type")
-        .order("current_path")
-        .range(from, from + pageSize - 1);
-
-      if (error) throw error;
-      if (!data || data.length === 0) break;
-      allRoutes.push(...data);
-      if (data.length < pageSize) break;
-      from += pageSize;
+    if (!type || type === "index") {
+      xml = await buildSitemapIndex(supabase);
+    } else if (type === "static") {
+      xml = buildStaticSitemap();
+    } else {
+      const page = pageParam ? parseInt(pageParam, 10) : 1;
+      xml = await buildEntitySitemap(supabase, type, page);
     }
-
-    const today = new Date().toISOString().split("T")[0];
-    const urlEntries: string[] = STATIC_PAGES.map((sp) => {
-      const priority = PRIORITY_MAP[sp.type] || "0.5";
-      const changefreq = CHANGEFREQ_MAP[sp.type] || "monthly";
-      return urlEntry(BASE_URL + sp.path, today, changefreq, priority);
-    });
-
-    const seenPaths = new Set(STATIC_PAGES.map((sp) => sp.path));
-
-    for (const route of allRoutes) {
-      const path = route.current_path;
-      if (seenPaths.has(path)) continue;
-      seenPaths.add(path);
-
-      const lastmod = route.updated_at ? route.updated_at.split("T")[0] : today;
-      const priority = PRIORITY_MAP[route.entity_type] || "0.5";
-      const changefreq = CHANGEFREQ_MAP[route.entity_type] || "monthly";
-      urlEntries.push(urlEntry(BASE_URL + path, lastmod, changefreq, priority));
-    }
-
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urlEntries.join("\n")}
-</urlset>`;
 
     return new Response(req.method === "HEAD" ? null : xml, {
       status: 200,
@@ -110,10 +84,115 @@ ${urlEntries.join("\n")}
     console.error("Sitemap error:", err);
     return new Response(
       JSON.stringify({ error: "Failed to generate sitemap" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
+
+/* ── Sitemap Index ─────────────────────────────── */
+
+async function buildSitemapIndex(supabase: ReturnType<typeof createClient>): Promise<string> {
+  const today = new Date().toISOString().split("T")[0];
+  const fnBase = `${Deno.env.get("SUPABASE_URL")}/functions/v1/sitemap`;
+
+  const entries: string[] = [];
+
+  // Static pages sitemap
+  entries.push(sitemapEntry(`${SITEMAP_BASE}/sitemap-static.xml`, today));
+
+  // Per entity type: count to determine pages
+  for (const et of ENTITY_TYPES) {
+    const { count, error } = await supabase
+      .from("public_routes")
+      .select("id", { count: "exact", head: true })
+      .eq("is_public", true)
+      .eq("entity_type", et);
+
+    if (error) throw error;
+    const total = count || 0;
+    if (total === 0) continue;
+
+    const pages = Math.ceil(total / MAX_URLS_PER_SITEMAP);
+    for (let p = 1; p <= pages; p++) {
+      const suffix = pages > 1 ? `-${p}` : "";
+      entries.push(sitemapEntry(`${SITEMAP_BASE}/sitemap-${et}${suffix}.xml`, today));
+    }
+  }
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${entries.join("\n")}
+</sitemapindex>`;
+}
+
+/* ── Static Pages Sitemap ──────────────────────── */
+
+function buildStaticSitemap(): string {
+  const today = new Date().toISOString().split("T")[0];
+  const urlEntries = STATIC_PAGES.map((sp) => {
+    const priority = PRIORITY_MAP[sp.type] || "0.5";
+    const changefreq = CHANGEFREQ_MAP[sp.type] || "monthly";
+    return urlEntry(BASE_URL + sp.path, today, changefreq, priority);
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlEntries.join("\n")}
+</urlset>`;
+}
+
+/* ── Entity-Type Sitemap (paginated) ───────────── */
+
+async function buildEntitySitemap(
+  supabase: ReturnType<typeof createClient>,
+  entityType: string,
+  page: number,
+): Promise<string> {
+  const from = (page - 1) * MAX_URLS_PER_SITEMAP;
+  const allRoutes: Array<{ current_path: string; entity_type: string; updated_at: string }> = [];
+  let offset = from;
+  const batchSize = 1000;
+  const limit = from + MAX_URLS_PER_SITEMAP;
+
+  while (offset < limit) {
+    const fetchSize = Math.min(batchSize, limit - offset);
+    const { data, error } = await supabase
+      .from("public_routes")
+      .select("current_path, entity_type, updated_at")
+      .eq("is_public", true)
+      .eq("entity_type", entityType)
+      .order("current_path")
+      .range(offset, offset + fetchSize - 1);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    allRoutes.push(...data);
+    if (data.length < fetchSize) break;
+    offset += fetchSize;
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+  const urlEntries = allRoutes.map((route) => {
+    const lastmod = route.updated_at ? route.updated_at.split("T")[0] : today;
+    const priority = PRIORITY_MAP[route.entity_type] || "0.5";
+    const changefreq = CHANGEFREQ_MAP[route.entity_type] || "monthly";
+    return urlEntry(BASE_URL + route.current_path, lastmod, changefreq, priority);
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlEntries.join("\n")}
+</urlset>`;
+}
+
+/* ── Helpers ───────────────────────────────────── */
+
+function sitemapEntry(loc: string, lastmod: string): string {
+  return `  <sitemap>
+    <loc>${escapeXml(loc)}</loc>
+    <lastmod>${lastmod}</lastmod>
+  </sitemap>`;
+}
 
 function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string): string {
   return `  <url>
