@@ -673,6 +673,45 @@ export type Database = {
         }
         Relationships: []
       }
+      redirect_staging: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          old_slug: string
+          redirected_at: string | null
+          resolved_at: string | null
+          resolved_handle: string | null
+          resolved_title: string | null
+          sku: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          old_slug: string
+          redirected_at?: string | null
+          resolved_at?: string | null
+          resolved_handle?: string | null
+          resolved_title?: string | null
+          sku: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          old_slug?: string
+          redirected_at?: string | null
+          resolved_at?: string | null
+          resolved_handle?: string | null
+          resolved_title?: string | null
+          sku?: string
+          status?: string
+        }
+        Relationships: []
+      }
       redirects: {
         Row: {
           article_number: string | null
