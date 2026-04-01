@@ -29,12 +29,6 @@ import CollectionDetail from "./pages/CollectionDetail";
 import ThankYou from "./pages/ThankYou";
 import { CookieBanner } from "./components/CookieBanner";
 
-const SITEMAP_URL = `https://ehiemefjuylqfkrkfqgs.supabase.co/functions/v1/sitemap`;
-const SitemapRedirect = () => {
-  window.location.replace(SITEMAP_URL);
-  return null;
-};
-
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -46,7 +40,6 @@ const AppContent = () => {
       <Routes>
         {/* Root → redirect to default locale */}
         <Route path="/" element={<Navigate to={`/${DEFAULT_LOCALE}`} replace />} />
-        <Route path="/sitemap.xml" element={<SitemapRedirect />} />
 
         {/* Admin routes (no locale prefix) */}
         <Route path="/admin" element={<Admin />} />
