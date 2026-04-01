@@ -8,6 +8,13 @@ export interface Brand {
   logoUrl: string | null;
   seoText: string | null;
   featured: boolean;
+  gpsrStreet: string | null;
+  gpsrHousenumber: string | null;
+  gpsrPostalcode: string | null;
+  gpsrCity: string | null;
+  gpsrCountry: string | null;
+  gpsrEmail: string | null;
+  gpsrHomepage: string | null;
 }
 
 export function useBrands() {
@@ -16,7 +23,7 @@ export function useBrands() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('brands')
-        .select('name, slug, logo_url, seo_text, featured')
+        .select('name, slug, logo_url, seo_text, featured, gpsr_street, gpsr_housenumber, gpsr_postalcode, gpsr_city, gpsr_country, gpsr_email, gpsr_homepage')
         .eq('is_active', true)
         .order('name');
       if (error) throw error;
@@ -26,6 +33,13 @@ export function useBrands() {
         logoUrl: b.logo_url,
         seoText: b.seo_text,
         featured: b.featured,
+        gpsrStreet: b.gpsr_street,
+        gpsrHousenumber: b.gpsr_housenumber,
+        gpsrPostalcode: b.gpsr_postalcode,
+        gpsrCity: b.gpsr_city,
+        gpsrCountry: b.gpsr_country,
+        gpsrEmail: b.gpsr_email,
+        gpsrHomepage: b.gpsr_homepage,
       }));
     },
     staleTime: 1000 * 60 * 5,

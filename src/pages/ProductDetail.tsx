@@ -355,6 +355,20 @@ const ProductDetail = () => {
               </div>
             </div>
           )}
+
+          {brand && (brand.gpsrStreet || brand.gpsrCity || brand.gpsrEmail) && (
+            <div className="mt-6 pt-4 border-t border-border">
+              <strong className="text-sm text-foreground">Hersteller:</strong>
+              <div className="text-sm text-muted-foreground mt-1">
+                {brand.name && <>{brand.name}<br /></>}
+                {(brand.gpsrStreet || brand.gpsrHousenumber) && <>{brand.gpsrStreet} {brand.gpsrHousenumber}<br /></>}
+                {(brand.gpsrPostalcode || brand.gpsrCity) && <>{brand.gpsrPostalcode} {brand.gpsrCity}<br /></>}
+                {brand.gpsrCountry && <>{brand.gpsrCountry}<br /></>}
+                {brand.gpsrEmail && <>{brand.gpsrEmail}<br /></>}
+                {brand.gpsrHomepage && <>{brand.gpsrHomepage}</>}
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

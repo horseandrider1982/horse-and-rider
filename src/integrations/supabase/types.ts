@@ -53,6 +53,13 @@ export type Database = {
         Row: {
           created_at: string
           featured: boolean
+          gpsr_city: string | null
+          gpsr_country: string | null
+          gpsr_email: string | null
+          gpsr_homepage: string | null
+          gpsr_housenumber: string | null
+          gpsr_postalcode: string | null
+          gpsr_street: string | null
           id: string
           is_active: boolean
           logo_url: string | null
@@ -65,6 +72,13 @@ export type Database = {
         Insert: {
           created_at?: string
           featured?: boolean
+          gpsr_city?: string | null
+          gpsr_country?: string | null
+          gpsr_email?: string | null
+          gpsr_homepage?: string | null
+          gpsr_housenumber?: string | null
+          gpsr_postalcode?: string | null
+          gpsr_street?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -77,6 +91,13 @@ export type Database = {
         Update: {
           created_at?: string
           featured?: boolean
+          gpsr_city?: string | null
+          gpsr_country?: string | null
+          gpsr_email?: string | null
+          gpsr_homepage?: string | null
+          gpsr_housenumber?: string | null
+          gpsr_postalcode?: string | null
+          gpsr_street?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null

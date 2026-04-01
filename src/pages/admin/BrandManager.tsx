@@ -17,6 +17,13 @@ interface BrandRow {
   website_url: string | null;
   featured: boolean;
   is_active: boolean;
+  gpsr_street: string | null;
+  gpsr_housenumber: string | null;
+  gpsr_postalcode: string | null;
+  gpsr_city: string | null;
+  gpsr_country: string | null;
+  gpsr_email: string | null;
+  gpsr_homepage: string | null;
 }
 
 function slugify(name: string): string {
@@ -92,13 +99,13 @@ export default function BrandManager() {
 
   const handleNew = () => {
     setIsNew(true);
-    setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, website_url: null, featured: false, is_active: true });
+    setEditing({ id: "", name: "", slug: "", logo_url: null, seo_text: null, website_url: null, featured: false, is_active: true, gpsr_street: null, gpsr_housenumber: null, gpsr_postalcode: null, gpsr_city: null, gpsr_country: null, gpsr_email: null, gpsr_homepage: null });
   };
 
   const handleSave = async () => {
     if (!editing) return;
     const slug = editing.slug || slugify(editing.name);
-    const payload = { name: editing.name, slug, logo_url: editing.logo_url, seo_text: editing.seo_text, website_url: editing.website_url, featured: editing.featured, is_active: editing.is_active };
+    const payload = { name: editing.name, slug, logo_url: editing.logo_url, seo_text: editing.seo_text, website_url: editing.website_url, featured: editing.featured, is_active: editing.is_active, gpsr_street: editing.gpsr_street, gpsr_housenumber: editing.gpsr_housenumber, gpsr_postalcode: editing.gpsr_postalcode, gpsr_city: editing.gpsr_city, gpsr_country: editing.gpsr_country, gpsr_email: editing.gpsr_email, gpsr_homepage: editing.gpsr_homepage };
 
     if (isNew) {
       const { error } = await (supabase.from("brands" as any).insert(payload) as any);
@@ -178,6 +185,39 @@ export default function BrandManager() {
         <div>
           <Label>URL Marke (wird nicht veröffentlicht)</Label>
           <Input value={editing.website_url || ""} onChange={(e) => setEditing({ ...editing, website_url: e.target.value || null })} placeholder="https://www.marke.com" />
+        </div>
+        <div className="border-t pt-4 mt-4">
+          <h4 className="font-semibold text-base mb-3">GPSR – Herstellerkontaktdaten</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Straße</Label>
+              <Input value={editing.gpsr_street || ""} onChange={(e) => setEditing({ ...editing, gpsr_street: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>Hausnummer</Label>
+              <Input value={editing.gpsr_housenumber || ""} onChange={(e) => setEditing({ ...editing, gpsr_housenumber: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>PLZ</Label>
+              <Input value={editing.gpsr_postalcode || ""} onChange={(e) => setEditing({ ...editing, gpsr_postalcode: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>Stadt</Label>
+              <Input value={editing.gpsr_city || ""} onChange={(e) => setEditing({ ...editing, gpsr_city: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>Land</Label>
+              <Input value={editing.gpsr_country || ""} onChange={(e) => setEditing({ ...editing, gpsr_country: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>E-Mail</Label>
+              <Input value={editing.gpsr_email || ""} onChange={(e) => setEditing({ ...editing, gpsr_email: e.target.value || null })} />
+            </div>
+            <div className="col-span-2">
+              <Label>Homepage</Label>
+              <Input value={editing.gpsr_homepage || ""} onChange={(e) => setEditing({ ...editing, gpsr_homepage: e.target.value || null })} />
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Switch checked={editing.featured} onCheckedChange={(v) => setEditing({ ...editing, featured: v })} />
