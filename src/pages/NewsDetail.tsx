@@ -11,6 +11,7 @@ import { usePageMeta } from '@/hooks/usePageMeta';
 import { useProducts } from '@/hooks/useProducts';
 import { useCartStore } from '@/stores/cartStore';
 import type { ShopifyProduct } from '@/lib/shopify';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 function RelatedProducts({ handles }: { handles: string[] }) {
   const { t } = useI18n();
@@ -106,6 +107,11 @@ export default function NewsDetail() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Breadcrumbs items={[
+        { label: "Home", to: "/" },
+        { label: t("news.title"), to: "/news" },
+        { label: article.title },
+      ]} className="container mx-auto px-4 pt-6 mb-0" />
       <NewsArticleJsonLd
         title={article.title}
         slug={article.slug}

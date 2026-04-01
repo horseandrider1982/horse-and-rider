@@ -11,6 +11,7 @@ import {
   CATEGORY_LABELS, type NewsCategory,
 } from '@/hooks/useNewsArticles';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Neueste zuerst' },
@@ -53,6 +54,10 @@ export default function News() {
       <main className="flex-1">
         <section className="bg-muted/40 py-10 md:py-14">
           <div className="container mx-auto px-4 text-center">
+            <Breadcrumbs items={[
+              { label: "Home", to: "/" },
+              { label: t("news.title") },
+            ]} className="mb-4 justify-center" />
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t("news.title")}</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">{t("news.subtitle")}</p>
           </div>

@@ -11,6 +11,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import type { ShopifyProduct } from "@/lib/shopify";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 function ProductCard({ product }: { product: ShopifyProduct }) {
   const { t } = useI18n();
@@ -89,8 +90,11 @@ export default function MarkenDetail() {
         <section className="bg-card py-10 md:py-14">
           <div className="container mx-auto px-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-              <LocaleLink to="/unsere-marken" className="hover:text-primary transition-colors">{t("brands.title")}</LocaleLink>
-              <span>/</span><span className="text-foreground">{brand.name}</span>
+              <Breadcrumbs items={[
+                { label: "Home", to: "/" },
+                { label: t("brands.title"), to: "/unsere-marken" },
+                { label: brand.name },
+              ]} className="mb-0" />
             </div>
             <div className="flex items-center gap-5">
                {brand.logoUrl && <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-10 w-auto max-w-[140px] object-contain brightness-0" loading="lazy" decoding="async" />}
