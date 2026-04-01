@@ -186,6 +186,39 @@ export default function BrandManager() {
           <Label>URL Marke (wird nicht veröffentlicht)</Label>
           <Input value={editing.website_url || ""} onChange={(e) => setEditing({ ...editing, website_url: e.target.value || null })} placeholder="https://www.marke.com" />
         </div>
+        <div className="border-t pt-4 mt-4">
+          <h4 className="font-semibold text-base mb-3">GPSR – Herstellerkontaktdaten</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Straße</Label>
+              <Input value={editing.gpsr_street || ""} onChange={(e) => setEditing({ ...editing, gpsr_street: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>Hausnummer</Label>
+              <Input value={editing.gpsr_housenumber || ""} onChange={(e) => setEditing({ ...editing, gpsr_housenumber: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>PLZ</Label>
+              <Input value={editing.gpsr_postalcode || ""} onChange={(e) => setEditing({ ...editing, gpsr_postalcode: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>Stadt</Label>
+              <Input value={editing.gpsr_city || ""} onChange={(e) => setEditing({ ...editing, gpsr_city: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>Land</Label>
+              <Input value={editing.gpsr_country || ""} onChange={(e) => setEditing({ ...editing, gpsr_country: e.target.value || null })} />
+            </div>
+            <div>
+              <Label>E-Mail</Label>
+              <Input value={editing.gpsr_email || ""} onChange={(e) => setEditing({ ...editing, gpsr_email: e.target.value || null })} />
+            </div>
+            <div className="col-span-2">
+              <Label>Homepage</Label>
+              <Input value={editing.gpsr_homepage || ""} onChange={(e) => setEditing({ ...editing, gpsr_homepage: e.target.value || null })} />
+            </div>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <Switch checked={editing.featured} onCheckedChange={(v) => setEditing({ ...editing, featured: v })} />
           <Label>Featured</Label>
