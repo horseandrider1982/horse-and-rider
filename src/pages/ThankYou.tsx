@@ -19,6 +19,12 @@ const ThankYou = () => {
   const [showConsent, setShowConsent] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
 
+  usePageMeta({
+    title: "Vielen Dank für Ihre Bestellung",
+    description: "Ihre Bestellung bei Horse & Rider Luhmühlen wurde erfolgreich aufgegeben.",
+    noIndex: true,
+  });
+
   // GA4 purchase + Google Ads conversion – fire once on page load
   useEffect(() => {
     const w = window as any;

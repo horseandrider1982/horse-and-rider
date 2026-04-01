@@ -19,6 +19,12 @@ export default function Auth() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+
+  usePageMeta({
+    title: "Anmelden / Registrieren",
+    description: "Melden Sie sich bei Horse & Rider an oder erstellen Sie ein neues Kundenkonto für Ihren Reitsport Online Shop.",
+    noIndex: true,
+  });
   const [loginPassword, setLoginPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");

@@ -20,6 +20,12 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
 
+  usePageMeta({
+    title: "Passwort zurücksetzen",
+    description: "Setzen Sie Ihr Passwort für Ihr Horse & Rider Kundenkonto zurück.",
+    noIndex: true,
+  });
+
   useEffect(() => {
     if (window.location.hash.includes("type=recovery")) setIsRecovery(true);
   }, []);
