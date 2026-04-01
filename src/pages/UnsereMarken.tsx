@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands } from "@/hooks/useBrands";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const ALPHABET = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
