@@ -105,7 +105,7 @@ export default function BrandManager() {
   const handleSave = async () => {
     if (!editing) return;
     const slug = editing.slug || slugify(editing.name);
-    const payload = { name: editing.name, slug, logo_url: editing.logo_url, seo_text: editing.seo_text, website_url: editing.website_url, featured: editing.featured, is_active: editing.is_active };
+    const payload = { name: editing.name, slug, logo_url: editing.logo_url, seo_text: editing.seo_text, website_url: editing.website_url, featured: editing.featured, is_active: editing.is_active, gpsr_street: editing.gpsr_street, gpsr_housenumber: editing.gpsr_housenumber, gpsr_postalcode: editing.gpsr_postalcode, gpsr_city: editing.gpsr_city, gpsr_country: editing.gpsr_country, gpsr_email: editing.gpsr_email, gpsr_homepage: editing.gpsr_homepage };
 
     if (isNew) {
       const { error } = await (supabase.from("brands" as any).insert(payload) as any);
