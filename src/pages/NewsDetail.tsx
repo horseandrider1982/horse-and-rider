@@ -8,6 +8,7 @@ import { LocaleLink } from '@/components/LocaleLink';
 import { useI18n } from '@/i18n';
 import { useArticleBySlug, useArticleProducts, CATEGORY_LABELS, usePublishedArticles } from '@/hooks/useNewsArticles';
 import { NewsArticleJsonLd } from '@/components/JsonLd';
+import { usePageMeta } from '@/hooks/usePageMeta';
 import { useProducts } from '@/hooks/useProducts';
 import { useCartStore } from '@/stores/cartStore';
 import type { ShopifyProduct } from '@/lib/shopify';
