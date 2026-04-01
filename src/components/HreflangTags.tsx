@@ -2,9 +2,13 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useI18n, DEFAULT_LOCALE } from "@/i18n";
 
+const PRODUCTION_ORIGIN = "https://www.horse-and-rider.de";
+
 /**
- * Injects <link rel="alternate" hreflang="..." /> and canonical tags
+ * Injects <link rel="alternate" hreflang="..." /> tags
  * for all available languages. Runs on every route change.
+ *
+ * NOTE: Canonical is handled by usePageMeta — not duplicated here.
  */
 export function HreflangTags() {
   const { availableLocales, locale } = useI18n();
@@ -16,7 +20,6 @@ export function HreflangTags() {
       .querySelectorAll("link[data-i18n-hreflang]")
       .forEach((el) => el.remove());
 
-    const origin = window.location.origin;
     // Strip locale prefix to get the base path
     const basePath =
       location.pathname.replace(new RegExp(`^/${locale}`), "") || "/";
@@ -27,7 +30,7 @@ export function HreflangTags() {
       const link = document.createElement("link");
       link.rel = "alternate";
       link.hreflang = l.code;
-      link.href = `${origin}/${l.code}${pathSuffix}`;
+      link.href = `${PRODUCTION_ORIGIN}/${l.code}${pathSuffix}`;
       link.setAttribute("data-i18n-hreflang", "true");
       document.head.appendChild(link);
     });
@@ -36,16 +39,9 @@ export function HreflangTags() {
     const xDefault = document.createElement("link");
     xDefault.rel = "alternate";
     xDefault.hreflang = "x-default";
-    xDefault.href = `${origin}/${DEFAULT_LOCALE}${pathSuffix}`;
+    xDefault.href = `${PRODUCTION_ORIGIN}/${DEFAULT_LOCALE}${pathSuffix}`;
     xDefault.setAttribute("data-i18n-hreflang", "true");
     document.head.appendChild(xDefault);
-
-    // Canonical for current locale
-    const canonical = document.createElement("link");
-    canonical.rel = "canonical";
-    canonical.href = `${origin}/${locale}${pathSuffix}`;
-    canonical.setAttribute("data-i18n-hreflang", "true");
-    document.head.appendChild(canonical);
 
     return () => {
       document
