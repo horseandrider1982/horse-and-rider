@@ -18,6 +18,12 @@ const NotFound = () => {
   const { t } = useI18n();
   const [checking, setChecking] = useState(true);
 
+  usePageMeta({
+    title: "Seite nicht gefunden (404)",
+    description: "Die angeforderte Seite wurde nicht gefunden. Entdecken Sie stattdessen über 20.000 Reitsport-Produkte bei Horse & Rider.",
+    noIndex: true,
+  });
+
   useEffect(() => {
     let cancelled = false;
 
