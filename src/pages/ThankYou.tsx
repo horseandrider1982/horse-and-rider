@@ -18,6 +18,28 @@ const ThankYou = () => {
   const [showConsent, setShowConsent] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
 
+  // GA4 purchase + Google Ads conversion – fire once on page load
+  useEffect(() => {
+    const w = window as any;
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push({ ecommerce: null });
+    w.dataLayer.push({
+      event: "purchase",
+      ecommerce: {
+        currency: "EUR",
+        transaction_id: `order_${Date.now()}`,
+        value: 0, // actual value not available from Shopify redirect
+        items: [],
+      },
+    });
+    // Google Ads conversion event
+    w.dataLayer.push({
+      event: "ads_conversion_purchase",
+      ads_conversion_id: "AW-1051638393",
+      ads_conversion_label: "NMdMCIOE2pMcEPn0uvUD",
+    });
+  }, []);
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
