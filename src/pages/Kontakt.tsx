@@ -24,6 +24,11 @@ const contactSchema = z.object({
 type ContactForm = z.infer<typeof contactSchema>;
 
 const Kontakt = () => {
+  usePageMeta({
+    title: "Kontakt",
+    description: "Kontaktieren Sie Horse & Rider Luhmühlen – wir beraten Sie gerne persönlich rund um den Reitsport.",
+  });
+
   const [form, setForm] = useState<ContactForm>({
     firstName: "", lastName: "", email: "", phone: "", subject: "", message: "",
   });
