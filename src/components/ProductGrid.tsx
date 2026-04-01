@@ -6,6 +6,7 @@ import { useProducts, useProductByHandle } from "@/hooks/useProducts";
 import { useHomepageProductHandles } from "@/hooks/useHomepageProducts";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
+import { trackAddToCart } from "@/lib/ga4";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 const ProductCard = ({ product }: { product: ShopifyProduct }) => {
@@ -24,6 +25,7 @@ const ProductCard = ({ product }: { product: ShopifyProduct }) => {
       product, variantId: variant.id, variantTitle: variant.title,
       price: variant.price, quantity: 1, selectedOptions: variant.selectedOptions || [],
     });
+    trackAddToCart(product, variant.id, 1);
     toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
   };
 

@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { useI18n } from "@/i18n";
+import { trackViewCart, trackBeginCheckout, trackRemoveFromCart } from "@/lib/ga4";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,11 +14,25 @@ export const CartDrawer = () => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
 
-  useEffect(() => { if (isOpen) syncCart(); }, [isOpen, syncCart]);
+  useEffect(() => {
+    if (isOpen) {
+      syncCart();
+      if (items.length > 0) trackViewCart(items);
+    }
+  }, [isOpen, syncCart]);
 
   const handleCheckout = () => {
     const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) { window.location.href = checkoutUrl; }
+    if (checkoutUrl) {
+      trackBeginCheckout(items);
+      window.location.href = checkoutUrl;
+    }
+  };
+
+  const handleRemoveItem = (variantId: string) => {
+    const item = items.find(i => i.variantId === variantId);
+    if (item) trackRemoveFromCart(item.product, item.variantId, item.quantity);
+    removeItem(variantId);
   };
 
   const itemsDesc = totalItems === 0
@@ -69,7 +84,7 @@ export const CartDrawer = () => {
                         <p className="font-semibold text-sm mt-1">{parseFloat(item.price.amount).toFixed(2)} €</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(item.variantId)}><Trash2 className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveItem(item.variantId)}><Trash2 className="h-3 w-3" /></Button>
                         <div className="flex items-center gap-1">
                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.variantId, item.quantity - 1)}><Minus className="h-3 w-3" /></Button>
                           <span className="w-8 text-center text-xs">{item.quantity}</span>
