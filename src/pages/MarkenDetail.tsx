@@ -60,7 +60,8 @@ export default function MarkenDetail() {
   const { data: brands, isLoading: brandsLoading } = useBrands();
   const brand = brands?.find((b) => b.slug === slug);
   const vendorName = brand?.name || "";
-  const { data: products, isLoading: productsLoading } = useBrandProducts(vendorName, !!vendorName);
+  const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
+  const products = useMemo(() => productsData?.pages.flatMap(p => p.products) || [], [productsData]);
 
   const brandMetaDesc = brand
     ? brand.seoText
