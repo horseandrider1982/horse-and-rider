@@ -113,6 +113,20 @@ const ProductDetail = () => {
   const { data: brands } = useBrands();
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
 
+  const variants = product?.node?.variants?.edges;
+  const selectedVariant = variants?.[selectedVariantIndex]?.node;
+  const isSingleVariant = variants ? variants.length === 1 && (variants[0]?.node?.title === 'Default Title' || !product?.node?.options?.length || (product.node.options.length === 1 && product.node.options[0].name === 'Title')) : false;
+
+  const availability = useMemo(() => {
+    if (!selectedVariant) return { canOrder: false, deliveryTime: null, isSupplierStock: false };
+    return computeAvailability(
+      selectedVariant.availableForSale,
+      selectedVariant.metafields,
+      product?.node?.metafields,
+      isSingleVariant,
+    );
+  }, [selectedVariant, product?.node?.metafields, isSingleVariant]);
+
   useEffect(() => {
     if (shopifyProductId) {
       const saved = loadConfig(shopifyProductId);
