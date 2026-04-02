@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Loader2, ChevronLeft, ShoppingCart } from "lucide-react";
+import { Loader2, ChevronLeft } from "lucide-react";
 import { useMemo } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
@@ -8,40 +8,26 @@ import { Button } from "@/components/ui/button";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
-import { useCartStore } from "@/stores/cartStore";
-import { toast } from "sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import type { ShopifyProduct } from "@/lib/shopify";
+import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 function ProductCard({ product }: { product: ShopifyProduct }) {
-  const { t } = useI18n();
-  const addItem = useCartStore((s) => s.addItem);
-  const isLoading = useCartStore((s) => s.isLoading);
-  const variant = product.node.variants.edges[0]?.node;
+  const { locale } = useI18n();
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
-
-  const handleAdd = async (e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation();
-    if (!variant) return;
-    await addItem({ product, variantId: variant.id, variantTitle: variant.title, price: variant.price, quantity: 1, selectedOptions: variant.selectedOptions || [] });
-    toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
-  };
 
   return (
     <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
       <div className="aspect-square overflow-hidden bg-white">
-         {image ? <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><ShoppingCart className="h-12 w-12" /></div>}
+        {image ? <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>}
       </div>
       <div className="p-4">
+        {product.node.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.node.vendor}</p>}
         <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-primary">{parseFloat(price.amount).toFixed(2)} {price.currencyCode === "EUR" ? "\u20AC" : price.currencyCode}</span>
-          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={handleAdd} disabled={isLoading || !variant?.availableForSale}>
-            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShoppingCart className="h-3 w-3" />}
-          </Button>
-        </div>
+        <span className="font-bold text-primary">
+          {new Intl.NumberFormat(locale, { style: "currency", currency: price.currencyCode }).format(parseFloat(price.amount))}
+        </span>
       </div>
     </LocaleLink>
   );
@@ -62,7 +48,10 @@ export default function MarkenDetail() {
   const brand = brands?.find((b) => b.slug === slug);
   const vendorName = brand?.name || "";
   const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
-  const products = useMemo(() => productsData?.pages.flatMap(p => p.products) || [], [productsData]);
+  const products = useMemo(() => {
+    const all = productsData?.pages.flatMap(p => p.products) || [];
+    return all.filter(p => isProductVisibleInListing(p.node));
+  }, [productsData]);
 
   const brandMetaDesc = brand
     ? brand.seoText
@@ -105,7 +94,7 @@ export default function MarkenDetail() {
               ]} className="mb-0" />
             </div>
             <div className="flex items-center gap-5">
-               {brand.logoUrl && <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-10 w-auto max-w-[140px] object-contain brightness-0" loading="lazy" decoding="async" />}
+              {brand.logoUrl && <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-10 w-auto max-w-[140px] object-contain brightness-0" loading="lazy" decoding="async" />}
               <h1 className="font-heading text-3xl md:text-4xl font-bold">{brand.name}</h1>
             </div>
           </div>

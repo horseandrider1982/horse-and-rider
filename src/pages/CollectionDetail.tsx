@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useI18n } from "@/i18n";
 import { Header } from "@/components/Header";
@@ -9,11 +9,10 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useCartStore } from "@/stores/cartStore";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
-import { toast } from "sonner";
 import { CollectionJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
@@ -24,7 +23,7 @@ const COLLECTION_QUERY = `
       id
       title
       description
-      products(first: $first, after: $after, filters: [{available: true}]) {
+      products(first: $first, after: $after) {
         pageInfo {
           hasNextPage
           endCursor
@@ -50,7 +49,16 @@ const COLLECTION_QUERY = `
                 }
               }
             }
-            variants(first: 1) {
+            metafields(identifiers: [
+              {namespace: "custom", key: "lieferantenbestand"},
+              {namespace: "custom", key: "ueberverkauf"}
+            ]) {
+              namespace
+              key
+              value
+              type
+            }
+            variants(first: 10) {
               edges {
                 node {
                   id
@@ -60,6 +68,15 @@ const COLLECTION_QUERY = `
                     currencyCode
                   }
                   availableForSale
+                  metafields(identifiers: [
+                    {namespace: "custom", key: "lieferantenbestand"},
+                    {namespace: "custom", key: "ueberverkauf"}
+                  ]) {
+                    namespace
+                    key
+                    value
+                    type
+                  }
                   selectedOptions {
                     name
                     value
@@ -93,9 +110,7 @@ async function fetchCollectionPage(handle: string, locale: string, cursor?: stri
 export default function CollectionDetail() {
   const { handle } = useParams<{ handle: string }>();
   const { t, locale } = useI18n();
-  const addItem = useCartStore((s) => s.addItem);
 
-  // Find subcategories from Shopify menu cache
   const { data: menuItems } = useShopifyMenu('kategoriemenu');
   const { data: mainMenuItems } = useShopifyMenu('main-menu');
 
@@ -136,15 +151,13 @@ export default function CollectionDetail() {
     enabled: !!handle,
   });
 
-  // Merge pages: collection meta from first page, products from all pages
   const collection = data?.pages?.[0] || null;
-  const allProductEdges = useMemo(() => {
+  const products = useMemo(() => {
     if (!data?.pages) return [];
-    return data.pages.flatMap((page) => page?.products?.edges || []);
+    return data.pages
+      .flatMap((page) => page?.products?.edges || [])
+      .filter((edge: any) => isProductVisibleInListing(edge.node));
   }, [data]);
-
-  // Shopify filters by availability server-side via `filters: [{available: true}]`
-  const products = allProductEdges;
 
   const collectionMetaDesc = collection
     ? collection.description?.slice(0, 120)
@@ -232,38 +245,34 @@ export default function CollectionDetail() {
                     {products.map(({ node: product }: any) => {
                       const image = product.images?.edges?.[0]?.node;
                       const price = product.priceRange?.minVariantPrice;
-                      const variant = product.variants?.edges?.[0]?.node;
 
                       return (
-                        <div
+                        <LocaleLink
                           key={product.id}
-                          className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow"
+                          to={`/product/${product.handle}`}
+                          className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow block"
                         >
-                          <LocaleLink to={`/product/${product.handle}`}>
-                            <div className="aspect-square bg-white overflow-hidden">
-                              {image ? (
-                                <img
-                                  src={image.url}
-                                  alt={image.altText || product.title}
-                                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                                  {t("news.no_image")}
-                                </div>
-                              )}
-                            </div>
-                          </LocaleLink>
+                          <div className="aspect-square bg-white overflow-hidden">
+                            {image ? (
+                              <img
+                                src={image.url}
+                                alt={image.altText || product.title}
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                                {t("news.no_image")}
+                              </div>
+                            )}
+                          </div>
                           <div className="p-3">
                             {product.vendor && (
                               <p className="text-xs text-muted-foreground mb-0.5">{product.vendor}</p>
                             )}
-                            <LocaleLink to={`/product/${product.handle}`}>
-                              <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                                {product.title}
-                              </h3>
-                            </LocaleLink>
+                            <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                              {product.title}
+                            </h3>
                             {price && (
                               <p className="text-sm font-bold text-foreground mt-1">
                                 {new Intl.NumberFormat(locale, {
@@ -272,26 +281,8 @@ export default function CollectionDetail() {
                                 }).format(parseFloat(price.amount))}
                               </p>
                             )}
-                            {variant?.availableForSale && (
-                              <button
-                                onClick={() => {
-                                  addItem({
-                                    product: { node: product },
-                                    variantId: variant.id,
-                                    variantTitle: variant.title || "",
-                                    price: { amount: variant.price.amount, currencyCode: variant.price.currencyCode },
-                                    quantity: 1,
-                                    selectedOptions: variant.selectedOptions || [],
-                                  });
-                                  toast.success(t("products.added_to_cart"));
-                                }}
-                                className="mt-2 w-full text-xs py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                              >
-                                {t("product.add_to_cart")}
-                              </button>
-                            )}
                           </div>
-                        </div>
+                        </LocaleLink>
                       );
                     })}
                   </div>

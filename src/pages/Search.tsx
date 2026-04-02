@@ -1,82 +1,90 @@
 import { useSearchParams } from "react-router-dom";
-import { ShoppingCart, Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/stores/cartStore";
-import { useProducts } from "@/hooks/useProducts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { toast } from "sonner";
-import type { ShopifyProduct } from "@/lib/shopify";
+import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
+const PAGE_SIZE = 24;
 
 const SearchProductCard = ({ product }: { product: ShopifyProduct }) => {
-  const { t } = useI18n();
-  const addItem = useCartStore((state) => state.addItem);
-  const isLoading = useCartStore((state) => state.isLoading);
-  const variant = product.node.variants.edges[0]?.node;
+  const { locale } = useI18n();
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!variant) return;
-    await addItem({
-      product,
-      variantId: variant.id,
-      variantTitle: variant.title,
-      price: variant.price,
-      quantity: 1,
-      selectedOptions: variant.selectedOptions || [],
-    });
-    toast.success(t("products.added_to_cart"), {
-      description: product.node.title,
-      position: "top-center",
-    });
-  };
 
   return (
     <LocaleLink
       to={`/product/${product.node.handle}`}
       className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block"
     >
-      <div className="aspect-square overflow-hidden bg-muted">
+      <div className="aspect-square overflow-hidden bg-white">
         {image ? (
-          <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <ShoppingCart className="h-12 w-12" />
-          </div>
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>
         )}
       </div>
       <div className="p-4">
+        {product.node.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.node.vendor}</p>}
         <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-primary">
-            {parseFloat(price.amount).toFixed(2)} {price.currencyCode === "EUR" ? "€" : price.currencyCode}
-          </span>
-          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={handleAddToCart} disabled={isLoading || !variant?.availableForSale}>
-            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShoppingCart className="h-3 w-3" />}
-          </Button>
-        </div>
+        <span className="font-bold text-primary">
+          {new Intl.NumberFormat(locale, { style: "currency", currency: price.currencyCode }).format(parseFloat(price.amount))}
+        </span>
       </div>
     </LocaleLink>
   );
 };
 
 const Search = () => {
-  const { t } = useI18n();
+  const { t, locale, shopifyLanguage } = useI18n();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const { data: products, isLoading, error } = useProducts(50, query);
+
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['search-products', query, shopifyLanguage],
+    queryFn: async ({ pageParam }) => {
+      const variables: Record<string, unknown> = {
+        first: PAGE_SIZE,
+        language: shopifyLanguage,
+        after: pageParam || null,
+      };
+      const parts: string[] = [];
+      if (query) parts.push(query);
+      parts.push('available_for_sale:true');
+      variables.query = parts.join(' ');
+      const res = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
+      const edges = res?.data?.products?.edges || [];
+      const pageInfo = res?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null };
+      return { products: edges as ShopifyProduct[], pageInfo };
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined,
+    enabled: !!query,
+  });
+
+  const products = useMemo(() => {
+    const all = data?.pages.flatMap(p => p.products) || [];
+    return all.filter(p => isProductVisibleInListing(p.node));
+  }, [data]);
 
   usePageMeta({
-    title: query ? `Suche: ${query}` : "Suche",
+    title: query ? `${t("search.search")}: ${query}` : t("search.search"),
     description: query
-      ? `Suchergebnisse für „${query}" im Reitsport Online Shop Horse & Rider – über 20.000 Produkte für Reiter und Pferd.`
-      : "Durchsuchen Sie über 20.000 Reitsport-Produkte bei Horse & Rider Luhmühlen.",
+      ? `${t("search.results_for").replace("{query}", query)} – Horse & Rider`
+      : undefined,
     noIndex: true,
   });
 
@@ -94,7 +102,7 @@ const Search = () => {
           <h1 className="font-heading text-2xl md:text-3xl font-bold">
             {query ? t("search.results_for").replace("{query}", query) : t("search.search")}
           </h1>
-          {!isLoading && products && (
+          {!isLoading && products.length > 0 && (
             <p className="text-muted-foreground mt-1">
               {products.length === 1 ? t("search.result_one") : t("search.result_other").replace("{count}", String(products.length))}
             </p>
@@ -111,19 +119,31 @@ const Search = () => {
           <div className="text-center py-16 text-muted-foreground">{t("search.loading_error")}</div>
         )}
 
-        {!isLoading && !error && products && products.length === 0 && (
+        {!isLoading && !error && products.length === 0 && query && (
           <div className="text-center py-16">
-            <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <p className="text-lg text-muted-foreground">{t("search.no_results").replace("{query}", query)}</p>
           </div>
         )}
 
-        {products && products.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.map((product) => (
-              <SearchProductCard key={product.node.id} product={product} />
-            ))}
-          </div>
+        {products.length > 0 && (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {products.map((product) => (
+                <SearchProductCard key={product.node.id} product={product} />
+              ))}
+            </div>
+            {hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <Button variant="outline" size="lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                  {isFetchingNextPage ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />{t("products.loading")}</>
+                  ) : (
+                    t("products.load_more")
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </main>
       <Footer />
