@@ -1,6 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { LocaleLink } from '@/components/LocaleLink';
+import { MegaMenuDropdown } from './MegaMenuDropdown';
+import type { ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 import { MegaMenuDropdown } from './MegaMenuDropdown';
 import type { ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 
