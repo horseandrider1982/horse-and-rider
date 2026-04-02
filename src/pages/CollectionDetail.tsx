@@ -114,7 +114,10 @@ export default function CollectionDetail() {
     enabled: !!handle,
   });
 
-  const products = collection?.products?.edges || [];
+  // Only show products with at least one available variant (PDP stays accessible for SEO)
+  const products = (collection?.products?.edges || []).filter((e: any) =>
+    e.node.variants?.edges?.some((v: any) => v.node.availableForSale)
+  );
 
   const collectionMetaDesc = collection
     ? collection.description?.slice(0, 120)

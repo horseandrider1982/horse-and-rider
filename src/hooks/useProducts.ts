@@ -9,7 +9,11 @@ export function useProducts(first: number = 20, query?: string) {
     queryKey: ['shopify-products', first, query, shopifyLanguage],
     queryFn: async () => {
       const variables: Record<string, unknown> = { first, language: shopifyLanguage };
-      if (query) variables.query = query;
+      // Combine user query with availability filter
+      const parts: string[] = [];
+      if (query) parts.push(query);
+      parts.push('available_for_sale:true');
+      variables.query = parts.join(' ');
       const data = await storefrontApiRequest(STOREFRONT_QUERY, variables);
       return (data?.data?.products?.edges || []) as ShopifyProduct[];
     },
