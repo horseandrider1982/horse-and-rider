@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useI18n } from "@/i18n";
 import { Header } from "@/components/Header";
@@ -7,6 +7,8 @@ import { Footer } from "@/components/Footer";
 import { TopBar } from "@/components/TopBar";
 import { LocaleLink } from "@/components/LocaleLink";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { toast } from "sonner";
@@ -17,12 +19,16 @@ const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/grap
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
 
 const COLLECTION_QUERY = `
-  query GetCollection($handle: String!, $first: Int!, $language: LanguageCode) @inContext(language: $language) {
+  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode) @inContext(language: $language) {
     collection(handle: $handle) {
       id
       title
       description
-      products(first: $first) {
+      products(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         edges {
           node {
             id
@@ -68,6 +74,22 @@ const COLLECTION_QUERY = `
   }
 `;
 
+async function fetchCollectionPage(handle: string, locale: string, cursor?: string) {
+  const res = await fetch(SHOPIFY_STOREFRONT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+    },
+    body: JSON.stringify({
+      query: COLLECTION_QUERY,
+      variables: { handle, first: 250, after: cursor || null, language: locale.toUpperCase() },
+    }),
+  });
+  const json = await res.json();
+  return json?.data?.collection || null;
+}
+
 export default function CollectionDetail() {
   const { handle } = useParams<{ handle: string }>();
   const { t, locale } = useI18n();
@@ -94,28 +116,35 @@ export default function CollectionDetail() {
     return findChildren(mainMenuItems || []);
   }, [handle, menuItems, mainMenuItems]);
 
-  const { data: collection, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["collection", handle, locale],
-    queryFn: async () => {
-      const res = await fetch(SHOPIFY_STOREFRONT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
-        },
-        body: JSON.stringify({
-          query: COLLECTION_QUERY,
-          variables: { handle, first: 50, language: locale.toUpperCase() },
-        }),
-      });
-      const json = await res.json();
-      return json?.data?.collection || null;
+    queryFn: async ({ pageParam }) => {
+      return fetchCollectionPage(handle!, locale, pageParam);
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      const pageInfo = lastPage?.products?.pageInfo;
+      return pageInfo?.hasNextPage ? pageInfo.endCursor : undefined;
     },
     enabled: !!handle,
   });
 
+  // Merge pages: collection meta from first page, products from all pages
+  const collection = data?.pages?.[0] || null;
+  const allProductEdges = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => page?.products?.edges || []);
+  }, [data]);
+
   // Only show products with at least one available variant (PDP stays accessible for SEO)
-  const products = (collection?.products?.edges || []).filter((e: any) =>
+  const products = allProductEdges.filter((e: any) =>
     e.node.variants?.edges?.some((v: any) => v.node.availableForSale)
   );
 
@@ -200,73 +229,94 @@ export default function CollectionDetail() {
               {products.length === 0 ? (
                 <p className="text-muted-foreground py-8">{t("products.empty")}</p>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {products.map(({ node: product }: any) => {
-                    const image = product.images?.edges?.[0]?.node;
-                    const price = product.priceRange?.minVariantPrice;
-                    const variant = product.variants?.edges?.[0]?.node;
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {products.map(({ node: product }: any) => {
+                      const image = product.images?.edges?.[0]?.node;
+                      const price = product.priceRange?.minVariantPrice;
+                      const variant = product.variants?.edges?.[0]?.node;
 
-                    return (
-                      <div
-                        key={product.id}
-                        className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow"
-                      >
-                        <LocaleLink to={`/product/${product.handle}`}>
-                          <div className="aspect-square bg-white overflow-hidden">
-                            {image ? (
-                              <img
-                                src={image.url}
-                                alt={image.altText || product.title}
-                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                                {t("news.no_image")}
-                              </div>
+                      return (
+                        <div
+                          key={product.id}
+                          className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow"
+                        >
+                          <LocaleLink to={`/product/${product.handle}`}>
+                            <div className="aspect-square bg-white overflow-hidden">
+                              {image ? (
+                                <img
+                                  src={image.url}
+                                  alt={image.altText || product.title}
+                                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                                  {t("news.no_image")}
+                                </div>
+                              )}
+                            </div>
+                          </LocaleLink>
+                          <div className="p-3">
+                            {product.vendor && (
+                              <p className="text-xs text-muted-foreground mb-0.5">{product.vendor}</p>
+                            )}
+                            <LocaleLink to={`/product/${product.handle}`}>
+                              <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                                {product.title}
+                              </h3>
+                            </LocaleLink>
+                            {price && (
+                              <p className="text-sm font-bold text-foreground mt-1">
+                                {new Intl.NumberFormat(locale, {
+                                  style: "currency",
+                                  currency: price.currencyCode,
+                                }).format(parseFloat(price.amount))}
+                              </p>
+                            )}
+                            {variant?.availableForSale && (
+                              <button
+                                onClick={() => {
+                                  addItem({
+                                    product: { node: product },
+                                    variantId: variant.id,
+                                    variantTitle: variant.title || "",
+                                    price: { amount: variant.price.amount, currencyCode: variant.price.currencyCode },
+                                    quantity: 1,
+                                    selectedOptions: variant.selectedOptions || [],
+                                  });
+                                  toast.success(t("products.added_to_cart"));
+                                }}
+                                className="mt-2 w-full text-xs py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                              >
+                                {t("product.add_to_cart")}
+                              </button>
                             )}
                           </div>
-                        </LocaleLink>
-                        <div className="p-3">
-                          {product.vendor && (
-                            <p className="text-xs text-muted-foreground mb-0.5">{product.vendor}</p>
-                          )}
-                          <LocaleLink to={`/product/${product.handle}`}>
-                            <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                              {product.title}
-                            </h3>
-                          </LocaleLink>
-                          {price && (
-                            <p className="text-sm font-bold text-foreground mt-1">
-                              {new Intl.NumberFormat(locale, {
-                                style: "currency",
-                                currency: price.currencyCode,
-                              }).format(parseFloat(price.amount))}
-                            </p>
-                          )}
-                          {variant?.availableForSale && (
-                            <button
-                              onClick={() => {
-                                addItem({
-                                  product: { node: product },
-                                  variantId: variant.id,
-                                  variantTitle: variant.title || "",
-                                  price: { amount: variant.price.amount, currencyCode: variant.price.currencyCode },
-                                  quantity: 1,
-                                  selectedOptions: variant.selectedOptions || [],
-                                });
-                                toast.success(t("products.added_to_cart"));
-                              }}
-                              className="mt-2 w-full text-xs py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                            >
-                              {t("product.add_to_cart")}
-                            </button>
-                          )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                  {hasNextPage && (
+                    <div className="flex justify-center mt-8">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={() => fetchNextPage()}
+                        disabled={isFetchingNextPage}
+                      >
+                        {isFetchingNextPage ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            {t("products.loading") || "Laden..."}
+                          </>
+                        ) : (
+                          t("products.load_more") || "Mehr laden"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
