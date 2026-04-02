@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { Loader2, ChevronLeft, ShoppingCart } from "lucide-react";
+import { useMemo } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -60,7 +61,8 @@ export default function MarkenDetail() {
   const { data: brands, isLoading: brandsLoading } = useBrands();
   const brand = brands?.find((b) => b.slug === slug);
   const vendorName = brand?.name || "";
-  const { data: products, isLoading: productsLoading } = useBrandProducts(vendorName, !!vendorName);
+  const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
+  const products = useMemo(() => productsData?.pages.flatMap(p => p.products) || [], [productsData]);
 
   const brandMetaDesc = brand
     ? brand.seoText
@@ -112,8 +114,17 @@ export default function MarkenDetail() {
         <section className="container mx-auto px-4 py-10">
           <h2 className="font-heading text-xl md:text-2xl font-bold mb-6">{t("brands.products_of").replace("{name}", brand.name)}</h2>
           {productsLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            : products && products.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{products.map(p => <ProductCard key={p.node.id} product={p} />)}</div>
+            : products.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{products.map(p => <ProductCard key={p.node.id} product={p} />)}</div>
+                {hasNextPage && (
+                  <div className="flex justify-center mt-8">
+                    <Button variant="outline" size="lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                      {isFetchingNextPage ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{t("products.loading")}</> : t("products.load_more")}
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <p className="text-muted-foreground py-8 text-center">{t("brands.no_products").replace("{name}", brand.name)}</p>
             )}
