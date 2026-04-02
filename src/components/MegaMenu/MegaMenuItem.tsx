@@ -4,8 +4,6 @@ import { ChevronDown } from 'lucide-react';
 import { LocaleLink } from '@/components/LocaleLink';
 import { MegaMenuDropdown } from './MegaMenuDropdown';
 import type { ShopifyMenuItem } from '@/hooks/useShopifyMenu';
-import { MegaMenuDropdown } from './MegaMenuDropdown';
-import type { ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 
 interface MegaMenuItemProps {
   item: ShopifyMenuItem;
