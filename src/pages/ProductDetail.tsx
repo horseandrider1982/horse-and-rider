@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Loader2, ShoppingCart, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool, Truck } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
 import { ProductContactModal } from "@/components/ProductContactModal";
