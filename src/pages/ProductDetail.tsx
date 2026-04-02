@@ -186,22 +186,9 @@ const ProductDetail = () => {
     );
   }
 
-  const variants = product.node.variants.edges;
-  const selectedVariant = variants[selectedVariantIndex]?.node;
   const images = product.node.images.edges;
-  const isSingleVariant = variants.length === 1 && (variants[0]?.node?.title === 'Default Title' || product.node.options.length === 0 || (product.node.options.length === 1 && product.node.options[0].name === 'Title'));
   const basePrice = selectedVariant ? parseFloat(selectedVariant.price.amount) : parseFloat(product.node.priceRange.minVariantPrice.amount);
   const totalPrice = basePrice + (configState?.totalPriceDelta ?? 0);
-
-  const availability = useMemo(() => {
-    if (!selectedVariant) return { canOrder: false, deliveryTime: null, isSupplierStock: false };
-    return computeAvailability(
-      selectedVariant.availableForSale,
-      selectedVariant.metafields,
-      product.node.metafields,
-      isSingleVariant,
-    );
-  }, [selectedVariant, product.node.metafields, isSingleVariant]);
 
   const handleWizardComplete = (state: ConfigurationState) => {
     setConfigState(state);
