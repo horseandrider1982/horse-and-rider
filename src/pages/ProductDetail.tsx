@@ -182,6 +182,12 @@ const ProductDetail = () => {
 
   const handleOptionSelect = (optionName: string, value: string) => {
     setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
+    setMainImage(0);
+  };
+
+  const handleResetToOverview = () => {
+    setSelectedOptions({});
+    setMainImage(0);
   };
 
   const availability = useMemo(() => {
