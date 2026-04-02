@@ -38,6 +38,58 @@ function loadConfig(productId: string): ConfigurationState | null {
   return null;
 }
 
+function getMetafieldValue(metafields: (ShopifyMetafield | null)[] | undefined, key: string): string | null {
+  if (!metafields) return null;
+  const mf = metafields.find(m => m && m.key === key);
+  return mf?.value ?? null;
+}
+
+interface AvailabilityInfo {
+  canOrder: boolean;
+  deliveryTime: string | null;
+  isSupplierStock: boolean;
+}
+
+function computeAvailability(
+  variantAvailableForSale: boolean,
+  variantMetafields?: (ShopifyMetafield | null)[],
+  productMetafields?: (ShopifyMetafield | null)[],
+  isSingleVariant?: boolean,
+): AvailabilityInfo {
+  // If available for sale in Shopify → standard delivery
+  if (variantAvailableForSale) {
+    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
+  }
+
+  // Check metafields: for single-variant products, fall back to product-level metafields
+  const mf = isSingleVariant ? productMetafields : variantMetafields;
+  const lieferantenbestand = getMetafieldValue(mf, 'lieferantenbestand');
+  const ueberverkauf = getMetafieldValue(mf, 'ueberverkauf');
+  const lieferzeit = getMetafieldValue(mf, 'lieferzeit');
+
+  // Also check variant-level for single-variant (in case fields are on variant too)
+  const varLieferantenbestand = getMetafieldValue(variantMetafields, 'lieferantenbestand');
+  const varUeberverkauf = getMetafieldValue(variantMetafields, 'ueberverkauf');
+  const varLieferzeit = getMetafieldValue(variantMetafields, 'lieferzeit');
+
+  const bestLieferantenbestand = varLieferantenbestand || lieferantenbestand;
+  const bestUeberverkauf = varUeberverkauf || ueberverkauf;
+  const bestLieferzeit = varLieferzeit || lieferzeit;
+
+  const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
+  const allowOversell = bestUeberverkauf === '1';
+
+  if (hasSupplierStock && allowOversell) {
+    return {
+      canOrder: true,
+      deliveryTime: bestLieferzeit || 'Lieferzeit auf Anfrage',
+      isSupplierStock: true,
+    };
+  }
+
+  return { canOrder: false, deliveryTime: null, isSupplierStock: false };
+}
+
 const ProductDetail = () => {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
