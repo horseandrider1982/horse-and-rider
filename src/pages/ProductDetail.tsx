@@ -417,7 +417,15 @@ const ProductDetail = () => {
               )}
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{product.node.title}</BreadcrumbPage>
+                {Object.keys(selectedOptions).length > 0 ? (
+                  <BreadcrumbLink asChild>
+                    <button onClick={handleResetToOverview} className="hover:underline cursor-pointer">
+                      {product.node.title}
+                    </button>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>{product.node.title}</BreadcrumbPage>
+                )}
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
