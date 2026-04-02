@@ -439,6 +439,7 @@ const ProductDetail = () => {
               </p>
 
               {options.length > 0 && (
+                <TooltipProvider delayDuration={200}>
                 <div className="mb-6">
                   {options.map((option) => (
                     <div key={option.name} className="mb-3">
