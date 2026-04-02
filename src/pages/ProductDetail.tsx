@@ -6,6 +6,7 @@ import { ProductContactModal } from "@/components/ProductContactModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
+import type { ShopifyMetafield } from "@/lib/shopify";
 import { useBrands } from "@/hooks/useBrands";
 import { useProductConfigurator } from "@/hooks/useConfigurator";
 import { useCartStore } from "@/stores/cartStore";
