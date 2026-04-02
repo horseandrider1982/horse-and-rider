@@ -142,6 +142,15 @@ export const STOREFRONT_PAGINATED_QUERY = `
               }
             }
           }
+          metafields(identifiers: [
+            {namespace: "custom", key: "lieferantenbestand"},
+            {namespace: "custom", key: "ueberverkauf"}
+          ]) {
+            namespace
+            key
+            value
+            type
+          }
           variants(first: 10) {
             edges {
               node {
@@ -154,6 +163,15 @@ export const STOREFRONT_PAGINATED_QUERY = `
                 availableForSale
                 sku
                 barcode
+                metafields(identifiers: [
+                  {namespace: "custom", key: "lieferantenbestand"},
+                  {namespace: "custom", key: "ueberverkauf"}
+                ]) {
+                  namespace
+                  key
+                  value
+                  type
+                }
                 selectedOptions {
                   name
                   value
@@ -170,6 +188,36 @@ export const STOREFRONT_PAGINATED_QUERY = `
     }
   }
 `;
+
+/** Check if a product should be visible in listings based on availability logic */
+export function isProductVisibleInListing(product: ShopifyProduct['node']): boolean {
+  const variants = product.variants?.edges || [];
+
+  // Product is visible if at least one variant is available for sale (includes untracked inventory)
+  if (variants.some(v => v.node.availableForSale)) return true;
+
+  // Check supplier stock: if ANY variant (or product-level for single-variant) has supplier stock + oversell
+  const isSingleVariant = variants.length <= 1;
+
+  const getMf = (mfs: (ShopifyMetafield | null)[] | undefined, key: string) =>
+    mfs?.find(m => m?.key === key)?.value || '';
+
+  if (isSingleVariant) {
+    // Single variant: check product-level metafields
+    const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
+    const oversell = getMf(product.metafields, 'ueberverkauf');
+    if (supplierStock > 0 && oversell === '1') return true;
+  }
+
+  // Multi-variant: check each variant's metafields
+  for (const { node: v } of variants) {
+    const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
+    const oversell = getMf(v.metafields, 'ueberverkauf');
+    if (supplierStock > 0 && oversell === '1') return true;
+  }
+
+  return false;
+}
 
 export const SHOPIFY_MENU_QUERY = `
   query GetMenu($handle: String!) {
