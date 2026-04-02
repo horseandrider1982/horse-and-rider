@@ -182,6 +182,12 @@ const ProductDetail = () => {
 
   const handleOptionSelect = (optionName: string, value: string) => {
     setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
+    setMainImage(0);
+  };
+
+  const handleResetToOverview = () => {
+    setSelectedOptions({});
+    setMainImage(0);
   };
 
   const availability = useMemo(() => {
@@ -253,7 +259,16 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.node.images.edges;
+  const allImages = product.node.images.edges;
+
+  // Filter images to show only those matching the selected variant's SKU (via altText)
+  const images = (() => {
+    if (!selectedVariant || isSingleVariant) return allImages;
+    const sku = selectedVariant.sku;
+    if (!sku) return allImages;
+    const filtered = allImages.filter(img => img.node.altText === sku);
+    return filtered.length > 0 ? filtered : allImages;
+  })();
   const basePrice = selectedVariant ? parseFloat(selectedVariant.price.amount) : parseFloat(product.node.priceRange.minVariantPrice.amount);
   const totalPrice = basePrice + (configState?.totalPriceDelta ?? 0);
 
@@ -402,7 +417,15 @@ const ProductDetail = () => {
               )}
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{product.node.title}</BreadcrumbPage>
+                {Object.keys(selectedOptions).length > 0 ? (
+                  <BreadcrumbLink asChild>
+                    <button onClick={handleResetToOverview} className="hover:underline cursor-pointer">
+                      {product.node.title}
+                    </button>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>{product.node.title}</BreadcrumbPage>
+                )}
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
