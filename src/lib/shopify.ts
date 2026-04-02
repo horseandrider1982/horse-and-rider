@@ -105,6 +105,63 @@ export const STOREFRONT_QUERY = `
   }
 `;
 
+export const STOREFRONT_PAGINATED_QUERY = `
+  query GetProductsPaginated($first: Int!, $query: String, $after: String, $language: LanguageCode) @inContext(language: $language) {
+    products(first: $first, query: $query, after: $after) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          title
+          description
+          handle
+          vendor
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 5) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+          variants(first: 10) {
+            edges {
+              node {
+                id
+                title
+                price {
+                  amount
+                  currencyCode
+                }
+                availableForSale
+                sku
+                barcode
+                selectedOptions {
+                  name
+                  value
+                }
+              }
+            }
+          }
+          options {
+            name
+            values
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const SHOPIFY_MENU_QUERY = `
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
