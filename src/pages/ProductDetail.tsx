@@ -485,6 +485,7 @@ const ProductDetail = () => {
                     </div>
                   ))}
                 </div>
+                </TooltipProvider>
               )}
 
               {isConfigurator && (
