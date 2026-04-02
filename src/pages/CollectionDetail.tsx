@@ -24,7 +24,7 @@ const COLLECTION_QUERY = `
       id
       title
       description
-      products(first: $first, after: $after) {
+      products(first: $first, after: $after, filters: [{available: true}]) {
         pageInfo {
           hasNextPage
           endCursor
