@@ -83,7 +83,7 @@ async function fetchCollectionPage(handle: string, locale: string, cursor?: stri
     },
     body: JSON.stringify({
       query: COLLECTION_QUERY,
-      variables: { handle, first: 250, after: cursor || null, language: locale.toUpperCase() },
+      variables: { handle, first: 24, after: cursor || null, language: locale.toUpperCase() },
     }),
   });
   const json = await res.json();

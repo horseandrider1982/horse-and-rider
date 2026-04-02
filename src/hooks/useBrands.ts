@@ -47,7 +47,7 @@ export function useBrands() {
   });
 }
 
-const BRAND_PAGE_SIZE = 48;
+const BRAND_PAGE_SIZE = 24;
 
 interface BrandProductsPage {
   products: ShopifyProduct[];
