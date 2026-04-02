@@ -449,7 +449,7 @@ const ProductDetail = () => {
                         {option.values.map((value) => {
                           const isSelected = selectedOptions[option.name] === value;
                           const isAvailable = optionAvailability[option.name]?.[value] ?? false;
-                          return (
+                          const btn = (
                             <button
                               key={value}
                               onClick={() => handleOptionSelect(option.name, value)}
@@ -469,6 +469,16 @@ const ProductDetail = () => {
                                 </span>
                               )}
                             </button>
+                          );
+                          if (!isAvailable && !isSelected) {
+                            return (
+                              <Tooltip key={value}>
+                                <TooltipTrigger asChild>{btn}</TooltipTrigger>
+                                <TooltipContent>Nicht verfügbar</TooltipContent>
+                              </Tooltip>
+                            );
+                          }
+                          return btn;
                           );
                         })}
                       </div>
