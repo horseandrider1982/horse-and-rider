@@ -480,6 +480,7 @@ const ProductDetail = () => {
                               </Tooltip>
                             );
                           }
+                          return btn;
                         })}
                       </div>
                     </div>
