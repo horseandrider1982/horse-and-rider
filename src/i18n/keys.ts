@@ -67,6 +67,8 @@ export const defaultTranslations: Record<string, string> = {
   "products.empty": "Noch keine Produkte vorhanden",
   "products.empty_hint": "Erstelle dein erstes Produkt, indem du mir im Chat sagst, was du verkaufen möchtest.",
   "products.added_to_cart": "In den Warenkorb gelegt",
+  "products.load_more": "Mehr Produkte laden",
+  "products.loading": "Laden...",
 
   // Cart
   "cart.title": "Warenkorb",
