@@ -97,7 +97,7 @@ const ProductDetail = () => {
   const { data: product, isLoading, error } = useProductByHandle(handle || "");
   const addItem = useCartStore(state => state.addItem);
   const cartLoading = useCartStore(state => state.isLoading);
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [mainImage, setMainImage] = useState(0);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [configState, setConfigState] = useState<ConfigurationState | null>(null);
@@ -114,8 +114,74 @@ const ProductDetail = () => {
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
 
   const variants = product?.node?.variants?.edges;
-  const selectedVariant = variants?.[selectedVariantIndex]?.node;
-  const isSingleVariant = variants ? variants.length === 1 && (variants[0]?.node?.title === 'Default Title' || !product?.node?.options?.length || (product.node.options.length === 1 && product.node.options[0].name === 'Title')) : false;
+  const options = product?.node?.options?.filter(o => o.name !== 'Title') ?? [];
+  const isSingleVariant = variants ? variants.length === 1 && (variants[0]?.node?.title === 'Default Title' || !options.length) : false;
+
+  // Initialize selectedOptions from first variant on product load
+  useEffect(() => {
+    if (variants?.length && options.length > 0) {
+      const firstVariant = variants[0].node;
+      const initial: Record<string, string> = {};
+      firstVariant.selectedOptions.forEach(o => {
+        if (o.name !== 'Title') initial[o.name] = o.value;
+      });
+      setSelectedOptions(initial);
+    }
+  }, [product?.node?.id]);
+
+  // Helper: check if a variant is orderable (local stock OR supplier stock)
+  const isVariantOrderable = useMemo(() => {
+    if (!variants) return () => false;
+    return (variant: typeof variants[0]['node']) => {
+      return computeAvailability(
+        variant.availableForSale,
+        variant.metafields,
+        product?.node?.metafields,
+        isSingleVariant,
+      ).canOrder;
+    };
+  }, [variants, product?.node?.metafields, isSingleVariant]);
+
+  // Find the variant matching all selected options
+  const selectedVariant = useMemo(() => {
+    if (!variants || options.length === 0) return variants?.[0]?.node;
+    const allSelected = options.every(o => selectedOptions[o.name]);
+    if (!allSelected) return undefined;
+    const match = variants.find(v =>
+      options.every(o => v.node.selectedOptions.some(so => so.name === o.name && so.value === selectedOptions[o.name]))
+    );
+    return match?.node;
+  }, [variants, options, selectedOptions]);
+
+  // For each option, determine which values are available given the OTHER selected options
+  const optionAvailability = useMemo(() => {
+    if (!variants) return {};
+    const result: Record<string, Record<string, boolean>> = {};
+    for (const option of options) {
+      result[option.name] = {};
+      for (const value of option.values) {
+        // Find all variants that match this value AND all other currently selected options
+        const matchingVariants = variants.filter(v => {
+          const hasThisValue = v.node.selectedOptions.some(so => so.name === option.name && so.value === value);
+          if (!hasThisValue) return false;
+          // Check all OTHER selected options match
+          return options.every(otherOpt => {
+            if (otherOpt.name === option.name) return true;
+            const otherSelected = selectedOptions[otherOpt.name];
+            if (!otherSelected) return true; // no filter on unselected options
+            return v.node.selectedOptions.some(so => so.name === otherOpt.name && so.value === otherSelected);
+          });
+        });
+        // Value is available if at least one matching variant is orderable
+        result[option.name][value] = matchingVariants.some(v => isVariantOrderable(v.node));
+      }
+    }
+    return result;
+  }, [variants, options, selectedOptions, isVariantOrderable]);
+
+  const handleOptionSelect = (optionName: string, value: string) => {
+    setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
+  };
 
   const availability = useMemo(() => {
     if (!selectedVariant) return { canOrder: false, deliveryTime: null, isSupplierStock: false };
@@ -371,18 +437,37 @@ const ProductDetail = () => {
                 )}
               </p>
 
-              {product.node.options.length > 0 && product.node.options[0].name !== "Title" && (
+              {options.length > 0 && (
                 <div className="mb-6">
-                  {product.node.options.map((option) => (
+                  {options.map((option) => (
                     <div key={option.name} className="mb-3">
-                      <label className="text-sm font-medium mb-2 block">{option.name}</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        {option.name}
+                        {selectedOptions[option.name] && <span className="font-normal text-muted-foreground ml-2">– {selectedOptions[option.name]}</span>}
+                      </label>
                       <div className="flex flex-wrap gap-2">
                         {option.values.map((value) => {
-                          const variantIdx = variants?.findIndex(v => v.node.selectedOptions.some(o => o.name === option.name && o.value === value)) ?? -1;
+                          const isSelected = selectedOptions[option.name] === value;
+                          const isAvailable = optionAvailability[option.name]?.[value] ?? false;
                           return (
-                            <button key={value} onClick={() => variantIdx >= 0 && setSelectedVariantIndex(variantIdx)}
-                              className={`px-3 py-1.5 text-sm rounded border transition-colors ${variantIdx === selectedVariantIndex ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}>
+                            <button
+                              key={value}
+                              onClick={() => handleOptionSelect(option.name, value)}
+                              disabled={false}
+                              className={`px-3 py-1.5 text-sm rounded border transition-colors relative ${
+                                isSelected
+                                  ? 'border-primary bg-primary text-primary-foreground'
+                                  : isAvailable
+                                    ? 'border-border hover:border-primary'
+                                    : 'border-border text-muted-foreground opacity-50'
+                              }`}
+                            >
                               {value}
+                              {!isAvailable && !isSelected && (
+                                <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <span className="block w-full h-px bg-muted-foreground/40 rotate-[-20deg]" />
+                                </span>
+                              )}
                             </button>
                           );
                         })}
@@ -428,10 +513,15 @@ const ProductDetail = () => {
                   <span className="text-destructive font-medium">Dieser Artikel ist derzeit nicht verfügbar.</span>
                 </div>
               )}
+              {!selectedVariant && options.length > 0 && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-muted text-sm">
+                  <span className="text-muted-foreground font-medium">Bitte wählen Sie alle Optionen aus.</span>
+                </div>
+              )}
 
-              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`w-full ${canAddToCart ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
+              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart || !selectedVariant} className={`w-full ${canAddToCart && selectedVariant ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {!canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
+                {!selectedVariant ? 'Bitte Variante wählen' : !canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
               <PaymentIcons />
