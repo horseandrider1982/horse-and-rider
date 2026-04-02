@@ -513,10 +513,15 @@ const ProductDetail = () => {
                   <span className="text-destructive font-medium">Dieser Artikel ist derzeit nicht verfügbar.</span>
                 </div>
               )}
+              {!selectedVariant && options.length > 0 && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-muted text-sm">
+                  <span className="text-muted-foreground font-medium">Bitte wählen Sie alle Optionen aus.</span>
+                </div>
+              )}
 
-              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`w-full ${canAddToCart ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
+              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart || !selectedVariant} className={`w-full ${canAddToCart && selectedVariant ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {!canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
+                {!selectedVariant ? 'Bitte Variante wählen' : !canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
               <PaymentIcons />
