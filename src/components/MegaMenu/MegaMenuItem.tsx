@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { LocaleLink } from '@/components/LocaleLink';
 import { MegaMenuDropdown } from './MegaMenuDropdown';
@@ -16,6 +17,12 @@ export function MegaMenuItem({ item }: MegaMenuItemProps) {
   const openTimeout = useRef<ReturnType<typeof setTimeout>>();
   const closeTimeout = useRef<ReturnType<typeof setTimeout>>();
   const hasChildren = item.items && item.items.length > 0;
+  const location = useLocation();
+
+  // Close menu on any route change (SPA navigation)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const handleMouseEnter = useCallback(() => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
