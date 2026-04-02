@@ -303,7 +303,7 @@ const ProductDetail = () => {
         images={productImages}
         price={selectedVariant?.price.amount || product.node.priceRange.minVariantPrice.amount}
         currency={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode}
-        available={selectedVariant?.availableForSale ?? true}
+        available={availability.canOrder}
         sku={firstVariantSku}
         brand={product.node.vendor}
         locale={locale}
