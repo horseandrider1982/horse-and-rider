@@ -247,7 +247,9 @@ Deno.serve(async (req) => {
     const synonyms = await loadSynonyms();
     const expandedQuery = expandQuery(q, synonyms);
 
-    const variables: Record<string, unknown> = { query: expandedQuery, first: 24 };
+    // Only return products that are available for sale
+    const shopifyQuery = `(${expandedQuery}) AND available_for_sale:true`;
+    const variables: Record<string, unknown> = { query: shopifyQuery, first: 24 };
     if (after) variables.after = after;
 
     const shopifyRes = await fetch(SHOPIFY_STOREFRONT_URL, {
