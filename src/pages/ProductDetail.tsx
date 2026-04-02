@@ -378,7 +378,7 @@ const ProductDetail = () => {
                       <label className="text-sm font-medium mb-2 block">{option.name}</label>
                       <div className="flex flex-wrap gap-2">
                         {option.values.map((value) => {
-                          const variantIdx = variants.findIndex(v => v.node.selectedOptions.some(o => o.name === option.name && o.value === value));
+                          const variantIdx = variants?.findIndex(v => v.node.selectedOptions.some(o => o.name === option.name && o.value === value)) ?? -1;
                           return (
                             <button key={value} onClick={() => variantIdx >= 0 && setSelectedVariantIndex(variantIdx)}
                               className={`px-3 py-1.5 text-sm rounded border transition-colors ${variantIdx === selectedVariantIndex ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}>
