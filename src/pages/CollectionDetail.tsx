@@ -143,10 +143,8 @@ export default function CollectionDetail() {
     return data.pages.flatMap((page) => page?.products?.edges || []);
   }, [data]);
 
-  // Only show products with at least one available variant (PDP stays accessible for SEO)
-  const products = allProductEdges.filter((e: any) =>
-    e.node.variants?.edges?.some((v: any) => v.node.availableForSale)
-  );
+  // Shopify filters by availability server-side via `filters: [{available: true}]`
+  const products = allProductEdges;
 
   const collectionMetaDesc = collection
     ? collection.description?.slice(0, 120)
