@@ -211,6 +211,16 @@ export const PRODUCT_BY_HANDLE_QUERY = `
           }
         }
       }
+      metafields(identifiers: [
+        {namespace: "custom", key: "lieferzeit"},
+        {namespace: "custom", key: "lieferantenbestand"},
+        {namespace: "custom", key: "ueberverkauf"}
+      ]) {
+        namespace
+        key
+        value
+        type
+      }
       variants(first: 20) {
         edges {
           node {
@@ -223,6 +233,16 @@ export const PRODUCT_BY_HANDLE_QUERY = `
             availableForSale
             sku
             barcode
+            metafields(identifiers: [
+              {namespace: "custom", key: "lieferzeit"},
+              {namespace: "custom", key: "lieferantenbestand"},
+              {namespace: "custom", key: "ueberverkauf"}
+            ]) {
+              namespace
+              key
+              value
+              type
+            }
             selectedOptions {
               name
               value
