@@ -5,6 +5,13 @@ const SHOPIFY_STORE_PERMANENT_DOMAIN = 'bpjvam-c1.myshopify.com';
 const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
 const SHOPIFY_STOREFRONT_TOKEN = 'd69c81decdb58ced137c44fa1b033aa3';
 
+export interface ShopifyMetafield {
+  namespace: string;
+  key: string;
+  value: string;
+  type: string;
+}
+
 export interface ShopifyProduct {
   node: {
     id: string;
@@ -26,6 +33,7 @@ export interface ShopifyProduct {
         };
       }>;
     };
+    metafields?: (ShopifyMetafield | null)[];
     variants: {
       edges: Array<{
         node: {
@@ -38,6 +46,7 @@ export interface ShopifyProduct {
           availableForSale: boolean;
           sku?: string;
           barcode?: string;
+          metafields?: (ShopifyMetafield | null)[];
           selectedOptions: Array<{
             name: string;
             value: string;
