@@ -437,18 +437,37 @@ const ProductDetail = () => {
                 )}
               </p>
 
-              {product.node.options.length > 0 && product.node.options[0].name !== "Title" && (
+              {options.length > 0 && (
                 <div className="mb-6">
-                  {product.node.options.map((option) => (
+                  {options.map((option) => (
                     <div key={option.name} className="mb-3">
-                      <label className="text-sm font-medium mb-2 block">{option.name}</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        {option.name}
+                        {selectedOptions[option.name] && <span className="font-normal text-muted-foreground ml-2">– {selectedOptions[option.name]}</span>}
+                      </label>
                       <div className="flex flex-wrap gap-2">
                         {option.values.map((value) => {
-                          const variantIdx = variants?.findIndex(v => v.node.selectedOptions.some(o => o.name === option.name && o.value === value)) ?? -1;
+                          const isSelected = selectedOptions[option.name] === value;
+                          const isAvailable = optionAvailability[option.name]?.[value] ?? false;
                           return (
-                            <button key={value} onClick={() => variantIdx >= 0 && setSelectedVariantIndex(variantIdx)}
-                              className={`px-3 py-1.5 text-sm rounded border transition-colors ${variantIdx === selectedVariantIndex ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}>
+                            <button
+                              key={value}
+                              onClick={() => handleOptionSelect(option.name, value)}
+                              disabled={false}
+                              className={`px-3 py-1.5 text-sm rounded border transition-colors relative ${
+                                isSelected
+                                  ? 'border-primary bg-primary text-primary-foreground'
+                                  : isAvailable
+                                    ? 'border-border hover:border-primary'
+                                    : 'border-border text-muted-foreground opacity-50'
+                              }`}
+                            >
                               {value}
+                              {!isAvailable && !isSelected && (
+                                <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <span className="block w-full h-px bg-muted-foreground/40 rotate-[-20deg]" />
+                                </span>
+                              )}
                             </button>
                           );
                         })}
