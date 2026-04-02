@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Loader2, ShoppingCart, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool, Truck } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
 import { ProductContactModal } from "@/components/ProductContactModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
