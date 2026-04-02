@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { storefrontApiRequest, type ShopifyProduct, STOREFRONT_QUERY } from '@/lib/shopify';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { storefrontApiRequest, type ShopifyProduct, STOREFRONT_PAGINATED_QUERY } from '@/lib/shopify';
 import { supabase } from '@/integrations/supabase/client';
+import { useI18n } from '@/i18n';
 
 export interface Brand {
   name: string;
@@ -46,16 +47,43 @@ export function useBrands() {
   });
 }
 
+const BRAND_PAGE_SIZE = 48;
+
+interface BrandProductsPage {
+  products: ShopifyProduct[];
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+}
+
+async function fetchBrandProductsPage(
+  vendor: string,
+  locale: string,
+  after?: string
+): Promise<BrandProductsPage> {
+  const languageMap: Record<string, string> = { de: 'DE', en: 'EN', es: 'ES', nl: 'NL', pl: 'PL', da: 'DA', sv: 'SV' };
+  const language = languageMap[locale] || 'DE';
+
+  const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, {
+    first: BRAND_PAGE_SIZE,
+    query: `vendor:"${vendor}"`,
+    after: after || null,
+    language,
+  });
+
+  const edges = data?.data?.products?.edges || [];
+  const pageInfo = data?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null };
+
+  return { products: edges as ShopifyProduct[], pageInfo };
+}
+
 export function useBrandProducts(vendor: string, enabled: boolean) {
-  return useQuery({
-    queryKey: ['brand-products', vendor],
-    queryFn: async () => {
-      const data = await storefrontApiRequest(STOREFRONT_QUERY, {
-        first: 24,
-        query: `vendor:"${vendor}"`,
-      });
-      return (data?.data?.products?.edges || []) as ShopifyProduct[];
-    },
+  const { locale } = useI18n();
+
+  return useInfiniteQuery({
+    queryKey: ['brand-products', vendor, locale],
+    queryFn: ({ pageParam }) => fetchBrandProductsPage(vendor, locale, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined,
     enabled,
   });
 }
