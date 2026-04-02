@@ -414,9 +414,24 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart} className={`w-full ${selectedVariant?.availableForSale !== false ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
+              {/* Delivery time / availability info */}
+              {availability.deliveryTime && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 text-sm">
+                  <Truck className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                  <span className="text-green-700 dark:text-green-300 font-medium">
+                    Lieferzeit: {availability.deliveryTime}
+                  </span>
+                </div>
+              )}
+              {!availability.canOrder && selectedVariant && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-destructive/10 text-sm">
+                  <span className="text-destructive font-medium">Dieser Artikel ist derzeit nicht verfügbar.</span>
+                </div>
+              )}
+
+              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`w-full ${canAddToCart ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
+                {!canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
               <PaymentIcons />
