@@ -349,7 +349,7 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart} className="w-full bg-primary text-primary-foreground hover:opacity-90" size="lg">
+              <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart} className={`w-full ${selectedVariant?.availableForSale !== false ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
                 {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
