@@ -253,7 +253,18 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.node.images.edges;
+  const allImages = product.node.images.edges;
+
+  // Filter images to show only those matching the selected variant's SKU (via altText)
+  const displayImages = useMemo(() => {
+    if (!selectedVariant || isSingleVariant) return allImages;
+    const sku = selectedVariant.sku;
+    if (!sku) return allImages;
+    const filtered = allImages.filter(img => img.node.altText === sku);
+    return filtered.length > 0 ? filtered : allImages;
+  }, [allImages, selectedVariant, isSingleVariant]);
+
+  const images = displayImages;
   const basePrice = selectedVariant ? parseFloat(selectedVariant.price.amount) : parseFloat(product.node.priceRange.minVariantPrice.amount);
   const totalPrice = basePrice + (configState?.totalPriceDelta ?? 0);
 
