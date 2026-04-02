@@ -17,6 +17,12 @@ export function MegaMenuItem({ item }: MegaMenuItemProps) {
   const openTimeout = useRef<ReturnType<typeof setTimeout>>();
   const closeTimeout = useRef<ReturnType<typeof setTimeout>>();
   const hasChildren = item.items && item.items.length > 0;
+  const location = useLocation();
+
+  // Close menu on any route change (SPA navigation)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const handleMouseEnter = useCallback(() => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
