@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { Loader2, ShoppingCart, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Loader2, ShoppingCart, Sparkles, Phone, MessageSquare, Smartphone, Monitor, PenTool, Truck } from "lucide-react";
 import { CalendlyModal } from "@/components/CalendlyModal";
 import { ProductContactModal } from "@/components/ProductContactModal";
 import beratungPortrait from "@/assets/beratung-portrait.png";
 import { Button } from "@/components/ui/button";
 import { useProductByHandle } from "@/hooks/useProducts";
+import type { ShopifyMetafield } from "@/lib/shopify";
 import { useBrands } from "@/hooks/useBrands";
 import { useProductConfigurator } from "@/hooks/useConfigurator";
 import { useCartStore } from "@/stores/cartStore";
@@ -37,6 +38,58 @@ function loadConfig(productId: string): ConfigurationState | null {
   return null;
 }
 
+function getMetafieldValue(metafields: (ShopifyMetafield | null)[] | undefined, key: string): string | null {
+  if (!metafields) return null;
+  const mf = metafields.find(m => m && m.key === key);
+  return mf?.value ?? null;
+}
+
+interface AvailabilityInfo {
+  canOrder: boolean;
+  deliveryTime: string | null;
+  isSupplierStock: boolean;
+}
+
+function computeAvailability(
+  variantAvailableForSale: boolean,
+  variantMetafields?: (ShopifyMetafield | null)[],
+  productMetafields?: (ShopifyMetafield | null)[],
+  isSingleVariant?: boolean,
+): AvailabilityInfo {
+  // If available for sale in Shopify → standard delivery
+  if (variantAvailableForSale) {
+    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
+  }
+
+  // Check metafields: for single-variant products, fall back to product-level metafields
+  const mf = isSingleVariant ? productMetafields : variantMetafields;
+  const lieferantenbestand = getMetafieldValue(mf, 'lieferantenbestand');
+  const ueberverkauf = getMetafieldValue(mf, 'ueberverkauf');
+  const lieferzeit = getMetafieldValue(mf, 'lieferzeit');
+
+  // Also check variant-level for single-variant (in case fields are on variant too)
+  const varLieferantenbestand = getMetafieldValue(variantMetafields, 'lieferantenbestand');
+  const varUeberverkauf = getMetafieldValue(variantMetafields, 'ueberverkauf');
+  const varLieferzeit = getMetafieldValue(variantMetafields, 'lieferzeit');
+
+  const bestLieferantenbestand = varLieferantenbestand || lieferantenbestand;
+  const bestUeberverkauf = varUeberverkauf || ueberverkauf;
+  const bestLieferzeit = varLieferzeit || lieferzeit;
+
+  const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
+  const allowOversell = bestUeberverkauf === '1';
+
+  if (hasSupplierStock && allowOversell) {
+    return {
+      canOrder: true,
+      deliveryTime: bestLieferzeit || 'Lieferzeit auf Anfrage',
+      isSupplierStock: true,
+    };
+  }
+
+  return { canOrder: false, deliveryTime: null, isSupplierStock: false };
+}
+
 const ProductDetail = () => {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
@@ -59,6 +112,20 @@ const ProductDetail = () => {
   const isEngravable = !!configuratorData && configuratorData.groups.some(g => g.name.toLowerCase().includes('gravur'));
   const { data: brands } = useBrands();
   const brand = brands?.find(b => b.name.toLowerCase().trim() === product?.node?.vendor?.toLowerCase().trim());
+
+  const variants = product?.node?.variants?.edges;
+  const selectedVariant = variants?.[selectedVariantIndex]?.node;
+  const isSingleVariant = variants ? variants.length === 1 && (variants[0]?.node?.title === 'Default Title' || !product?.node?.options?.length || (product.node.options.length === 1 && product.node.options[0].name === 'Title')) : false;
+
+  const availability = useMemo(() => {
+    if (!selectedVariant) return { canOrder: false, deliveryTime: null, isSupplierStock: false };
+    return computeAvailability(
+      selectedVariant.availableForSale,
+      selectedVariant.metafields,
+      product?.node?.metafields,
+      isSingleVariant,
+    );
+  }, [selectedVariant, product?.node?.metafields, isSingleVariant]);
 
   useEffect(() => {
     if (shopifyProductId) {
@@ -119,8 +186,6 @@ const ProductDetail = () => {
     );
   }
 
-  const variants = product.node.variants.edges;
-  const selectedVariant = variants[selectedVariantIndex]?.node;
   const images = product.node.images.edges;
   const basePrice = selectedVariant ? parseFloat(selectedVariant.price.amount) : parseFloat(product.node.priceRange.minVariantPrice.amount);
   const totalPrice = basePrice + (configState?.totalPriceDelta ?? 0);
@@ -224,10 +289,10 @@ const ProductDetail = () => {
     });
   };
 
-  const canAddToCart = !isConfigurator || configState?.isConfigured;
+  const canAddToCart = (!isConfigurator || configState?.isConfigured) && availability.canOrder;
 
   const productImages = images.map(e => e.node.url);
-  const firstVariantSku = variants[0]?.node?.sku;
+  const firstVariantSku = variants?.[0]?.node?.sku;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -238,7 +303,7 @@ const ProductDetail = () => {
         images={productImages}
         price={selectedVariant?.price.amount || product.node.priceRange.minVariantPrice.amount}
         currency={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode}
-        available={selectedVariant?.availableForSale ?? true}
+        available={availability.canOrder}
         sku={firstVariantSku}
         brand={product.node.vendor}
         locale={locale}
@@ -313,7 +378,7 @@ const ProductDetail = () => {
                       <label className="text-sm font-medium mb-2 block">{option.name}</label>
                       <div className="flex flex-wrap gap-2">
                         {option.values.map((value) => {
-                          const variantIdx = variants.findIndex(v => v.node.selectedOptions.some(o => o.name === option.name && o.value === value));
+                          const variantIdx = variants?.findIndex(v => v.node.selectedOptions.some(o => o.name === option.name && o.value === value)) ?? -1;
                           return (
                             <button key={value} onClick={() => variantIdx >= 0 && setSelectedVariantIndex(variantIdx)}
                               className={`px-3 py-1.5 text-sm rounded border transition-colors ${variantIdx === selectedVariantIndex ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}>
@@ -349,9 +414,24 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              <Button onClick={handleAddToCart} disabled={cartLoading || !selectedVariant?.availableForSale || !canAddToCart} className={`w-full ${selectedVariant?.availableForSale !== false ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
+              {/* Delivery time / availability info */}
+              {availability.deliveryTime && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 text-sm">
+                  <Truck className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                  <span className="text-green-700 dark:text-green-300 font-medium">
+                    Lieferzeit: {availability.deliveryTime}
+                  </span>
+                </div>
+              )}
+              {!availability.canOrder && selectedVariant && (
+                <div className="flex items-center gap-2 mb-3 p-3 rounded-lg bg-destructive/10 text-sm">
+                  <span className="text-destructive font-medium">Dieser Artikel ist derzeit nicht verfügbar.</span>
+                </div>
+              )}
+
+              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`w-full ${canAddToCart ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
                 {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {!canAddToCart ? t("product.configure_first") : selectedVariant?.availableForSale ? t("product.add_to_cart") : t("product.unavailable")}
+                {!canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
               <PaymentIcons />
