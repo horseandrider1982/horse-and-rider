@@ -683,6 +683,12 @@ const ProductDetail = () => {
               </div>
             </div>
           )}
+          <SimilarProducts
+            vendor={product.node.vendor}
+            productType={product.node.productType}
+            currentProductId={product.node.id}
+          />
+
           {/* Bottom spacer for sticky mobile bar */}
           <div className="h-20 md:hidden" />
         </div>
