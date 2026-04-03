@@ -53,17 +53,7 @@ export const SearchEmptyState: React.FC<SearchEmptyStateProps> = ({ onChipClick,
         </div>
       </div>
 
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Tag className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">{t("search.popular_categories")}</h3>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-          {POPULAR_CATEGORIES.map(cat => (
-            <button key={cat.label} onClick={() => onChipClick(cat.query)} className={cn("px-4 py-3 rounded-xl text-sm font-medium border border-border", "bg-muted/30 text-foreground hover:bg-primary hover:text-primary-foreground", "transition-colors text-center")}>{cat.label}</button>
-          ))}
-        </div>
-      </div>
+
 
       {trending.length > 0 && (
         <div>
