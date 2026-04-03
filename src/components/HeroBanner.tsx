@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Search, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { SearchOverlay } from "@/components/SmartSearch";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n";
 
 export const HeroBanner = () => {
   const [searchOpen, setSearchOpen] = useState(false);
-  const { t } = useI18n();
+  const { t, localePath } = useI18n();
+  const navigate = useNavigate();
 
   return (
     <>
