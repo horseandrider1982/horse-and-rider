@@ -215,14 +215,7 @@ const ProductDetail = () => {
 
   // Dynamic meta tags – SEO-optimized description
   const metaDescription = product?.node
-    ? (() => {
-        const title = product.node.title;
-        const vendor = product.node.vendor || '';
-        const base = `${title} von ${vendor}. Jetzt bei Horse & Rider Luhmühlen entdecken.`;
-        return base.slice(0, 155);
-        const base = `${title} von ${vendor}.${typePart} Jetzt bei Horse & Rider Luhmühlen entdecken.`;
-        return base.slice(0, 155);
-      })()
+    ? `${product.node.title} von ${product.node.vendor || ''}. Jetzt bei Horse & Rider Luhmühlen entdecken.`.slice(0, 155)
     : undefined;
 
   usePageMeta({
