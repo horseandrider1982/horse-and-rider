@@ -90,10 +90,19 @@ export function ShopifyCustomerProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useShopifyCustomer() {
+export function useShopifyCustomer(): ShopifyCustomerContextValue {
   const ctx = useContext(ShopifyCustomerContext);
   if (!ctx) {
-    throw new Error('useShopifyCustomer must be used within ShopifyCustomerProvider');
+    // Return safe defaults when used outside provider (e.g. admin routes)
+    return {
+      customer: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: async () => {},
+      logout: () => {},
+      refreshCustomer: async () => {},
+      getCheckoutUrl: (url: string) => url,
+    };
   }
   return ctx;
 }
