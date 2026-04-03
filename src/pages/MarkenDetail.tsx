@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { BackToTop } from "@/components/BackToTop";
 import { Button } from "@/components/ui/button";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
