@@ -479,11 +479,20 @@ const ProductDetail = () => {
                 </p>
               </div>
               {product.node.vendor && (
-                <meta itemProp="brand" content={product.node.vendor} />
+                <p className="text-sm text-muted-foreground mb-1" itemProp="brand" itemScope itemType="https://schema.org/Brand">
+                  Marke: <span itemProp="name" className="font-medium text-foreground">{product.node.vendor}</span>
+                </p>
               )}
               {selectedSku && (
-                <meta itemProp="sku" content={selectedSku} />
+                <p className="text-sm text-muted-foreground mb-1">
+                  Art.-Nr.: <span itemProp="sku" className="font-medium text-foreground">{selectedSku}</span>
+                </p>
               )}
+              <p className="text-sm text-muted-foreground mb-3">
+                Verfügbarkeit: <span className={`font-medium ${availability.canOrder ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
+                  {availability.canOrder ? 'Auf Lager' : 'Nicht verfügbar'}
+                </span>
+              </p>
 
               {options.length > 0 && (
                 <TooltipProvider delayDuration={200}>
