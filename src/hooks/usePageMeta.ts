@@ -62,6 +62,11 @@ export function usePageMeta(options: PageMetaOptions) {
     // Standard meta
     setMeta("description", description);
 
+    // Robots – always set explicitly
+    if (!options.noIndex) {
+      setMeta("robots", "index, follow");
+    }
+
     // OG
     setMeta("og:title", fullTitle, "property");
     setMeta("og:description", description, "property");
