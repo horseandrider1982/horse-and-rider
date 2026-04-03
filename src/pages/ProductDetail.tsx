@@ -565,6 +565,20 @@ const ProductDetail = () => {
                 {!selectedVariant ? 'Bitte Variante wählen' : !canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
               </Button>
 
+              {/* Sticky mobile add-to-cart bar */}
+              {selectedVariant && (
+                <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border p-3 flex items-center gap-3 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{basePrice.toFixed(2)} €</p>
+                    {availability.deliveryTime && <p className="text-xs text-muted-foreground truncate">{availability.deliveryTime}</p>}
+                  </div>
+                  <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`flex-shrink-0 ${canAddToCart ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground opacity-60'}`} size="default">
+                    {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
+                    {canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
+                  </Button>
+                </div>
+              )}
+
               <PaymentIcons />
 
               {/* Beratungs-Strip */}

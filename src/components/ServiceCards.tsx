@@ -20,7 +20,7 @@ export const ServiceCards = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((s) => (
             <div key={s.titleKey} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-              <div className="aspect-[4/3] overflow-hidden">
+              <div className="aspect-[16/9] sm:aspect-[4/3] overflow-hidden">
                 <img src={s.image} alt={t(s.titleKey)} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
               <div className="p-4">
