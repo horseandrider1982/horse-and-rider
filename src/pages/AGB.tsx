@@ -1,7 +1,7 @@
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 
 const AGB = () => (
-  <LegalPageLayout>
+  <LegalPageLayout title="AGB" description="Allgemeine Geschäftsbedingungen der Horse & Rider Reitsportfachhandels GmbH." slug="agb">
     <h1>Allgemeine Geschäftsbedingungen</h1>
 
     <p><strong>Allgemeine Geschäftsbedingungen und Kundeninformationen</strong></p>

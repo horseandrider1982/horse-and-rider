@@ -1,7 +1,7 @@
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 
 const Widerrufsrecht = () => (
-  <LegalPageLayout>
+  <LegalPageLayout title="Widerrufsrecht" description="Widerrufsbelehrung und Muster-Widerrufsformular der Horse & Rider Reitsportfachhandels GmbH." slug="widerrufsrecht">
     <h1>Widerrufsrecht für Verbraucher</h1>
 
     <p>(Verbraucher ist jede natürliche Person, die ein Rechtsgeschäft zu Zwecken abschließt, die überwiegend weder ihrer gewerblichen noch ihrer selbstständigen beruflichen Tätigkeit zugerechnet werden können.)</p>

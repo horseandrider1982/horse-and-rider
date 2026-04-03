@@ -1,7 +1,7 @@
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 
 const Datenschutz = () => (
-  <LegalPageLayout>
+  <LegalPageLayout title="Datenschutzerklärung" description="Datenschutzerklärung der Horse & Rider Reitsportfachhandels GmbH – Informationen zum Umgang mit Ihren Daten." slug="datenschutz">
     <h1>Datenschutzerklärung</h1>
 
     <p>Soweit nachstehend keine anderen Angaben gemacht werden, ist die Bereitstellung Ihrer personenbezogenen Daten weder gesetzlich oder vertraglich vorgeschrieben, noch für einen Vertragsabschluss erforderlich. Sie sind zur Bereitstellung der Daten nicht verpflichtet. Eine Nichtbereitstellung hat keine Folgen. Dies gilt nur soweit bei den nachfolgenden Verarbeitungsvorgängen keine anderweitige Angabe gemacht wird.</p>

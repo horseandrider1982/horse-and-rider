@@ -93,7 +93,7 @@ const paymentMethods = [
 ];
 
 const Versand = () => (
-  <LegalPageLayout>
+  <LegalPageLayout title="Versand & Zahlung" description="Versandkosten, Lieferzeiten und Zahlungsmöglichkeiten bei Horse & Rider Luhmühlen." slug="versand">
     <h1>Versand &amp; Zahlung</h1>
 
     {/* ───── Versand ───── */}
