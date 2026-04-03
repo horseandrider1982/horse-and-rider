@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import type { PublicMenuItem } from "@/hooks/usePublicCmsMenus";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 function MobileShopifyItem({ item, onClose }: { item: ShopifyMenuItem; onClose: () => void }) {
   const hasChildren = item.items && item.items.length > 0;
