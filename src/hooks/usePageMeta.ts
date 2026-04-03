@@ -42,7 +42,7 @@ export function usePageMeta(options: PageMetaOptions) {
 
   useEffect(() => {
     const fullTitle = options.title
-      ? `${options.title} – ${SITE_NAME}`
+      ? `${options.title} | ${SITE_NAME}`
       : SITE_NAME;
     const description = options.description || "Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte für Reiter und Pferd bei Horse & Rider Luhmühlen.";
     const ogImage = options.ogImage || DEFAULT_OG_IMAGE;
@@ -61,6 +61,11 @@ export function usePageMeta(options: PageMetaOptions) {
 
     // Standard meta
     setMeta("description", description);
+
+    // Robots – always set explicitly
+    if (!options.noIndex) {
+      setMeta("robots", "index, follow");
+    }
 
     // OG
     setMeta("og:title", fullTitle, "property");
@@ -87,7 +92,7 @@ export function usePageMeta(options: PageMetaOptions) {
 
     return () => {
       // Reset to defaults on unmount
-      document.title = `${SITE_NAME} - Reitsport Online Shop`;
+      document.title = `${SITE_NAME} | Reitsport Online Shop`;
       if (options.noIndex) {
         setMeta("robots", "index, follow");
       }

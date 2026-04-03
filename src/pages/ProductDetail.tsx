@@ -213,17 +213,9 @@ const ProductDetail = () => {
     }
   }, [shopifyProductId]);
 
-  // Dynamic meta tags – build keyword-rich description
+  // Dynamic meta tags – SEO-optimized description
   const metaDescription = product?.node
-    ? (() => {
-        const title = product.node.title;
-        const vendor = product.node.vendor;
-        const price = parseFloat(product.node.priceRange.minVariantPrice.amount).toFixed(2);
-        const currency = product.node.priceRange.minVariantPrice.currencyCode === 'EUR' ? '€' : product.node.priceRange.minVariantPrice.currencyCode;
-        const rawDesc = product.node.description?.replace(/\s+/g, ' ').trim() || '';
-        const snippet = rawDesc.slice(0, 80);
-        return `${title} von ${vendor} ab ${price} ${currency} kaufen. ${snippet}…`.slice(0, 160);
-      })()
+    ? `${product.node.title} von ${product.node.vendor || ''}. Jetzt bei Horse & Rider Luhmühlen entdecken.`.slice(0, 155)
     : undefined;
 
   usePageMeta({
@@ -381,6 +373,7 @@ const ProductDetail = () => {
 
   const productImages = images.map(e => e.node.url);
   const firstVariantSku = variants?.[0]?.node?.sku;
+  const selectedSku = selectedVariant?.sku || firstVariantSku;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -392,7 +385,7 @@ const ProductDetail = () => {
         price={selectedVariant?.price.amount || product.node.priceRange.minVariantPrice.amount}
         currency={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode}
         available={availability.canOrder}
-        sku={firstVariantSku}
+        sku={selectedSku}
         brand={product.node.vendor}
         locale={locale}
       />
@@ -402,7 +395,7 @@ const ProductDetail = () => {
         { name: product.node.title, url: `https://horse-and-rider.de/${locale}/product/${product.node.handle}` },
       ]} />
       <TopBar /><Header />
-      <main className="flex-1">
+      <main className="flex-1" itemScope itemType="https://schema.org/Product">
         <div className="container mx-auto px-4 py-8">
           <Breadcrumb className="mb-6">
             <BreadcrumbList>
@@ -439,7 +432,14 @@ const ProductDetail = () => {
             <div>
               <div className="aspect-square rounded-lg overflow-hidden bg-white mb-3">
                 {images[mainImage] ? (
-                  <img src={images[mainImage].node.url} alt={images[mainImage].node.altText || product.node.title} className="w-full h-full object-contain" />
+                  <img
+                    src={images[mainImage].node.url}
+                    alt={images[mainImage].node.altText || product.node.title}
+                    width={800}
+                    height={800}
+                    className="w-full h-full object-contain"
+                    itemProp="image"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><ShoppingCart className="h-16 w-16 text-muted-foreground" /></div>
                 )}
@@ -448,7 +448,7 @@ const ProductDetail = () => {
                 <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
                   {images.map((img, i) => (
                     <button key={i} onClick={() => setMainImage(i)} className={`w-16 h-16 sm:w-16 sm:h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-colors snap-start ${i === mainImage ? "border-primary" : "border-transparent"}`}>
-                      <img src={img.node.url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.node.url} alt={img.node.altText || `${product.node.title} Bild ${i + 1}`} width={64} height={64} loading="lazy" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -458,14 +458,25 @@ const ProductDetail = () => {
               {brand?.logoUrl && (
                 <img src={brand.logoUrl} alt={brand.name} className="h-6 w-auto object-contain mb-2" style={{ filter: 'brightness(0)' }} />
               )}
-              <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3">{product.node.title}</h1>
-              <p className="text-2xl font-bold text-primary mb-4">
-                {isConfigurator && configState?.isConfigured ? (
-                  <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">{t("product.incl_config")}</span></>
-                ) : (
-                  <>{basePrice.toFixed(2)} €</>
-                )}
-              </p>
+              <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3" itemProp="name">{product.node.title}</h1>
+              <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
+                <meta itemProp="priceCurrency" content={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode} />
+                <meta itemProp="price" content={String(basePrice.toFixed(2))} />
+                <link itemProp="availability" href={availability.canOrder ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"} />
+                <p className="text-2xl font-bold text-primary mb-4">
+                  {isConfigurator && configState?.isConfigured ? (
+                    <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">{t("product.incl_config")}</span></>
+                  ) : (
+                    <>{basePrice.toFixed(2)} €</>
+                  )}
+                </p>
+              </div>
+              {product.node.vendor && (
+                <meta itemProp="brand" content={product.node.vendor} />
+              )}
+              {selectedSku && (
+                <meta itemProp="sku" content={selectedSku} />
+              )}
 
               {options.length > 0 && (
                 <TooltipProvider delayDuration={200}>
@@ -613,10 +624,10 @@ const ProductDetail = () => {
           </div>
 
           {product.node.description && (
-            <div className="mt-10 pt-8 border-t border-border">
-              <h3 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h3>
-              <p className="text-base text-muted-foreground leading-relaxed">{product.node.description}</p>
-            </div>
+            <section className="mt-10 pt-8 border-t border-border">
+              <h2 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h2>
+              <div className="text-base text-muted-foreground leading-relaxed" itemProp="description">{product.node.description}</div>
+            </section>
           )}
 
           {(selectedVariant?.sku || selectedVariant?.barcode) && (
