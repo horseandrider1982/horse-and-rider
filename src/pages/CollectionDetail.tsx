@@ -313,6 +313,7 @@ export default function CollectionDetail() {
         </div>
       </main>
       <Footer />
+      <BackToTop />
     </div>
   );
 }

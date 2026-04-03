@@ -124,6 +124,7 @@ export default function MarkenDetail() {
           {brand.seoText ? <div className="prose prose-sm max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: brand.seoText }} /> : <DefaultSeoText brand={brand.name} />}
         </section>
       </main><Footer />
+      <BackToTop />
     </div>
   );
 }
