@@ -5,26 +5,27 @@ import { CartDrawer } from "./CartDrawer";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MobileMenu } from "./MobileMenu";
 import { useAuth } from "@/hooks/useAuth";
+import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
 import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { MegaMenu } from "@/components/MegaMenu";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, Search, LogIn, LogOut, UserCircle } from "lucide-react";
+import { User, Search, LogIn, LogOut, UserCircle, CreditCard, PawPrint, ShoppingBag, ExternalLink } from "lucide-react";
 import { SearchOverlay } from "@/components/SmartSearch";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import logo from "@/assets/logo.png";
 
 export const Header = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { customer, isAuthenticated: isCustomerAuth, login: shopifyLogin, logout: shopifyLogout } = useShopifyCustomer();
   const { data: menus } = usePublicCmsMenus();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const { t, localePath } = useI18n();
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    shopifyLogout();
     toast.success(t("header.logged_out"));
     navigate(localePath("/"));
   };
@@ -61,22 +62,33 @@ export const Header = () => {
                   <Button variant="ghost" size="icon"><User className="h-5 w-5" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-popover z-[100]">
-                  {accountMenuItems.length > 0 ? (
-                    accountMenuItems.map(item => (
-                      <DropdownMenuItem key={item.id} asChild>
-                        <LocaleLink to={item.url || '/'} className="flex items-center gap-2 cursor-pointer">{item.label}</LocaleLink>
-                      </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <DropdownMenuItem asChild>
-                      <LocaleLink to={user ? "/account" : "/auth"} className="flex items-center gap-2 cursor-pointer">
-                        <UserCircle className="h-4 w-4" />
-                        {user ? t("header.account") : t("header.login")}
-                      </LocaleLink>
-                    </DropdownMenuItem>
-                  )}
-                  {user ? (
+                  {isCustomerAuth ? (
                     <>
+                      <DropdownMenuItem className="text-xs text-muted-foreground font-medium" disabled>
+                        {customer?.displayName || customer?.email || t("header.account")}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <LocaleLink to="/account" className="flex items-center gap-2 cursor-pointer">
+                          <UserCircle className="h-4 w-4" />{t("header.account") || "Mein Bereich"}
+                        </LocaleLink>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <LocaleLink to="/kundenkarte" className="flex items-center gap-2 cursor-pointer">
+                          <CreditCard className="h-4 w-4" />Kundenkarte
+                        </LocaleLink>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <LocaleLink to="/pferde" className="flex items-center gap-2 cursor-pointer">
+                          <PawPrint className="h-4 w-4" />Meine Pferde
+                        </LocaleLink>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <a href="https://account.horse-and-rider.de" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 cursor-pointer">
+                          <ShoppingBag className="h-4 w-4" />Bestellungen
+                          <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
+                        </a>
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
                         <LogOut className="h-4 w-4" />{t("header.logout")}
@@ -84,11 +96,19 @@ export const Header = () => {
                     </>
                   ) : (
                     <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <LocaleLink to="/auth" className="flex items-center gap-2 cursor-pointer">
-                          <LogIn className="h-4 w-4" />{t("header.login")}
-                        </LocaleLink>
+                      {/* Admin login (Supabase) still accessible */}
+                      {user && isAdmin && (
+                        <>
+                          <DropdownMenuItem asChild>
+                            <LocaleLink to="/admin" className="flex items-center gap-2 cursor-pointer">
+                              <UserCircle className="h-4 w-4" />Admin
+                            </LocaleLink>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
+                      <DropdownMenuItem onClick={() => shopifyLogin()} className="flex items-center gap-2 cursor-pointer">
+                        <LogIn className="h-4 w-4" />{t("header.login") || "Anmelden"}
                       </DropdownMenuItem>
                     </>
                   )}

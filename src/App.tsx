@@ -9,6 +9,9 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { RedirectGuard } from "@/components/RedirectGuard";
 import { I18nLayout, DEFAULT_LOCALE } from "@/i18n";
 import { HreflangTags } from "@/components/HreflangTags";
+import { ShopifyCustomerProvider } from "@/lib/auth/ShopifyCustomerContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -29,6 +32,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const CmsPage = lazy(() => import("./pages/CmsPage"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
+const ShopifyCallback = lazy(() => import("./pages/ShopifyCallback"));
+const ShopifyLogin = lazy(() => import("./pages/ShopifyLogin"));
 const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({ default: m.CookieBanner })));
 
 const queryClient = new QueryClient();
@@ -63,7 +68,14 @@ const AppContent = () => {
           <Route path="thank-you" element={<ThankYou />} />
           <Route path="collections/:handle" element={<CollectionDetail />} />
           <Route path="auth" element={<Auth />} />
-          <Route path="account" element={<Account />} />
+          <Route path="auth/callback" element={<ShopifyCallback />} />
+          <Route path="login" element={<ShopifyLogin />} />
+          <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="kundenkarte" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde/neu" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde/:id" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde/:id/bearbeiten" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="search" element={<Search />} />
           <Route path="unsere-marken" element={<UnsereMarken />} />
           <Route path="unsere-marken/:slug" element={<MarkenDetail />} />
@@ -98,9 +110,11 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppContent />
+      <ShopifyCustomerProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
+      </ShopifyCustomerProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

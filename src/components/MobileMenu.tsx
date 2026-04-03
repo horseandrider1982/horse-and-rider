@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, LogIn, LogOut, UserCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Menu, X, LogIn, LogOut, UserCircle, ChevronDown, ChevronRight, CreditCard, PawPrint, ShoppingBag, ExternalLink } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { LocaleLink } from "./LocaleLink";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
+import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
 import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import type { PublicMenuItem } from "@/hooks/usePublicCmsMenus";
@@ -67,7 +67,8 @@ function MobileShopifyPlaceholder({ handle, onClose }: { handle?: string; onClos
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { customer, isAuthenticated: isCustomerAuth, login: shopifyLogin, logout: shopifyLogout } = useShopifyCustomer();
   const { data: menus } = usePublicCmsMenus();
   const navigate = useNavigate();
   const { t, localePath } = useI18n();
@@ -75,8 +76,8 @@ export function MobileMenu() {
   const topNavItems = menus?.top_navigation || [];
   const accountMenuItems = menus?.account_icon_menu || [];
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    shopifyLogout();
     toast.success(t("header.logged_out"));
     setOpen(false);
     navigate(localePath("/"));
@@ -140,34 +141,41 @@ export function MobileMenu() {
               {t("header.account")}
             </div>
 
-            {accountMenuItems.length > 0 ? (
-              accountMenuItems.map((item: PublicMenuItem) => (
-                <LocaleLink key={item.id} to={item.url || "/"} onClick={close}
+            {isCustomerAuth ? (
+              <>
+                <LocaleLink to="/account" onClick={close}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
                   <UserCircle className="h-4 w-4 text-muted-foreground" />
-                  {item.label}
+                  {customer?.displayName || t("header.account")}
                 </LocaleLink>
-              ))
+                <LocaleLink to="/kundenkarte" onClick={close}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  Kundenkarte
+                </LocaleLink>
+                <LocaleLink to="/pferde" onClick={close}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
+                  <PawPrint className="h-4 w-4 text-muted-foreground" />
+                  Meine Pferde
+                </LocaleLink>
+                <a href="https://account.horse-and-rider.de" target="_blank" rel="noopener noreferrer" onClick={close}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
+                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                  Bestellungen
+                  <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
+                </a>
+                <button onClick={handleLogout}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors rounded-md">
+                  <LogOut className="h-4 w-4" />
+                  {t("header.logout")}
+                </button>
+              </>
             ) : (
-              <LocaleLink to={user ? "/account" : "/auth"} onClick={close}
-                className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
-                <UserCircle className="h-4 w-4 text-muted-foreground" />
-                {user ? t("header.account") : t("header.login")}
-              </LocaleLink>
-            )}
-
-            {user ? (
-              <button onClick={handleLogout}
-                className="flex items-center gap-3 w-full px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors rounded-md">
-                <LogOut className="h-4 w-4" />
-                {t("header.logout")}
-              </button>
-            ) : (
-              <LocaleLink to="/auth" onClick={close}
-                className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
+              <button onClick={() => { close(); shopifyLogin(); }}
+                className="flex items-center gap-3 w-full px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-md">
                 <LogIn className="h-4 w-4 text-muted-foreground" />
-                {t("header.login")}
-              </LocaleLink>
+                {t("header.login") || "Anmelden"}
+              </button>
             )}
           </nav>
 
