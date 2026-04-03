@@ -445,9 +445,9 @@ const ProductDetail = () => {
                 )}
               </div>
               {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
                   {images.map((img, i) => (
-                    <button key={i} onClick={() => setMainImage(i)} className={`w-16 h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-colors ${i === mainImage ? "border-primary" : "border-transparent"}`}>
+                    <button key={i} onClick={() => setMainImage(i)} className={`w-16 h-16 sm:w-16 sm:h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-colors snap-start ${i === mainImage ? "border-primary" : "border-transparent"}`}>
                       <img src={img.node.url} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
