@@ -75,26 +75,20 @@ function computeAvailability(
   const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
   const allowOversell = bestUeberverkauf === '1';
 
-  // If Shopify says available AND it's not purely via "continue selling" (i.e. has own stock),
-  // show standard delivery time. We detect own stock when availableForSale is true.
-  // Supplier oversell items also have availableForSale=true (because continue selling is on),
-  // so we distinguish: if item has supplier stock + oversell but ALSO has own Shopify stock,
-  // availableForSale would be true regardless. The key insight: if availableForSale=true AND
-  // the item genuinely has own stock, standard time applies. We check: if availableForSale
-  // is true and there's NO supplier override scenario, use standard time.
-  // If availableForSale is true but supplier stock exists, the item might have own stock too —
-  // in that case standard time takes priority (own stock ships first).
-  if (variantAvailableForSale) {
-    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
-  }
-
-  // Not available via own stock — check supplier stock fallback
+  // Supplier stock with oversell: these items have "continue selling" enabled in Shopify,
+  // so availableForSale=true even without own stock. The metafields indicate supplier fulfillment
+  // → show supplier delivery time. Items with own stock don't have these metafields set.
   if (hasSupplierStock && allowOversell) {
     return {
       canOrder: true,
       deliveryTime: bestLieferzeit || 'Lieferzeit auf Anfrage',
       isSupplierStock: true,
     };
+  }
+
+  // Standard local stock: no supplier override → own stock available
+  if (variantAvailableForSale) {
+    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
   }
 
   return { canOrder: false, deliveryTime: null, isSupplierStock: false };
