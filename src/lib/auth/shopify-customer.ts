@@ -12,9 +12,8 @@ import { generateCodeVerifier, generateCodeChallenge, generateState, generateNon
 
 // Shopify Customer Account API configuration
 const SHOPIFY_CUSTOMER_CLIENT_ID = '6c0f10ad-d50b-4745-bd0b-70329879cfea';
-const SHOPIFY_SHOP_ID = '324083278';
-const SHOPIFY_AUTH_BASE = `https://shopify.com/${SHOPIFY_SHOP_ID}/auth/oauth`;
-const SHOPIFY_CUSTOMER_API = `https://shopify.com/${SHOPIFY_SHOP_ID}/account/customer/api/2025-01/graphql`;
+const SHOPIFY_AUTH_BASE = 'https://account.horse-and-rider.de/authentication/oauth';
+const SHOPIFY_CUSTOMER_API = 'https://account.horse-and-rider.de/account/customer/api/2025-01/graphql';
 const REDIRECT_URI = `${window.location.origin}/de/auth/callback`;
 
 // Storage keys
