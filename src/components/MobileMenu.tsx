@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, LogIn, LogOut, UserCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Menu, X, LogIn, LogOut, UserCircle, ChevronDown, ChevronRight, CreditCard, PawPrint, ShoppingBag, ExternalLink } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { LocaleLink } from "./LocaleLink";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
+import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
 import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import type { PublicMenuItem } from "@/hooks/usePublicCmsMenus";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 function MobileShopifyItem({ item, onClose }: { item: ShopifyMenuItem; onClose: () => void }) {
