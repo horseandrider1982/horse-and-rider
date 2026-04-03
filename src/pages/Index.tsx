@@ -39,6 +39,7 @@ const Index = () => {
         <AboutTeamSection />
       </main>
       <Footer />
+      <BackToTop />
     </div>
   );
 };
