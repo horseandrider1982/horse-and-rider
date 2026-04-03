@@ -71,6 +71,7 @@ export function useSearchOverlay() {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    const isCurrentRequest = () => abortRef.current === controller;
 
     if (!after) setIsLoading(true);
     else setIsLoadingMore(true);
@@ -124,8 +125,11 @@ export function useSearchOverlay() {
       console.error("Search error:", err);
       if (!after) setResults(null);
     } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
+      // Only clear loading state if this is still the active request
+      if (isCurrentRequest()) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, []);
 
