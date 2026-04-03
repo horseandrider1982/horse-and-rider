@@ -1,7 +1,7 @@
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 
 const Impressum = () => (
-  <LegalPageLayout>
+  <LegalPageLayout title="Impressum" description="Impressum der Horse & Rider Reitsportfachhandels GmbH – Kontaktdaten und rechtliche Angaben." slug="impressum">
     <h1>Impressum</h1>
 
     <p><strong>Gesetzliche Anbieterkennung:</strong></p>
