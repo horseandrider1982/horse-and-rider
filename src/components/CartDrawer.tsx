@@ -23,8 +23,9 @@ export const CartDrawer = () => {
   }, [isOpen, syncCart]);
 
   const handleCheckout = () => {
-    const checkoutUrl = getCheckoutUrl();
+    let checkoutUrl = getCheckoutUrl();
     if (checkoutUrl) {
+      checkoutUrl = getAuthenticatedCheckoutUrl(checkoutUrl);
       trackBeginCheckout(items);
       window.location.href = checkoutUrl;
     }
