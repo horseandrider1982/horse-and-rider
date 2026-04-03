@@ -391,7 +391,7 @@ const ProductDetail = () => {
         price={selectedVariant?.price.amount || product.node.priceRange.minVariantPrice.amount}
         currency={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode}
         available={availability.canOrder}
-        sku={firstVariantSku}
+        sku={selectedSku}
         brand={product.node.vendor}
         locale={locale}
       />
