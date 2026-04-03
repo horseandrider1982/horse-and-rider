@@ -128,13 +128,8 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
               </button>
             )}
           </div>
-          {!hasQuery && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {SUGGESTION_CHIPS.map((chip) => (
-                <button key={chip} onClick={() => handleChipClick(chip)} className={cn("px-3 py-1.5 rounded-full text-sm border border-border", "bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground", "transition-colors cursor-pointer")}>{chip}</button>
-              ))}
-            </div>
-          )}
+
+
         </div>
 
         {/* Content */}
