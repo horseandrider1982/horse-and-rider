@@ -9,6 +9,9 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { RedirectGuard } from "@/components/RedirectGuard";
 import { I18nLayout, DEFAULT_LOCALE } from "@/i18n";
 import { HreflangTags } from "@/components/HreflangTags";
+import { ShopifyCustomerProvider } from "@/lib/auth/ShopifyCustomerContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -29,6 +32,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const CmsPage = lazy(() => import("./pages/CmsPage"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
+const ShopifyCallback = lazy(() => import("./pages/ShopifyCallback"));
+const ShopifyLogin = lazy(() => import("./pages/ShopifyLogin"));
 const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({ default: m.CookieBanner })));
 
 const queryClient = new QueryClient();
