@@ -645,6 +645,8 @@ const ProductDetail = () => {
               </div>
             </div>
           )}
+          {/* Bottom spacer for sticky mobile bar */}
+          <div className="h-20 md:hidden" />
         </div>
       </main>
       <Footer />
