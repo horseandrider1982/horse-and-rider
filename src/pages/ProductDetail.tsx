@@ -218,8 +218,8 @@ const ProductDetail = () => {
     ? (() => {
         const title = product.node.title;
         const vendor = product.node.vendor || '';
-        const productType = product.node.productType || '';
-        const typePart = productType ? ` ${productType}.` : '';
+        const base = `${title} von ${vendor}. Jetzt bei Horse & Rider Luhmühlen entdecken.`;
+        return base.slice(0, 155);
         const base = `${title} von ${vendor}.${typePart} Jetzt bei Horse & Rider Luhmühlen entdecken.`;
         return base.slice(0, 155);
       })()
