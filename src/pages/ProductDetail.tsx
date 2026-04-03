@@ -465,13 +465,24 @@ const ProductDetail = () => {
                 <img src={brand.logoUrl} alt={brand.name} className="h-6 w-auto object-contain mb-2" style={{ filter: 'brightness(0)' }} />
               )}
               <h1 className="font-heading text-2xl md:text-3xl font-bold mb-3" itemProp="name">{product.node.title}</h1>
-              <p className="text-2xl font-bold text-primary mb-4">
-                {isConfigurator && configState?.isConfigured ? (
-                  <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">{t("product.incl_config")}</span></>
-                ) : (
-                  <>{basePrice.toFixed(2)} €</>
-                )}
-              </p>
+              <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
+                <meta itemProp="priceCurrency" content={selectedVariant?.price.currencyCode || product.node.priceRange.minVariantPrice.currencyCode} />
+                <meta itemProp="price" content={String(basePrice.toFixed(2))} />
+                <link itemProp="availability" href={availability.canOrder ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"} />
+                <p className="text-2xl font-bold text-primary mb-4">
+                  {isConfigurator && configState?.isConfigured ? (
+                    <>{totalPrice.toFixed(2)} € <span className="text-sm font-normal text-muted-foreground">{t("product.incl_config")}</span></>
+                  ) : (
+                    <>{basePrice.toFixed(2)} €</>
+                  )}
+                </p>
+              </div>
+              {product.node.vendor && (
+                <meta itemProp="brand" content={product.node.vendor} />
+              )}
+              {selectedSku && (
+                <meta itemProp="sku" content={selectedSku} />
+              )}
 
               {options.length > 0 && (
                 <TooltipProvider delayDuration={200}>
