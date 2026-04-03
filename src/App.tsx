@@ -76,6 +76,7 @@ const AppContent = () => {
           <Route path="pferde/neu" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="pferde/:id" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="pferde/:id/bearbeiten" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="search" element={<Search />} />
           <Route path="unsere-marken" element={<UnsereMarken />} />
           <Route path="unsere-marken/:slug" element={<MarkenDetail />} />
           <Route path="reset-password" element={<ResetPassword />} />
