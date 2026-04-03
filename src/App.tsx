@@ -68,8 +68,14 @@ const AppContent = () => {
           <Route path="thank-you" element={<ThankYou />} />
           <Route path="collections/:handle" element={<CollectionDetail />} />
           <Route path="auth" element={<Auth />} />
-          <Route path="account" element={<Account />} />
-          <Route path="search" element={<Search />} />
+          <Route path="auth/callback" element={<ShopifyCallback />} />
+          <Route path="login" element={<ShopifyLogin />} />
+          <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="kundenkarte" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde/neu" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde/:id" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="pferde/:id/bearbeiten" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="unsere-marken" element={<UnsereMarken />} />
           <Route path="unsere-marken/:slug" element={<MarkenDetail />} />
           <Route path="reset-password" element={<ResetPassword />} />
