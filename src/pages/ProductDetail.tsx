@@ -57,11 +57,6 @@ function computeAvailability(
   productMetafields?: (ShopifyMetafield | null)[],
   isSingleVariant?: boolean,
 ): AvailabilityInfo {
-  // If available for sale in Shopify → standard delivery
-  if (variantAvailableForSale) {
-    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
-  }
-
   // Check metafields: for single-variant products, fall back to product-level metafields
   const mf = isSingleVariant ? productMetafields : variantMetafields;
   const lieferantenbestand = getMetafieldValue(mf, 'lieferantenbestand');
@@ -80,12 +75,19 @@ function computeAvailability(
   const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
   const allowOversell = bestUeberverkauf === '1';
 
+  // Supplier stock with oversell: always show supplier delivery time (even if availableForSale
+  // is true because "continue selling when out of stock" is enabled in Shopify)
   if (hasSupplierStock && allowOversell) {
     return {
       canOrder: true,
       deliveryTime: bestLieferzeit || 'Lieferzeit auf Anfrage',
       isSupplierStock: true,
     };
+  }
+
+  // Standard local stock: available for sale without supplier override → standard delivery
+  if (variantAvailableForSale) {
+    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
   }
 
   return { canOrder: false, deliveryTime: null, isSupplierStock: false };
