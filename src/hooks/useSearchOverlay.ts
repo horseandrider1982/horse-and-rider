@@ -125,8 +125,11 @@ export function useSearchOverlay() {
       console.error("Search error:", err);
       if (!after) setResults(null);
     } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
+      // Only clear loading state if this is still the active request
+      if (isCurrentRequest()) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, []);
 
