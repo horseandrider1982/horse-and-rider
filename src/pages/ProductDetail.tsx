@@ -213,13 +213,20 @@ const ProductDetail = () => {
     }
   }, [shopifyProductId]);
 
-  // Dynamic meta tags – SEO-optimized description
+  // Dynamic meta tags – SEO-optimized
+  const productType = product?.node?.productType;
+  const vendorName = product?.node?.vendor || '';
+
+  const metaTitle = product?.node
+    ? `${product.node.title}${productType ? ` ${productType}` : ''}`
+    : undefined;
+
   const metaDescription = product?.node
-    ? `${product.node.title} von ${product.node.vendor || ''}. Jetzt bei Horse & Rider Luhmühlen entdecken.`.slice(0, 155)
+    ? `${product.node.title} von ${vendorName}${productType ? ` – ${productType}` : ''}. Jetzt bei Horse & Rider Luhmühlen online kaufen.`.slice(0, 155)
     : undefined;
 
   usePageMeta({
-    title: product?.node?.title,
+    title: metaTitle,
     description: metaDescription,
     ogImage: product?.node?.images?.edges?.[0]?.node?.url,
     ogType: "product",
@@ -390,8 +397,8 @@ const ProductDetail = () => {
         locale={locale}
       />
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: `https://horse-and-rider.de/${locale}` },
-        ...(brand ? [{ name: brand.name, url: `https://horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
+        { name: "Start", url: `https://horse-and-rider.de/${locale}` },
+        ...(productType ? [{ name: productType, url: `https://horse-and-rider.de/${locale}/search?q=${encodeURIComponent(productType)}` }] : brand ? [{ name: brand.name, url: `https://horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
         { name: product.node.title, url: `https://horse-and-rider.de/${locale}/product/${product.node.handle}` },
       ]} />
       <TopBar /><Header />
@@ -472,11 +479,20 @@ const ProductDetail = () => {
                 </p>
               </div>
               {product.node.vendor && (
-                <meta itemProp="brand" content={product.node.vendor} />
+                <p className="text-sm text-muted-foreground mb-1" itemProp="brand" itemScope itemType="https://schema.org/Brand">
+                  Marke: <span itemProp="name" className="font-medium text-foreground">{product.node.vendor}</span>
+                </p>
               )}
               {selectedSku && (
-                <meta itemProp="sku" content={selectedSku} />
+                <p className="text-sm text-muted-foreground mb-1">
+                  Art.-Nr.: <span itemProp="sku" className="font-medium text-foreground">{selectedSku}</span>
+                </p>
               )}
+              <p className="text-sm text-muted-foreground mb-3">
+                Verfügbarkeit: <span className={`font-medium ${availability.canOrder ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
+                  {availability.canOrder ? 'Auf Lager' : 'Nicht verfügbar'}
+                </span>
+              </p>
 
               {options.length > 0 && (
                 <TooltipProvider delayDuration={200}>
@@ -623,10 +639,20 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {product.node.description && (
+          {(product.node.descriptionHtml || product.node.description) && (
             <section className="mt-10 pt-8 border-t border-border">
               <h2 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h2>
-              <div className="text-base text-muted-foreground leading-relaxed" itemProp="description">{product.node.description}</div>
+              {product.node.descriptionHtml ? (
+                <div
+                  className="prose prose-sm max-w-none text-muted-foreground leading-relaxed"
+                  itemProp="description"
+                  dangerouslySetInnerHTML={{ __html: product.node.descriptionHtml }}
+                />
+              ) : (
+                <div className="text-base text-muted-foreground leading-relaxed" itemProp="description">
+                  {product.node.description}
+                </div>
+              )}
             </section>
           )}
 
