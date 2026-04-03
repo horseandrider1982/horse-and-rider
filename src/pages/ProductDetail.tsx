@@ -379,6 +379,7 @@ const ProductDetail = () => {
   const canAddToCart = (!isConfigurator || configState?.isConfigured) && availability.canOrder;
 
   const productImages = images.map(e => e.node.url);
+  const firstVariantSku = variants?.[0]?.node?.sku;
   const selectedSku = selectedVariant?.sku || firstVariantSku;
 
   return (
