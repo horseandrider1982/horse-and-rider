@@ -26,6 +26,7 @@ import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
+import { SimilarProducts } from "@/components/SimilarProducts";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
@@ -682,6 +683,12 @@ const ProductDetail = () => {
               </div>
             </div>
           )}
+          <SimilarProducts
+            vendor={product.node.vendor}
+            productType={product.node.productType}
+            currentProductId={product.node.id}
+          />
+
           {/* Bottom spacer for sticky mobile bar */}
           <div className="h-20 md:hidden" />
         </div>
