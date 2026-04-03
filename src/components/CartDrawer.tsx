@@ -6,6 +6,7 @@ import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide
 import { useCartStore } from "@/stores/cartStore";
 import { useI18n } from "@/i18n";
 import { trackViewCart, trackBeginCheckout, trackRemoveFromCart } from "@/lib/ga4";
+import { getAuthenticatedCheckoutUrl } from "@/lib/auth/shopify-customer";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
