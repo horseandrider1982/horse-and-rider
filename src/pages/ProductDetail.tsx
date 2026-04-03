@@ -630,10 +630,20 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {product.node.description && (
+          {(product.node.descriptionHtml || product.node.description) && (
             <section className="mt-10 pt-8 border-t border-border">
               <h2 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h2>
-              <div className="text-base text-muted-foreground leading-relaxed" itemProp="description">{product.node.description}</div>
+              {product.node.descriptionHtml ? (
+                <div
+                  className="prose prose-sm max-w-none text-muted-foreground leading-relaxed"
+                  itemProp="description"
+                  dangerouslySetInnerHTML={{ __html: product.node.descriptionHtml }}
+                />
+              ) : (
+                <div className="text-base text-muted-foreground leading-relaxed" itemProp="description">
+                  {product.node.description}
+                </div>
+              )}
             </section>
           )}
 
