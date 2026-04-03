@@ -213,13 +213,20 @@ const ProductDetail = () => {
     }
   }, [shopifyProductId]);
 
-  // Dynamic meta tags – SEO-optimized description
+  // Dynamic meta tags – SEO-optimized
+  const productType = product?.node?.productType;
+  const vendorName = product?.node?.vendor || '';
+
+  const metaTitle = product?.node
+    ? `${product.node.title}${productType ? ` ${productType}` : ''}`
+    : undefined;
+
   const metaDescription = product?.node
-    ? `${product.node.title} von ${product.node.vendor || ''}. Jetzt bei Horse & Rider Luhmühlen entdecken.`.slice(0, 155)
+    ? `${product.node.title} von ${vendorName}${productType ? ` – ${productType}` : ''}. Jetzt bei Horse & Rider Luhmühlen online kaufen.`.slice(0, 155)
     : undefined;
 
   usePageMeta({
-    title: product?.node?.title,
+    title: metaTitle,
     description: metaDescription,
     ogImage: product?.node?.images?.edges?.[0]?.node?.url,
     ogType: "product",
