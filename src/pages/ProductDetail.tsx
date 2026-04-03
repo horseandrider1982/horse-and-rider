@@ -630,10 +630,10 @@ const ProductDetail = () => {
           </div>
 
           {product.node.description && (
-            <div className="mt-10 pt-8 border-t border-border">
-              <h3 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h3>
-              <p className="text-base text-muted-foreground leading-relaxed">{product.node.description}</p>
-            </div>
+            <section className="mt-10 pt-8 border-t border-border">
+              <h2 className="font-heading text-xl font-semibold mb-4">{t("product.description")}</h2>
+              <div className="text-base text-muted-foreground leading-relaxed" itemProp="description">{product.node.description}</div>
+            </section>
           )}
 
           {(selectedVariant?.sku || selectedVariant?.barcode) && (
