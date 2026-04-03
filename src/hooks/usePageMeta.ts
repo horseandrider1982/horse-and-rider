@@ -92,7 +92,7 @@ export function usePageMeta(options: PageMetaOptions) {
 
     return () => {
       // Reset to defaults on unmount
-      document.title = `${SITE_NAME} - Reitsport Online Shop`;
+      document.title = `${SITE_NAME} | Reitsport Online Shop`;
       if (options.noIndex) {
         setMeta("robots", "index, follow");
       }
