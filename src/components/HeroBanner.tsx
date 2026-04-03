@@ -51,7 +51,7 @@ export const HeroBanner = () => {
               {(["winterdecke", "airbagweste", "schabracke", "reithelm", "gamaschen", "turnierbekleidung"] as const).map((chipKey) => (
                 <button
                   key={chipKey}
-                  onClick={() => setSearchOpen(true)}
+                  onClick={() => navigate(localePath(`/search?q=${encodeURIComponent(t(`hero.chip.${chipKey}`))}`)) }
                   className={cn(
                     "px-3 py-1.5 sm:py-1 rounded-full text-xs font-medium min-h-[36px] sm:min-h-0",
                     "border border-border bg-background/80",
