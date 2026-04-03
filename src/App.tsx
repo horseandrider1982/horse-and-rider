@@ -109,9 +109,11 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppContent />
+      <ShopifyCustomerProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
+      </ShopifyCustomerProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
