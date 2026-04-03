@@ -26,6 +26,7 @@ import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
+import { SimilarProducts } from "@/components/SimilarProducts";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
