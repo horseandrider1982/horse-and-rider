@@ -17,14 +17,15 @@ import { useI18n } from "@/i18n";
 import logo from "@/assets/logo.png";
 
 export const Header = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { customer, isAuthenticated: isCustomerAuth, login: shopifyLogin, logout: shopifyLogout } = useShopifyCustomer();
   const { data: menus } = usePublicCmsMenus();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const { t, localePath } = useI18n();
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    shopifyLogout();
     toast.success(t("header.logged_out"));
     navigate(localePath("/"));
   };
