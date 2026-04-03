@@ -44,14 +44,14 @@ export const HeroBanner = () => {
                 {t("hero.search_placeholder")}
               </span>
             </button>
-            <div className="flex flex-wrap justify-center gap-2 mt-5">
+            <div className="flex flex-wrap justify-center gap-2 mt-3 sm:mt-5">
               <span className="text-xs text-muted-foreground self-center mr-1">{t("hero.popular")}</span>
               {(["winterdecke", "airbagweste", "schabracke", "reithelm", "gamaschen", "turnierbekleidung"] as const).map((chipKey) => (
                 <button
                   key={chipKey}
                   onClick={() => setSearchOpen(true)}
                   className={cn(
-                    "px-3 py-1 rounded-full text-xs font-medium",
+                    "px-3 py-1.5 sm:py-1 rounded-full text-xs font-medium min-h-[36px] sm:min-h-0",
                     "border border-border bg-background/80",
                     "text-muted-foreground hover:text-primary hover:border-primary/40",
                     "transition-colors"
