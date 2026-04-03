@@ -71,6 +71,7 @@ export function useSearchOverlay() {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    const isCurrentRequest = () => abortRef.current === controller;
 
     if (!after) setIsLoading(true);
     else setIsLoadingMore(true);
