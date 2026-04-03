@@ -44,6 +44,7 @@ export interface ShopifyProduct {
             currencyCode: string;
           };
           availableForSale: boolean;
+          currentlyNotInStock?: boolean;
           sku?: string;
           barcode?: string;
           metafields?: (ShopifyMetafield | null)[];
@@ -95,6 +96,7 @@ export const STOREFRONT_QUERY = `
                   currencyCode
                 }
                 availableForSale
+                currentlyNotInStock
                 sku
                 barcode
                 selectedOptions {
@@ -161,6 +163,7 @@ export const STOREFRONT_PAGINATED_QUERY = `
                   currencyCode
                 }
                 availableForSale
+                currentlyNotInStock
                 sku
                 barcode
                 metafields(identifiers: [
@@ -279,6 +282,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
               currencyCode
             }
             availableForSale
+            currentlyNotInStock
             sku
             barcode
             metafields(identifiers: [
