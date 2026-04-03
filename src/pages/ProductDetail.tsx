@@ -53,6 +53,7 @@ interface AvailabilityInfo {
 
 function computeAvailability(
   variantAvailableForSale: boolean,
+  variantCurrentlyNotInStock?: boolean,
   variantMetafields?: (ShopifyMetafield | null)[],
   productMetafields?: (ShopifyMetafield | null)[],
   isSingleVariant?: boolean,
@@ -74,21 +75,21 @@ function computeAvailability(
 
   const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
   const allowOversell = bestUeberverkauf === '1';
+  const hasOwnStock = variantAvailableForSale && !variantCurrentlyNotInStock;
 
-  // Supplier stock with oversell: these items have "continue selling" enabled in Shopify,
-  // so availableForSale=true even without own stock. The metafields indicate supplier fulfillment
-  // → show supplier delivery time. Items with own stock don't have these metafields set.
+  // Own stock always wins and gets the standard delivery time.
+  if (hasOwnStock) {
+    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
+  }
+
+  // No own stock left: supplier stock with oversell allowed can still be ordered
+  // and should show the supplier delivery time instead of the default one.
   if (hasSupplierStock && allowOversell) {
     return {
       canOrder: true,
       deliveryTime: bestLieferzeit || 'Lieferzeit auf Anfrage',
       isSupplierStock: true,
     };
-  }
-
-  // Standard local stock: no supplier override → own stock available
-  if (variantAvailableForSale) {
-    return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
   }
 
   return { canOrder: false, deliveryTime: null, isSupplierStock: false };
@@ -139,6 +140,7 @@ const ProductDetail = () => {
     return (variant: typeof variants[0]['node']) => {
       return computeAvailability(
         variant.availableForSale,
+        variant.currentlyNotInStock,
         variant.metafields,
         product?.node?.metafields,
         isSingleVariant,
@@ -197,6 +199,7 @@ const ProductDetail = () => {
     if (!selectedVariant) return { canOrder: false, deliveryTime: null, isSupplierStock: false };
     return computeAvailability(
       selectedVariant.availableForSale,
+      selectedVariant.currentlyNotInStock,
       selectedVariant.metafields,
       product?.node?.metafields,
       isSingleVariant,
