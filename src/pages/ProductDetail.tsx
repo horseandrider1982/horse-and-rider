@@ -485,7 +485,7 @@ const ProductDetail = () => {
                               key={value}
                               onClick={() => handleOptionSelect(option.name, value)}
                               disabled={false}
-                              className={`px-3 py-1.5 text-sm rounded border transition-colors relative ${
+                              className={`px-3 py-2 sm:py-1.5 text-sm rounded border transition-colors relative min-h-[44px] sm:min-h-0 ${
                                 isSelected
                                   ? 'border-primary bg-primary text-primary-foreground'
                                   : isAvailable
