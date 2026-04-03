@@ -67,7 +67,8 @@ function MobileShopifyPlaceholder({ handle, onClose }: { handle?: string; onClos
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { customer, isAuthenticated: isCustomerAuth, login: shopifyLogin, logout: shopifyLogout } = useShopifyCustomer();
   const { data: menus } = usePublicCmsMenus();
   const navigate = useNavigate();
   const { t, localePath } = useI18n();
@@ -75,8 +76,8 @@ export function MobileMenu() {
   const topNavItems = menus?.top_navigation || [];
   const accountMenuItems = menus?.account_icon_menu || [];
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    shopifyLogout();
     toast.success(t("header.logged_out"));
     setOpen(false);
     navigate(localePath("/"));
