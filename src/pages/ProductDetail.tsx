@@ -397,8 +397,8 @@ const ProductDetail = () => {
         locale={locale}
       />
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: `https://horse-and-rider.de/${locale}` },
-        ...(brand ? [{ name: brand.name, url: `https://horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
+        { name: "Start", url: `https://horse-and-rider.de/${locale}` },
+        ...(productType ? [{ name: productType, url: `https://horse-and-rider.de/${locale}/search?q=${encodeURIComponent(productType)}` }] : brand ? [{ name: brand.name, url: `https://horse-and-rider.de/${locale}/unsere-marken/${brand.slug}` }] : []),
         { name: product.node.title, url: `https://horse-and-rider.de/${locale}/product/${product.node.handle}` },
       ]} />
       <TopBar /><Header />
