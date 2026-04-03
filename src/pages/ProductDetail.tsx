@@ -401,7 +401,7 @@ const ProductDetail = () => {
         { name: product.node.title, url: `https://horse-and-rider.de/${locale}/product/${product.node.handle}` },
       ]} />
       <TopBar /><Header />
-      <main className="flex-1">
+      <main className="flex-1" itemScope itemType="https://schema.org/Product">
         <div className="container mx-auto px-4 py-8">
           <Breadcrumb className="mb-6">
             <BreadcrumbList>
