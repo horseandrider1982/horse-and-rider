@@ -15,17 +15,35 @@ export const CategoryHighlights = () => {
   ];
 
   return (
-    <section className="py-12">
+    <section className="py-14">
       <div className="container mx-auto px-4">
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-8">{t("categories.title")}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest text-center mb-2">
+          {t("categories.subtitle") || "Unser Sortiment"}
+        </p>
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-10">
+          {t("categories.title")}
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {categories.map((cat) => (
-            <div key={cat.titleKey} className="relative rounded-lg overflow-hidden group cursor-pointer aspect-[3/4]">
-              <img src={cat.image} alt={t(cat.titleKey)} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="font-heading text-xl font-bold text-background mb-1">{t(cat.titleKey)}</h3>
-                <p className="text-background/80 text-sm">{t(cat.descKey)}</p>
+            <div
+              key={cat.titleKey}
+              className="relative rounded-xl overflow-hidden group cursor-pointer aspect-[3/4] shadow-sm hover:shadow-xl transition-shadow duration-300"
+            >
+              <img
+                src={cat.image}
+                alt={t(cat.titleKey)}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                <h3 className="font-heading text-lg md:text-xl font-bold text-white mb-1 drop-shadow-md">
+                  {t(cat.titleKey)}
+                </h3>
+                <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2 drop-shadow-sm">
+                  {t(cat.descKey)}
+                </p>
               </div>
             </div>
           ))}
