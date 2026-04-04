@@ -49,10 +49,7 @@ export default function MarkenDetail() {
   const brand = brands?.find((b) => b.slug === slug);
   const vendorName = brand?.name || "";
   const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
-  const products = useMemo(() => {
-    const all = productsData?.pages.flatMap(p => p.products) || [];
-    return all.filter(p => isProductVisibleInListing(p.node));
-  }, [productsData]);
+  const products = productsData?.pages.flatMap(p => p.products) || [];
 
   const brandMetaDesc = brand
     ? brand.seoText
