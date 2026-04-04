@@ -172,7 +172,7 @@ export default function Admin() {
           )}
           {activeSection === "brands" && <BrandsSection />}
           {activeSection === "redirects" && <RedirectsSection />}
-          {activeSection === "users" && <UsersSection />}
+          
           {activeSection === "configurator" && <ConfiguratorSection />}
           {activeSection === "calendly" && <CalendlySettings />}
           {activeSection === "search" && <SearchSettings />}
