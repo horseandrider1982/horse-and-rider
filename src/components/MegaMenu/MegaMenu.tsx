@@ -3,6 +3,7 @@ import { useShopifyMenu, type ShopifyMenuItem } from '@/hooks/useShopifyMenu';
 import { usePublicCmsMenus, type PublicMenuItem } from '@/hooks/usePublicCmsMenus';
 import { MegaMenuItem } from './MegaMenuItem';
 import { CmsMegaMenuItem } from './CmsMegaMenuItem';
+import { ExternalLink } from 'lucide-react';
 
 /**
  * Desktop-only Mega Menu.
@@ -16,7 +17,6 @@ export function MegaMenu() {
   // Calculate top position for mega dropdown
   useEffect(() => {
     const updateTop = () => {
-      // Use the parent <header> element so the dropdown starts below the full header
       const header = navRef.current?.closest('header');
       if (header) {
         const rect = header.getBoundingClientRect();
@@ -49,6 +49,17 @@ export function MegaMenu() {
           }
           return <CmsMegaMenuItem key={cmsItem.id} item={cmsItem} />;
         })}
+        <li>
+          <a
+            href="https://sattelservice.horse-and-rider.de"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors whitespace-nowrap"
+          >
+            Sattelservice
+            <ExternalLink className="h-3 w-3 text-muted-foreground" />
+          </a>
+        </li>
       </ul>
     </nav>
   );
