@@ -124,9 +124,9 @@ export default function Admin() {
 
         <div className="p-3 border-t border-border">
           <Button variant="outline" size="sm" asChild className={`w-full ${sidebarCollapsed ? "px-0" : ""}`}>
-            <Link to="/account">
+            <Link to="/de">
               <ArrowLeft className="h-4 w-4 shrink-0" />
-              {!sidebarCollapsed && <span className="ml-2">Mein Konto</span>}
+              {!sidebarCollapsed && <span className="ml-2">Zum Shop</span>}
             </Link>
           </Button>
         </div>
