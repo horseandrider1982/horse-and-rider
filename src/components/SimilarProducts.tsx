@@ -24,6 +24,15 @@ const SIMILAR_QUERY = `
           images(first: 1) {
             edges { node { url altText } }
           }
+          metafields(identifiers: [
+            {namespace: "custom", key: "lieferantenbestand"},
+            {namespace: "custom", key: "ueberverkauf"}
+          ]) {
+            namespace
+            key
+            value
+            type
+          }
           variants(first: 1) {
             edges {
               node {
@@ -51,27 +60,38 @@ const SIMILAR_QUERY = `
   }
 `;
 
+async function fetchSimilar(queryStr: string, language: string, currentId: string): Promise<ShopifyProduct[]> {
+  const data = await storefrontApiRequest(SIMILAR_QUERY, {
+    first: 20,
+    query: queryStr,
+    language,
+  });
+  const edges = (data?.data?.products?.edges || []) as ShopifyProduct[];
+  return edges.filter(p => p.node.id !== currentId && isProductVisibleInListing(p.node));
+}
+
 function useSimilarProducts(vendor: string | undefined, productType: string | undefined, currentId: string | undefined, language: string) {
   return useQuery({
     queryKey: ["similar-products", vendor, productType, currentId, language],
     queryFn: async () => {
-      // Try vendor-based first, then productType-based
-      const queries: string[] = [];
-      if (vendor) queries.push(`vendor:"${vendor}"`);
-      if (productType) queries.push(`product_type:"${productType}"`);
-      if (!queries.length) return [];
+      if (!currentId) return [];
 
-      const queryStr = queries[0]; // primary: same vendor
-      const data = await storefrontApiRequest(SIMILAR_QUERY, {
-        first: 9,
-        query: queryStr,
-        language,
-      });
-      const edges = (data?.data?.products?.edges || []) as ShopifyProduct[];
-      // Filter out current product and non-visible products
-      return edges
-        .filter(p => p.node.id !== currentId && isProductVisibleInListing(p.node))
-        .slice(0, 4);
+      // Try vendor first
+      let results: ShopifyProduct[] = [];
+      if (vendor) {
+        results = await fetchSimilar(`vendor:"${vendor}"`, language, currentId);
+      }
+
+      // Fallback to productType if not enough results
+      if (results.length < 4 && productType) {
+        const typeResults = await fetchSimilar(`product_type:"${productType}"`, language, currentId);
+        const existingIds = new Set(results.map(p => p.node.id));
+        for (const p of typeResults) {
+          if (!existingIds.has(p.node.id)) results.push(p);
+        }
+      }
+
+      return results.slice(0, 4);
     },
     enabled: !!(vendor || productType) && !!currentId,
     staleTime: 5 * 60 * 1000,
