@@ -68,6 +68,7 @@ export function RedirectGuard() {
         let hops = 0;
         const visited = new Set([path]);
         let redirectId: string | null = null;
+        let lastNewUrl: string | null = null;
 
         while (hops < 5) {
           const { data } = await supabase
