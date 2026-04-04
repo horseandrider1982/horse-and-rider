@@ -86,6 +86,7 @@ export function RedirectGuard() {
           if (!target || visited.has(target)) break;
 
           if (hops === 0) redirectId = data.id;
+          lastNewUrl = data.new_url;
           visited.add(target);
           currentPath = target;
           hops++;
