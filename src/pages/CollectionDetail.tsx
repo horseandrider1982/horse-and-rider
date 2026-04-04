@@ -166,8 +166,7 @@ export default function CollectionDetail() {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
-      const pageInfo = lastPage?.products?.pageInfo;
-      return pageInfo?.hasNextPage ? pageInfo.endCursor : undefined;
+      return lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
     enabled: !!handle,
   });
