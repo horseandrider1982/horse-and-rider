@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { storefrontApiRequest, type ShopifyProduct, STOREFRONT_PAGINATED_QUERY } from '@/lib/shopify';
+import { fetchUntilVisible } from '@/lib/fetchVisibleProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { useI18n } from '@/i18n';
 
