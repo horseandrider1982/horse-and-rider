@@ -35,6 +35,7 @@ const NotFound = () => {
         let currentPath = path;
         let hops = 0;
         const visited = new Set([path]);
+        let lastNewUrl: string | null = null;
 
         while (hops < 5) {
           const { data } = await supabase
