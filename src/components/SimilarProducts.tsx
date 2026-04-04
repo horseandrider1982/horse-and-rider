@@ -68,8 +68,10 @@ function useSimilarProducts(vendor: string | undefined, productType: string | un
         language,
       });
       const edges = (data?.data?.products?.edges || []) as ShopifyProduct[];
-      // Filter out current product
-      return edges.filter(p => p.node.id !== currentId).slice(0, 4);
+      // Filter out current product and non-visible products
+      return edges
+        .filter(p => p.node.id !== currentId && isProductVisibleInListing(p.node))
+        .slice(0, 4);
     },
     enabled: !!(vendor || productType) && !!currentId,
     staleTime: 5 * 60 * 1000,
