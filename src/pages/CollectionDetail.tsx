@@ -171,12 +171,10 @@ export default function CollectionDetail() {
     enabled: !!handle,
   });
 
-  const collection = data?.pages?.[0] || null;
+  const collection = data?.pages?.[0]?.collection || null;
   const products = useMemo(() => {
     if (!data?.pages) return [];
-    return data.pages
-      .flatMap((page) => page?.products?.edges || [])
-      .filter((edge: any) => isProductVisibleInListing(edge.node));
+    return data.pages.flatMap((page) => page.products || []);
   }, [data]);
 
   const collectionMetaDesc = collection
