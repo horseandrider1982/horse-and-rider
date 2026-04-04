@@ -350,22 +350,8 @@ function RedirectsSection() {
   );
 }
 
-function UsersSection() {
-  return (
-    <>
-      <h1 className="text-2xl font-heading font-bold mb-6">Kunden-Übersicht</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Kunden-Übersicht</CardTitle>
-          <CardDescription>Liste der registrierten Kunden.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CustomerList />
-        </CardContent>
-      </Card>
-    </>
-  );
-}
+
+
 
 function ConfiguratorSection() {
   return (
