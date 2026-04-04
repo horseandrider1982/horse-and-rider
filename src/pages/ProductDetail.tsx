@@ -197,15 +197,30 @@ const ProductDetail = () => {
   };
 
   const availability = useMemo(() => {
-    if (!selectedVariant) return { canOrder: false, deliveryTime: null, isSupplierStock: false };
-    return computeAvailability(
-      selectedVariant.availableForSale,
-      selectedVariant.currentlyNotInStock,
-      selectedVariant.metafields,
-      product?.node?.metafields,
-      isSingleVariant,
-    );
-  }, [selectedVariant, product?.node?.metafields, isSingleVariant]);
+    if (selectedVariant) {
+      return computeAvailability(
+        selectedVariant.availableForSale,
+        selectedVariant.currentlyNotInStock,
+        selectedVariant.metafields,
+        product?.node?.metafields,
+        isSingleVariant,
+      );
+    }
+    // No variant selected (parent view): check if ANY variant is orderable
+    if (variants?.length) {
+      for (const { node: v } of variants) {
+        const va = computeAvailability(
+          v.availableForSale,
+          v.currentlyNotInStock,
+          v.metafields,
+          product?.node?.metafields,
+          isSingleVariant,
+        );
+        if (va.canOrder) return { canOrder: true, deliveryTime: null, isSupplierStock: false };
+      }
+    }
+    return { canOrder: false, deliveryTime: null, isSupplierStock: false };
+  }, [selectedVariant, variants, product?.node?.metafields, isSingleVariant]);
 
   useEffect(() => {
     if (shopifyProductId) {
