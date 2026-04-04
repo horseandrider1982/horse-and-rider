@@ -29,7 +29,7 @@ const NAV_ITEMS = [
   { key: "news", label: "News", icon: Newspaper },
   { key: "brands", label: "Marken", icon: Tag },
   { key: "redirects", label: "301", icon: ArrowRightLeft },
-  { key: "users", label: "Kunden", icon: Users },
+  
   { key: "configurator", label: "Konfigurator", icon: Settings },
   { key: "calendly", label: "Calendly", icon: Calendar },
   { key: "search", label: "Suche", icon: SearchIcon },
