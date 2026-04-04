@@ -15,7 +15,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const Auth = lazy(() => import("./pages/Auth"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const Account = lazy(() => import("./pages/Account"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -57,6 +57,7 @@ const AppContent = () => {
 
         {/* Admin routes (no locale prefix) */}
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/301/monitoring" element={<RedirectMonitoring />} />
         <Route path="/admin/301/conflicts" element={<RedirectConflicts />} />
 
@@ -67,7 +68,7 @@ const AppContent = () => {
           <Route path="danke" element={<ThankYou />} />
           <Route path="thank-you" element={<ThankYou />} />
           <Route path="collections/:handle" element={<CollectionDetail />} />
-          <Route path="auth" element={<Auth />} />
+          
           <Route path="auth/callback" element={<ShopifyCallback />} />
           <Route path="login" element={<ShopifyLogin />} />
           <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
