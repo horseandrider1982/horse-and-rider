@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { Loader2, ChevronLeft } from "lucide-react";
-import { useMemo } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
