@@ -14,6 +14,7 @@ import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { CollectionJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
+import { fetchUntilVisible, type VisibleProductsPage } from "@/lib/fetchVisibleProducts";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
@@ -92,20 +93,39 @@ const COLLECTION_QUERY = `
   }
 `;
 
-async function fetchCollectionPage(handle: string, locale: string, cursor?: string) {
-  const res = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+async function fetchCollectionPage(handle: string, locale: string, cursor?: string): Promise<VisibleProductsPage & { collection: any }> {
+  const fetcher = async (innerCursor?: string) => {
+    const res = await fetch(SHOPIFY_STOREFRONT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({
+        query: COLLECTION_QUERY,
+        variables: { handle, first: 24, after: innerCursor || cursor || null, language: locale.toUpperCase() },
+      }),
+    });
+    const json = await res.json();
+    const collection = json?.data?.collection;
+    if (!collection) return { edges: [] as ShopifyProduct[], pageInfo: { hasNextPage: false, endCursor: null }, _collection: null };
+    const edges = (collection.products?.edges || []).map((e: any) => ({ node: e.node })) as ShopifyProduct[];
+    const pageInfo = collection.products?.pageInfo || { hasNextPage: false, endCursor: null };
+    return { edges, pageInfo, _collection: collection };
+  };
+
+  // We need the collection metadata from the first fetch
+  let collectionMeta: any = null;
+  const result = await fetchUntilVisible(
+    async (c?: string) => {
+      const r = await fetcher(c);
+      if (!collectionMeta && r._collection) collectionMeta = r._collection;
+      return { edges: r.edges, pageInfo: r.pageInfo };
     },
-    body: JSON.stringify({
-      query: COLLECTION_QUERY,
-      variables: { handle, first: 24, after: cursor || null, language: locale.toUpperCase() },
-    }),
-  });
-  const json = await res.json();
-  return json?.data?.collection || null;
+    24,
+  );
+
+  return { ...result, collection: collectionMeta };
 }
 
 export default function CollectionDetail() {
@@ -146,18 +166,15 @@ export default function CollectionDetail() {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
-      const pageInfo = lastPage?.products?.pageInfo;
-      return pageInfo?.hasNextPage ? pageInfo.endCursor : undefined;
+      return lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
     enabled: !!handle,
   });
 
-  const collection = data?.pages?.[0] || null;
+  const collection = data?.pages?.[0]?.collection || null;
   const products = useMemo(() => {
     if (!data?.pages) return [];
-    return data.pages
-      .flatMap((page) => page?.products?.edges || [])
-      .filter((edge: any) => isProductVisibleInListing(edge.node));
+    return data.pages.flatMap((page) => page.products || []);
   }, [data]);
 
   const collectionMetaDesc = collection

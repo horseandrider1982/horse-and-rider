@@ -6,9 +6,9 @@ import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
+import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import { fetchUntilVisible } from "@/lib/fetchVisibleProducts";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 const PAGE_SIZE = 24;
 
@@ -55,19 +55,26 @@ const Search = () => {
   } = useInfiniteQuery({
     queryKey: ['search-products', query, shopifyLanguage],
     queryFn: async ({ pageParam }) => {
-      const variables: Record<string, unknown> = {
-        first: PAGE_SIZE,
-        language: shopifyLanguage,
-        after: pageParam || null,
-      };
-      const parts: string[] = [];
-      if (query) parts.push(query);
-      parts.push('available_for_sale:true');
-      variables.query = parts.join(' ');
-      const res = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
-      const edges = res?.data?.products?.edges || [];
-      const pageInfo = res?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null };
-      return { products: edges as ShopifyProduct[], pageInfo };
+      const queryParts: string[] = [];
+      if (query) queryParts.push(query);
+      queryParts.push('available_for_sale:true');
+      const combinedQuery = queryParts.join(' ');
+
+      return fetchUntilVisible(
+        async (cursor?: string) => {
+          const res = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, {
+            first: PAGE_SIZE,
+            language: shopifyLanguage,
+            after: cursor || pageParam || null,
+            query: combinedQuery,
+          });
+          return {
+            edges: (res?.data?.products?.edges || []) as ShopifyProduct[],
+            pageInfo: res?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null },
+          };
+        },
+        PAGE_SIZE,
+      );
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
@@ -75,10 +82,7 @@ const Search = () => {
     enabled: !!query,
   });
 
-  const products = useMemo(() => {
-    const all = data?.pages.flatMap(p => p.products) || [];
-    return all.filter(p => isProductVisibleInListing(p.node));
-  }, [data]);
+  const products = data?.pages.flatMap(p => p.products) || [];
 
   usePageMeta({
     title: query ? `${t("search.search")}: ${query}` : t("search.search"),

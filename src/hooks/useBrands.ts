@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { storefrontApiRequest, type ShopifyProduct, STOREFRONT_PAGINATED_QUERY } from '@/lib/shopify';
+import { fetchUntilVisible } from '@/lib/fetchVisibleProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { useI18n } from '@/i18n';
 
@@ -62,17 +63,21 @@ async function fetchBrandProductsPage(
   const languageMap: Record<string, string> = { de: 'DE', en: 'EN', es: 'ES', nl: 'NL', pl: 'PL', da: 'DA', sv: 'SV' };
   const language = languageMap[locale] || 'DE';
 
-  const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, {
-    first: BRAND_PAGE_SIZE,
-    query: `vendor:"${vendor}"`,
-    after: after || null,
-    language,
-  });
-
-  const edges = data?.data?.products?.edges || [];
-  const pageInfo = data?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null };
-
-  return { products: edges as ShopifyProduct[], pageInfo };
+  return fetchUntilVisible(
+    async (cursor?: string) => {
+      const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, {
+        first: BRAND_PAGE_SIZE,
+        query: `vendor:"${vendor}"`,
+        after: cursor || after || null,
+        language,
+      });
+      return {
+        edges: (data?.data?.products?.edges || []) as ShopifyProduct[],
+        pageInfo: data?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null },
+      };
+    },
+    BRAND_PAGE_SIZE,
+  );
 }
 
 export function useBrandProducts(vendor: string, enabled: boolean) {

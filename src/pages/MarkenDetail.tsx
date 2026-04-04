@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { Loader2, ChevronLeft } from "lucide-react";
-import { useMemo } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -10,7 +9,7 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
+import { type ShopifyProduct } from "@/lib/shopify";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 function ProductCard({ product }: { product: ShopifyProduct }) {
@@ -49,10 +48,7 @@ export default function MarkenDetail() {
   const brand = brands?.find((b) => b.slug === slug);
   const vendorName = brand?.name || "";
   const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
-  const products = useMemo(() => {
-    const all = productsData?.pages.flatMap(p => p.products) || [];
-    return all.filter(p => isProductVisibleInListing(p.node));
-  }, [productsData]);
+  const products = productsData?.pages.flatMap(p => p.products) || [];
 
   const brandMetaDesc = brand
     ? brand.seoText
