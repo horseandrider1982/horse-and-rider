@@ -166,7 +166,7 @@ export default function CollectionDetail() {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
-      return lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
+      return lastPage?.pageInfo?.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
     enabled: !!handle,
   });
