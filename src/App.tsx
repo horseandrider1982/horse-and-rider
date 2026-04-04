@@ -15,7 +15,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const Auth = lazy(() => import("./pages/Auth"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const Account = lazy(() => import("./pages/Account"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
