@@ -7,6 +7,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { trackAddToCart } from "@/lib/ga4";
+import { isProductVisibleInListing } from "@/lib/shopify";
 
 const SIMILAR_QUERY = `
   query GetSimilar($first: Int!, $query: String, $language: LanguageCode) @inContext(language: $language) {
@@ -29,6 +30,16 @@ const SIMILAR_QUERY = `
                 id title
                 price { amount currencyCode }
                 availableForSale
+                currentlyNotInStock
+                metafields(identifiers: [
+                  {namespace: "custom", key: "lieferantenbestand"},
+                  {namespace: "custom", key: "ueberverkauf"}
+                ]) {
+                  namespace
+                  key
+                  value
+                  type
+                }
                 selectedOptions { name value }
               }
             }
@@ -57,8 +68,10 @@ function useSimilarProducts(vendor: string | undefined, productType: string | un
         language,
       });
       const edges = (data?.data?.products?.edges || []) as ShopifyProduct[];
-      // Filter out current product
-      return edges.filter(p => p.node.id !== currentId).slice(0, 4);
+      // Filter out current product and non-visible products
+      return edges
+        .filter(p => p.node.id !== currentId && isProductVisibleInListing(p.node))
+        .slice(0, 4);
     },
     enabled: !!(vendor || productType) && !!currentId,
     staleTime: 5 * 60 * 1000,
