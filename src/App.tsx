@@ -57,6 +57,7 @@ const AppContent = () => {
 
         {/* Admin routes (no locale prefix) */}
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/301/monitoring" element={<RedirectMonitoring />} />
         <Route path="/admin/301/conflicts" element={<RedirectConflicts />} />
 
