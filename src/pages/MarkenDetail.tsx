@@ -10,7 +10,7 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
+import { type ShopifyProduct } from "@/lib/shopify";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 function ProductCard({ product }: { product: ShopifyProduct }) {
