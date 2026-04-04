@@ -41,7 +41,7 @@ export const Header = () => {
           <div className="flex items-center gap-2">
             <MobileMenu />
             <LocaleLink to="/" className="flex-shrink-0">
-              <img src={logo} alt="Horse & Rider Luhmühlen" className="h-9 md:h-11 w-auto" />
+              <img src={logo} alt="Horse & Rider Luhmühlen" className="h-9 md:h-11 w-auto" style={{ filter: "brightness(0) sepia(1) hue-rotate(120deg) saturate(0.6) brightness(0.25)" }} />
             </LocaleLink>
           </div>
 
