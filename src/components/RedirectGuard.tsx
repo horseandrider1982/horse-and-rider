@@ -90,16 +90,22 @@ export function RedirectGuard() {
           hops++;
         }
 
-        const finalTarget = currentPath !== path ? currentPath : null;
+    // Check if final target is an external URL (stored in new_url)
+        const isExternal = lastNewUrl && /^https?:\/\//.test(lastNewUrl);
+        const finalTarget = currentPath !== path ? (isExternal ? lastNewUrl! : currentPath) : null;
         cacheSet(path, finalTarget);
 
         if (finalTarget) {
           if (redirectId) {
-            logHit(redirectId, path, finalTarget).catch(() => {});
+            logHit(redirectId, path, isExternal ? finalTarget : currentPath).catch(() => {});
           }
-          const localeMatch = location.pathname.match(/^\/([a-z]{2})(?=\/|$)/);
-          const prefix = localeMatch ? `/${localeMatch[1]}` : '';
-          navigate(`${prefix}${finalTarget}`, { replace: true });
+          if (isExternal) {
+            window.location.href = finalTarget;
+          } else {
+            const localeMatch = location.pathname.match(/^\/([a-z]{2})(?=\/|$)/);
+            const prefix = localeMatch ? `/${localeMatch[1]}` : '';
+            navigate(`${prefix}${finalTarget}`, { replace: true });
+          }
         }
       } finally {
         checking.current = false;
