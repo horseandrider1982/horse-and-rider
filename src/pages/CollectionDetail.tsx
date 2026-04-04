@@ -93,20 +93,39 @@ const COLLECTION_QUERY = `
   }
 `;
 
-async function fetchCollectionPage(handle: string, locale: string, cursor?: string) {
-  const res = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+async function fetchCollectionPage(handle: string, locale: string, cursor?: string): Promise<VisibleProductsPage & { collection: any }> {
+  const fetcher = async (innerCursor?: string) => {
+    const res = await fetch(SHOPIFY_STOREFRONT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({
+        query: COLLECTION_QUERY,
+        variables: { handle, first: 24, after: innerCursor || cursor || null, language: locale.toUpperCase() },
+      }),
+    });
+    const json = await res.json();
+    const collection = json?.data?.collection;
+    if (!collection) return { edges: [] as ShopifyProduct[], pageInfo: { hasNextPage: false, endCursor: null }, _collection: null };
+    const edges = (collection.products?.edges || []).map((e: any) => ({ node: e.node })) as ShopifyProduct[];
+    const pageInfo = collection.products?.pageInfo || { hasNextPage: false, endCursor: null };
+    return { edges, pageInfo, _collection: collection };
+  };
+
+  // We need the collection metadata from the first fetch
+  let collectionMeta: any = null;
+  const result = await fetchUntilVisible(
+    async (c?: string) => {
+      const r = await fetcher(c);
+      if (!collectionMeta && r._collection) collectionMeta = r._collection;
+      return { edges: r.edges, pageInfo: r.pageInfo };
     },
-    body: JSON.stringify({
-      query: COLLECTION_QUERY,
-      variables: { handle, first: 24, after: cursor || null, language: locale.toUpperCase() },
-    }),
-  });
-  const json = await res.json();
-  return json?.data?.collection || null;
+    24,
+  );
+
+  return { ...result, collection: collectionMeta };
 }
 
 export default function CollectionDetail() {
