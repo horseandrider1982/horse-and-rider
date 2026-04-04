@@ -41,6 +41,8 @@ export const defaultTranslations: Record<string, string> = {
   "hero_section.cta_phone": "Beratung: 04172-6403",
 
   // ServiceCards
+  "services.subtitle": "Das macht uns aus",
+  "services.heading": "Vier Wege zu Ihrem perfekten Equipment",
   "services.store.title": "Reitsportfachgeschäft",
   "services.store.desc": "Über 10.000 Artikel vor Ort. Kompetente Beratung in Luhmühlen.",
   "services.online.title": "Online-Shop",
