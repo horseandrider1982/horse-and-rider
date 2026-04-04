@@ -53,6 +53,7 @@ export const defaultTranslations: Record<string, string> = {
   "services.embroidery.desc": "Individuelle Stickerei für Schabracken, Decken, Jacken u.v.m.",
 
   // CategoryHighlights
+  "categories.subtitle": "Unsere Top Kategorien",
   "categories.title": "Was wir besonders gut können",
   "categories.eventing.title": "Vielseitigkeit",
   "categories.eventing.desc": "Alles für den Vielseitigkeitsreiter und das Vielseitigkeitspferd.",
