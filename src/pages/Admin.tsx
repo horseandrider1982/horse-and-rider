@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, Users, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home } from "lucide-react";
+import { Loader2, BarChart3, Settings, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
@@ -29,7 +29,7 @@ const NAV_ITEMS = [
   { key: "news", label: "News", icon: Newspaper },
   { key: "brands", label: "Marken", icon: Tag },
   { key: "redirects", label: "301", icon: ArrowRightLeft },
-  { key: "users", label: "Kunden", icon: Users },
+  
   { key: "configurator", label: "Konfigurator", icon: Settings },
   { key: "calendly", label: "Calendly", icon: Calendar },
   { key: "search", label: "Suche", icon: SearchIcon },
@@ -172,7 +172,7 @@ export default function Admin() {
           )}
           {activeSection === "brands" && <BrandsSection />}
           {activeSection === "redirects" && <RedirectsSection />}
-          {activeSection === "users" && <UsersSection />}
+          
           {activeSection === "configurator" && <ConfiguratorSection />}
           {activeSection === "calendly" && <CalendlySettings />}
           {activeSection === "search" && <SearchSettings />}
@@ -350,22 +350,8 @@ function RedirectsSection() {
   );
 }
 
-function UsersSection() {
-  return (
-    <>
-      <h1 className="text-2xl font-heading font-bold mb-6">Kunden-Übersicht</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Kunden-Übersicht</CardTitle>
-          <CardDescription>Liste der registrierten Kunden.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CustomerList />
-        </CardContent>
-      </Card>
-    </>
-  );
-}
+
+
 
 function ConfiguratorSection() {
   return (
@@ -424,49 +410,5 @@ function ConfiguratorSection() {
         </TabsContent>
       </Tabs>
     </>
-  );
-}
-
-/* ─── Customer List ─── */
-
-function CustomerList() {
-  const [customers, setCustomers] = useState<Array<{ id: string; first_name: string | null; last_name: string | null; created_at: string }>>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase
-      .from("profiles")
-      .select("id, first_name, last_name, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        setCustomers(data || []);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-
-  if (customers.length === 0) return <p className="text-center py-8 text-muted-foreground">Noch keine Kunden registriert.</p>;
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="text-left py-3 px-2 font-medium">Name</th>
-            <th className="text-left py-3 px-2 font-medium">Registriert am</th>
-          </tr>
-        </thead>
-        <tbody>
-          {customers.map(c => (
-            <tr key={c.id} className="border-b">
-              <td className="py-3 px-2">{c.first_name || ""} {c.last_name || ""}</td>
-              <td className="py-3 px-2 text-muted-foreground">{new Date(c.created_at).toLocaleDateString("de-DE")}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
