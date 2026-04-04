@@ -412,8 +412,3 @@ function ConfiguratorSection() {
     </>
   );
 }
-
-
-
-  );
-}
