@@ -29,6 +29,16 @@ const SIMILAR_QUERY = `
                 id title
                 price { amount currencyCode }
                 availableForSale
+                currentlyNotInStock
+                metafields(identifiers: [
+                  {namespace: "custom", key: "lieferantenbestand"},
+                  {namespace: "custom", key: "ueberverkauf"}
+                ]) {
+                  namespace
+                  key
+                  value
+                  type
+                }
                 selectedOptions { name value }
               }
             }
