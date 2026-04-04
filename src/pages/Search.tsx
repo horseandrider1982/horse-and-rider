@@ -6,9 +6,9 @@ import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
+import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import { fetchUntilVisible } from "@/lib/fetchVisibleProducts";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 const PAGE_SIZE = 24;
 
