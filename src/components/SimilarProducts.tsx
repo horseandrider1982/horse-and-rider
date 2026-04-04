@@ -7,6 +7,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { trackAddToCart } from "@/lib/ga4";
+import { isProductVisibleInListing } from "@/lib/shopify";
 
 const SIMILAR_QUERY = `
   query GetSimilar($first: Int!, $query: String, $language: LanguageCode) @inContext(language: $language) {
