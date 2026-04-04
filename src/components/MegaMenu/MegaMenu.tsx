@@ -57,7 +57,6 @@ export function MegaMenu() {
             className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors whitespace-nowrap"
           >
             Sattelservice
-            <ExternalLink className="h-3 w-3 text-muted-foreground" />
           </a>
         </li>
       </ul>
