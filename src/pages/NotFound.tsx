@@ -51,12 +51,18 @@ const NotFound = () => {
           const target = data.new_path || normalizeUrl(data.new_url);
           if (!target || visited.has(target)) break;
 
+          lastNewUrl = data.new_url;
           visited.add(target);
           currentPath = target;
           hops++;
         }
 
         if (!cancelled && currentPath !== path) {
+          const isExternal = lastNewUrl && /^https?:\/\//.test(lastNewUrl);
+          if (isExternal) {
+            window.location.href = lastNewUrl!;
+            return;
+          }
           const localeMatch = location.pathname.match(/^\/([a-z]{2})(?=\/|$)/);
           const prefix = localeMatch ? `/${localeMatch[1]}` : '';
           navigate(`${prefix}${currentPath}`, { replace: true });
