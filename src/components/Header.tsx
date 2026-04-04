@@ -91,8 +91,7 @@ export const Header = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <a href="https://sattelservice.horse-and-rider.de" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 cursor-pointer">
-                          <ExternalLink className="h-4 w-4" />Sattelservice
-                          <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
+                          Sattelservice
                         </a>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
