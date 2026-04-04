@@ -55,19 +55,26 @@ const Search = () => {
   } = useInfiniteQuery({
     queryKey: ['search-products', query, shopifyLanguage],
     queryFn: async ({ pageParam }) => {
-      const variables: Record<string, unknown> = {
-        first: PAGE_SIZE,
-        language: shopifyLanguage,
-        after: pageParam || null,
-      };
-      const parts: string[] = [];
-      if (query) parts.push(query);
-      parts.push('available_for_sale:true');
-      variables.query = parts.join(' ');
-      const res = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
-      const edges = res?.data?.products?.edges || [];
-      const pageInfo = res?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null };
-      return { products: edges as ShopifyProduct[], pageInfo };
+      const queryParts: string[] = [];
+      if (query) queryParts.push(query);
+      queryParts.push('available_for_sale:true');
+      const combinedQuery = queryParts.join(' ');
+
+      return fetchUntilVisible(
+        async (cursor?: string) => {
+          const res = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, {
+            first: PAGE_SIZE,
+            language: shopifyLanguage,
+            after: cursor || pageParam || null,
+            query: combinedQuery,
+          });
+          return {
+            edges: (res?.data?.products?.edges || []) as ShopifyProduct[],
+            pageInfo: res?.data?.products?.pageInfo || { hasNextPage: false, endCursor: null },
+          };
+        },
+        PAGE_SIZE,
+      );
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
