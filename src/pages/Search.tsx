@@ -82,10 +82,7 @@ const Search = () => {
     enabled: !!query,
   });
 
-  const products = useMemo(() => {
-    const all = data?.pages.flatMap(p => p.products) || [];
-    return all.filter(p => isProductVisibleInListing(p.node));
-  }, [data]);
+  const products = data?.pages.flatMap(p => p.products) || [];
 
   usePageMeta({
     title: query ? `${t("search.search")}: ${query}` : t("search.search"),
