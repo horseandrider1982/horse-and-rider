@@ -31,9 +31,9 @@ const Index = () => {
       <main className="flex-1">
         <HeroBanner />
         <BrandLogosBar />
+        <ServiceCards />
         <ProductGrid />
         <CategoryHighlights />
-        <ServiceCards />
         <NewsletterSection />
         <TrustedShopsSection />
         <AboutTeamSection />
