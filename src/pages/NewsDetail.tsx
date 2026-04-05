@@ -43,7 +43,7 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
   return (
     <div className="group">
       <LocaleLink to={`/product/${product.node.handle}`} className="block">
-        {img ? <img src={img.url} alt={img.altText || product.node.title} className="w-full aspect-square object-cover rounded-lg mb-2 group-hover:opacity-90 transition-opacity" loading="lazy" /> : <div className="w-full aspect-square bg-muted rounded-lg mb-2" />}
+        {img ? <img src={img.url} alt={img.altText || product.node.title} width={300} height={300} className="w-full aspect-square object-cover rounded-lg mb-2 group-hover:opacity-90 transition-opacity" loading="lazy" decoding="async" /> : <div className="w-full aspect-square bg-muted rounded-lg mb-2" />}
         <h3 className="text-sm font-medium truncate group-hover:text-primary transition-colors">{product.node.title}</h3>
       </LocaleLink>
       <p className="text-sm text-muted-foreground mb-2">{parseFloat(price.amount).toLocaleString('de-DE', { style: 'currency', currency: price.currencyCode })}</p>

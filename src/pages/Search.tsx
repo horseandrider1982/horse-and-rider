@@ -24,7 +24,7 @@ const SearchProductCard = ({ product }: { product: ShopifyProduct }) => {
     >
       <div className="aspect-square overflow-hidden bg-white">
         {image ? (
-          <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          <img src={image.url} alt={image.altText || product.node.title} width={400} height={400} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>
         )}
