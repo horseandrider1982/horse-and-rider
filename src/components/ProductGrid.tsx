@@ -10,24 +10,9 @@ import { trackAddToCart } from "@/lib/ga4";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 const ProductCard = ({ product }: { product: ShopifyProduct }) => {
-  const addItem = useCartStore(state => state.addItem);
-  const isLoading = useCartStore(state => state.isLoading);
   const { t } = useI18n();
-  const variant = product.node.variants.edges[0]?.node;
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!variant) return;
-    await addItem({
-      product, variantId: variant.id, variantTitle: variant.title,
-      price: variant.price, quantity: 1, selectedOptions: variant.selectedOptions || [],
-    });
-    trackAddToCart(product, variant.id, 1);
-    toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
-  };
 
   return (
     <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
@@ -40,12 +25,7 @@ const ProductCard = ({ product }: { product: ShopifyProduct }) => {
       </div>
       <div className="p-4">
         <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-primary">{parseFloat(price.amount).toFixed(2)} {price.currencyCode === 'EUR' ? '€' : price.currencyCode}</span>
-          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={handleAddToCart} disabled={isLoading || !variant?.availableForSale}>
-            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShoppingCart className="h-3 w-3" />}
-          </Button>
-        </div>
+        <span className="font-bold text-primary">{parseFloat(price.amount).toFixed(2)} {price.currencyCode === 'EUR' ? '€' : price.currencyCode}</span>
       </div>
     </LocaleLink>
   );
