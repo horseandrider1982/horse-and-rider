@@ -314,34 +314,55 @@ export const PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
-export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}) {
-  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}, retries = 2) {
+  let lastError: Error | null = null;
 
-  if (response.status === 402) {
-    toast.error("Shopify: Zahlung erforderlich", {
-      description: "Der Shopify API-Zugang erfordert einen aktiven Billing-Plan. Bitte besuche https://admin.shopify.com um ein Upgrade durchzuführen.",
-    });
-    return;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(SHOPIFY_STOREFRONT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
+        },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      if (response.status === 402) {
+        toast.error("Shopify: Zahlung erforderlich", {
+          description: "Der Shopify API-Zugang erfordert einen aktiven Billing-Plan. Bitte besuche https://admin.shopify.com um ein Upgrade durchzuführen.",
+        });
+        return;
+      }
+
+      // Retry on 429 (rate limit) and 5xx (server errors)
+      if ((response.status === 429 || response.status >= 500) && attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.errors) {
+        throw new Error(`Error calling Shopify: ${data.errors.map((e: { message: string }) => e.message).join(', ')}`);
+      }
+
+      return data;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      // Retry on network errors (TypeError: Failed to fetch)
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+    }
   }
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  if (data.errors) {
-    throw new Error(`Error calling Shopify: ${data.errors.map((e: { message: string }) => e.message).join(', ')}`);
-  }
-
-  return data;
+  throw lastError || new Error('Shopify API request failed');
 }
 
 // Cart mutations
