@@ -110,15 +110,17 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ShopifyCustomerProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </ShopifyCustomerProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ShopifyCustomerProvider>
+          <Toaster />
+          <Sonner />
+          <AppContent />
+        </ShopifyCustomerProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
