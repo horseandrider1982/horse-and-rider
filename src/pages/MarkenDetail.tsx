@@ -20,7 +20,7 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
   return (
     <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
       <div className="aspect-square overflow-hidden bg-white">
-        {image ? <img src={image.url} alt={image.altText || product.node.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>}
+        {image ? <img src={image.url} alt={image.altText || product.node.title} width={400} height={400} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>}
       </div>
       <div className="p-4">
         {product.node.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.node.vendor}</p>}
