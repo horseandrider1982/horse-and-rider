@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
 
     if (segRes.ok) {
       const segData = await segRes.json();
+      console.log("Full segments response:", JSON.stringify(segData));
       const segments = segData?.data?.segments?.edges || [];
       console.log("All segments:", segments.map((e: any) => e.node.name));
 
