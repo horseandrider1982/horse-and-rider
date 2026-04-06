@@ -197,7 +197,7 @@ export const Footer = () => {
 
           {/* Col 4: Logo + Kontakt */}
           <div>
-             <img src={logo} alt="Horse & Rider Luhmühlen" className="h-10 w-auto brightness-0 invert mb-4" />
+             <img src={logo} alt="Horse & Rider Luhmühlen" width={146} height={40} className="h-10 w-auto brightness-0 invert mb-4" />
             <p className="text-sm text-background/70 leading-relaxed mb-3">{t("footer.about")}</p>
             <div className="flex items-center gap-2 text-sm text-background/70">
               <Phone className="h-3.5 w-3.5 flex-shrink-0" />

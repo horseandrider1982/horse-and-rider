@@ -1,9 +1,9 @@
 import { useI18n } from "@/i18n";
 import { LocaleLink } from "./LocaleLink";
-import eventingImg from "@/assets/eventing.jpg";
-import sattelImg from "@/assets/sattel.jpg";
-import gebisseImg from "@/assets/gebisse.jpg";
-import airbagImg from "@/assets/airbag.jpg";
+import eventingImg from "@/assets/eventing.webp";
+import sattelImg from "@/assets/sattel.webp";
+import gebisseImg from "@/assets/gebisse.webp";
+import airbagImg from "@/assets/airbag.webp";
 
 export const CategoryHighlights = () => {
   const { t } = useI18n();
@@ -36,6 +36,8 @@ export const CategoryHighlights = () => {
                 alt={t(cat.titleKey)}
                 loading="lazy"
                 decoding="async"
+                width={300}
+                height={400}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
