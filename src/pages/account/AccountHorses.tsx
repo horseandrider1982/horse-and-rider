@@ -193,7 +193,10 @@ export default function AccountHorses() {
         </div>
         <div className="space-y-2">
           <Label>Disziplin</Label>
-          <Select value={form.discipline} onValueChange={v => setForm(f => ({ ...f, discipline: v }))}>
+          <Select
+            value={form.discipline && !DISCIPLINE_OPTIONS.includes(form.discipline) ? "Sonstiges" : (form.discipline || "")}
+            onValueChange={v => setForm(f => ({ ...f, discipline: v === "" ? "" : v }))}
+          >
             <SelectTrigger><SelectValue placeholder="Bitte wählen" /></SelectTrigger>
             <SelectContent>
               {DISCIPLINE_OPTIONS.map(d => (
@@ -201,6 +204,13 @@ export default function AccountHorses() {
               ))}
             </SelectContent>
           </Select>
+          {(form.discipline === "Sonstiges" || (form.discipline && !DISCIPLINE_OPTIONS.filter(d => d !== "Sonstiges").includes(form.discipline))) && (
+            <Input
+              placeholder="Disziplin eingeben"
+              value={form.discipline === "Sonstiges" ? "" : (form.discipline || "")}
+              onChange={e => setForm(f => ({ ...f, discipline: e.target.value || "Sonstiges" }))}
+            />
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="horse-notes">Notizen</Label>
