@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 const SHOPIFY_CUSTOMER_API =
-  "https://account.horse-and-rider.de/account/customer/api/2025-01/graphql";
+  "https://shopify.com/103820493125/account/customer/api/2025-01/graphql";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
