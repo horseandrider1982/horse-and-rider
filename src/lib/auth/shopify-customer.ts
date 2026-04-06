@@ -223,13 +223,18 @@ export async function fetchCustomerData(): Promise<ShopifyCustomerData | null> {
   
   // Try refresh if expired
   if (!token) {
+    console.log('[ShopifyCustomer] Token expired or missing, trying refresh…');
     const refreshed = await refreshAccessToken();
     if (refreshed) token = getAccessToken();
   }
 
-  if (!token) return null;
+  if (!token) {
+    console.warn('[ShopifyCustomer] No valid token available – skipping fetch');
+    return null;
+  }
 
   try {
+    console.log('[ShopifyCustomer] Fetching customer data from', SHOPIFY_CUSTOMER_API);
     const response = await fetch(SHOPIFY_CUSTOMER_API, {
       method: 'POST',
       headers: {
@@ -252,19 +257,33 @@ export async function fetchCustomerData(): Promise<ShopifyCustomerData | null> {
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error(`[ShopifyCustomer] API returned ${response.status}:`, errText);
       if (response.status === 401) {
-        // Token invalid, try refresh
+        // Token invalid, try refresh once
         const refreshed = await refreshAccessToken();
         if (refreshed) return fetchCustomerData();
+        console.warn('[ShopifyCustomer] Refresh failed – logging out');
         logout();
       }
       return null;
     }
 
     const data = await response.json();
-    const customer = data?.data?.customer;
-    if (!customer) return null;
+    console.log('[ShopifyCustomer] API response:', JSON.stringify(data).slice(0, 500));
 
+    if (data?.errors) {
+      console.error('[ShopifyCustomer] GraphQL errors:', data.errors);
+      return null;
+    }
+
+    const customer = data?.data?.customer;
+    if (!customer) {
+      console.warn('[ShopifyCustomer] No customer in response');
+      return null;
+    }
+
+    console.log('[ShopifyCustomer] Customer loaded:', customer.displayName, customer.emailAddress?.emailAddress);
     return {
       id: customer.id,
       email: customer.emailAddress?.emailAddress || '',
@@ -273,7 +292,7 @@ export async function fetchCustomerData(): Promise<ShopifyCustomerData | null> {
       displayName: customer.displayName || '',
     };
   } catch (err) {
-    console.error('Failed to fetch customer data:', err);
+    console.error('[ShopifyCustomer] Network/fetch error:', err);
     return null;
   }
 }
