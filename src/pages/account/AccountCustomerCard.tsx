@@ -5,7 +5,7 @@ import { AccountLayout } from "@/components/account/AccountLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, Tag } from "lucide-react";
 
 const TIER_COLORS: Record<string, string> = {
   bronze: "bg-amber-700/10 text-amber-800 border-amber-700/30",
@@ -29,19 +29,32 @@ export default function AccountCustomerCard() {
 
   const { customer } = useShopifyCustomer();
   const [card, setCard] = useState<CustomerCard | null>(null);
+  const [cardTags, setCardTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!customer?.id) { setLoading(false); return; }
-    supabase
+
+    // Fetch customer card from DB and tags from Shopify in parallel
+    const fetchCard = supabase
       .from("customer_cards")
       .select("*")
       .eq("shopify_customer_id", customer.id)
       .maybeSingle()
-      .then(({ data }) => {
-        setCard(data as CustomerCard | null);
-        setLoading(false);
-      });
+      .then(({ data }) => data as CustomerCard | null);
+
+    const fetchTags = supabase.functions
+      .invoke("get-customer-tags", {
+        body: { shopify_customer_id: customer.id },
+      })
+      .then(({ data }) => (data?.cardTags as string[]) || [])
+      .catch(() => [] as string[]);
+
+    Promise.all([fetchCard, fetchTags]).then(([cardData, tags]) => {
+      setCard(cardData);
+      setCardTags(tags);
+      setLoading(false);
+    });
   }, [customer?.id]);
 
   return (
@@ -73,6 +86,17 @@ export default function AccountCustomerCard() {
                 </span>
               </div>
 
+              {cardTags.length > 0 && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Tag className="h-4 w-4 text-muted-foreground" />
+                  {cardTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
               {card.valid_from && (
                 <p className="mt-4 text-xs text-muted-foreground">
                   Gültig ab {new Date(card.valid_from).toLocaleDateString("de-DE")}
@@ -85,6 +109,31 @@ export default function AccountCustomerCard() {
                 <p className="text-sm text-muted-foreground">{card.notes}</p>
               </CardContent>
             )}
+          </Card>
+        ) : cardTags.length > 0 ? (
+          /* No DB card, but Shopify has Card-tags → show segment info */
+          <Card className="overflow-hidden">
+            <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 sm:p-8">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Horse & Rider Luhmühlen</p>
+                  <p className="text-lg font-heading font-bold">{customer?.displayName}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                {cardTags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+
+              <p className="mt-4 text-sm text-muted-foreground">
+                Ihr Kundenstatus wurde in unserem System erkannt. Details zu Ihrer Kundenkarte erhalten Sie bei Ihrem nächsten Besuch im Laden.
+              </p>
+            </div>
           </Card>
         ) : (
           <Card>
