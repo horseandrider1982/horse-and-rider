@@ -6,7 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SHOPIFY_STORE = "horse-and-rider-luhmuehlen.myshopify.com";
+const SHOPIFY_STORE = "bpjvam-c1.myshopify.com";
+const API_VERSION = "2025-01";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
