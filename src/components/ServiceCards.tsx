@@ -1,9 +1,9 @@
 import { useI18n } from "@/i18n";
 import { Store, Globe, Wrench, Scissors } from "lucide-react";
-import ladenImg from "@/assets/laden-start.png";
-import sattlereiImg from "@/assets/sattlerei-start.png";
-import stickImg from "@/assets/stickerei-start.png";
-import onlineImg from "@/assets/online-start.png";
+import ladenImg from "@/assets/laden-start.webp";
+import sattlereiImg from "@/assets/sattlerei-start.webp";
+import stickImg from "@/assets/stickerei-start.webp";
+import onlineImg from "@/assets/online-start.webp";
 
 export const ServiceCards = () => {
   const { t } = useI18n();
