@@ -17,7 +17,9 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 const Index = lazy(() => import("./pages/Index"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
-const Account = lazy(() => import("./pages/Account"));
+const AccountProfile = lazy(() => import("./pages/account/AccountProfile"));
+const AccountCustomerCard = lazy(() => import("./pages/account/AccountCustomerCard"));
+const AccountHorses = lazy(() => import("./pages/account/AccountHorses"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Search = lazy(() => import("./pages/Search"));
@@ -72,12 +74,12 @@ const AppContent = () => {
           
           <Route path="auth/callback" element={<ShopifyCallback />} />
           <Route path="login" element={<ShopifyLogin />} />
-          <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="kundenkarte" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="pferde" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="pferde/neu" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="pferde/:id" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="pferde/:id/bearbeiten" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="account" element={<ProtectedRoute><AccountProfile /></ProtectedRoute>} />
+          <Route path="kundenkarte" element={<ProtectedRoute><AccountCustomerCard /></ProtectedRoute>} />
+          <Route path="pferde" element={<ProtectedRoute><AccountHorses /></ProtectedRoute>} />
+          <Route path="pferde/neu" element={<ProtectedRoute><AccountHorses /></ProtectedRoute>} />
+          <Route path="pferde/:id" element={<ProtectedRoute><AccountHorses /></ProtectedRoute>} />
+          <Route path="pferde/:id/bearbeiten" element={<ProtectedRoute><AccountHorses /></ProtectedRoute>} />
           <Route path="search" element={<Search />} />
           <Route path="unsere-marken" element={<UnsereMarken />} />
           <Route path="unsere-marken/:slug" element={<MarkenDetail />} />
