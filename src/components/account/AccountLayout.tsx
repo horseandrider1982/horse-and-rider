@@ -77,6 +77,18 @@ export function AccountLayout({ children }: AccountLayoutProps) {
                 <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
               </a>
 
+              {/* External: Sattelservice */}
+              <a
+                href="https://sattelservice.horse-and-rider.de/dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <Armchair className="h-4 w-4 shrink-0" />
+                Sattelservice
+                <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
+              </a>
+
               {/* Logout */}
               <div className="pt-3 mt-3 border-t border-border">
                 <button
