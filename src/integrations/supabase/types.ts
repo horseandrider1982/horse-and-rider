@@ -397,6 +397,45 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_cards: {
+        Row: {
+          card_number: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          shopify_customer_id: string
+          status: string
+          tier: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          card_number?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          shopify_customer_id: string
+          status?: string
+          tier?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          card_number?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          shopify_customer_id?: string
+          status?: string
+          tier?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       entity_paths: {
         Row: {
           canonical_key: string
@@ -421,6 +460,48 @@ export type Database = {
           is_current?: boolean
           last_seen_at?: string
           path?: string
+        }
+        Relationships: []
+      }
+      horse_profiles: {
+        Row: {
+          birth_year: number | null
+          breed: string | null
+          color: string | null
+          created_at: string
+          height_cm: number | null
+          id: string
+          image_url: string | null
+          name: string
+          notes: string | null
+          shopify_customer_id: string
+          updated_at: string
+        }
+        Insert: {
+          birth_year?: number | null
+          breed?: string | null
+          color?: string | null
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          notes?: string | null
+          shopify_customer_id: string
+          updated_at?: string
+        }
+        Update: {
+          birth_year?: number | null
+          breed?: string | null
+          color?: string | null
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          notes?: string | null
+          shopify_customer_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
