@@ -36,7 +36,11 @@ const STATIC_PAGES = [
   { path: "/de/news", type: "news" },
   { path: "/de/faq", type: "page" },
   { path: "/de/kontakt", type: "page" },
-  { path: "/de/search", type: "custom" },
+  { path: "/de/impressum", type: "page" },
+  { path: "/de/datenschutz", type: "page" },
+  { path: "/de/agb", type: "page" },
+  { path: "/de/widerrufsrecht", type: "page" },
+  { path: "/de/versand", type: "page" },
 ];
 
 const ENTITY_TYPES = ["product", "collection", "brand", "news", "page", "custom"] as const;
