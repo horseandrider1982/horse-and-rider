@@ -235,33 +235,39 @@ export async function fetchCustomerData(): Promise<ShopifyCustomerData | null> {
   }
 
   try {
-    console.log('[ShopifyCustomer] Fetching customer data from', SHOPIFY_CUSTOMER_API);
-    const response = await fetch(SHOPIFY_CUSTOMER_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token,
-      },
-      body: JSON.stringify({
-        query: `
-          query {
-            customer {
-              id
-              emailAddress { emailAddress }
-              firstName
-              lastName
-              displayName
-            }
-          }
-        `,
-      }),
-    });
+    console.log('[ShopifyCustomer] Fetching customer data via proxy…');
+    const query = `
+      query {
+        customer {
+          id
+          emailAddress { emailAddress }
+          firstName
+          lastName
+          displayName
+        }
+      }
+    `;
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.error(`[ShopifyCustomer] API returned ${response.status}:`, errText);
-      if (response.status === 401) {
-        // Token invalid, try refresh once
+    const { data: proxyData, error: invokeError } = await supabase.functions.invoke(
+      'shopify-customer-proxy',
+      { body: { query, accessToken: token } }
+    );
+
+    if (invokeError) {
+      console.error('[ShopifyCustomer] Proxy invoke error:', invokeError);
+      return null;
+    }
+
+    console.log('[ShopifyCustomer] Proxy response:', JSON.stringify(proxyData).slice(0, 500));
+
+    if (proxyData?.errors) {
+      console.error('[ShopifyCustomer] GraphQL errors:', proxyData.errors);
+      return null;
+    }
+
+    if (proxyData?.error) {
+      console.error('[ShopifyCustomer] Proxy returned error:', proxyData.error);
+      if (proxyData.error.includes('401') || proxyData.error.includes('Unauthorized')) {
         const refreshed = await refreshAccessToken();
         if (refreshed) return fetchCustomerData();
         console.warn('[ShopifyCustomer] Refresh failed – logging out');
@@ -270,15 +276,7 @@ export async function fetchCustomerData(): Promise<ShopifyCustomerData | null> {
       return null;
     }
 
-    const data = await response.json();
-    console.log('[ShopifyCustomer] API response:', JSON.stringify(data).slice(0, 500));
-
-    if (data?.errors) {
-      console.error('[ShopifyCustomer] GraphQL errors:', data.errors);
-      return null;
-    }
-
-    const customer = data?.data?.customer;
+    const customer = proxyData?.data?.customer;
     if (!customer) {
       console.warn('[ShopifyCustomer] No customer in response');
       return null;
