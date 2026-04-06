@@ -36,6 +36,8 @@ export const CategoryHighlights = () => {
                 alt={t(cat.titleKey)}
                 loading="lazy"
                 decoding="async"
+                width={300}
+                height={400}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

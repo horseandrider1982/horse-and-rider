@@ -3,7 +3,7 @@ import { MapPin, Phone, MessageSquare, Smartphone, Monitor } from "lucide-react"
 import { useI18n } from "@/i18n";
 import { CalendlyModal } from "./CalendlyModal";
 import { ProductContactModal } from "./ProductContactModal";
-import storeImg from "@/assets/store-interior.jpg";
+import storeImg from "@/assets/store-interior.webp";
 
 export const AboutTeamSection = () => {
   const { t } = useI18n();
