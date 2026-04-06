@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
@@ -20,11 +21,22 @@ interface Horse {
   color: string | null;
   height_cm: number | null;
   birth_year: number | null;
+  discipline: string | null;
+  training_level: number | null;
   notes: string | null;
-  image_url: string | null;
 }
 
 type ViewMode = "list" | "new" | "detail" | "edit";
+
+const DISCIPLINE_OPTIONS = [
+  "Dressur", "Springen", "Vielseitigkeit", "Island",
+  "Western", "Barock", "Freizeitpferd", "Sonstiges",
+];
+
+const emptyForm = {
+  name: "", breed: "", color: "", height_cm: "",
+  birth_year: "", discipline: "", training_level: "", notes: "",
+};
 
 export default function AccountHorses() {
   usePageMeta({ title: "Meine Pferde", description: "Verwalten Sie Ihre Pferdeprofile.", noIndex: true });
@@ -39,6 +51,9 @@ export default function AccountHorses() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedHorse, setSelectedHorse] = useState<Horse | null>(null);
+  const [form, setForm] = useState(emptyForm);
+
+  const customerEmail = customer?.emailAddress?.emailAddress;
 
   // Determine view mode from URL
   const getViewMode = (): ViewMode => {
@@ -50,24 +65,28 @@ export default function AccountHorses() {
   };
   const viewMode = getViewMode();
 
-  const [form, setForm] = useState({
-    name: "", breed: "", color: "", height_cm: "", birth_year: "", notes: "",
-  });
-
-  const customerId = customer?.id;
+  // Call the sync-horses edge function
+  const callSync = async (action: string, horse?: Record<string, unknown>) => {
+    const { data, error } = await supabase.functions.invoke("sync-horses", {
+      body: { action, email: customerEmail, horse },
+    });
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
 
   const loadHorses = async () => {
-    if (!customerId) { setLoading(false); return; }
-    const { data } = await supabase
-      .from("horse_profiles")
-      .select("*")
-      .eq("shopify_customer_id", customerId)
-      .order("name");
-    setHorses((data as Horse[]) || []);
+    if (!customerEmail) { setLoading(false); return; }
+    try {
+      const result = await callSync("list");
+      setHorses(result.data || []);
+    } catch (err) {
+      console.error("Failed to load horses:", err);
+    }
     setLoading(false);
   };
 
-  useEffect(() => { loadHorses(); }, [customerId]);
+  useEffect(() => { loadHorses(); }, [customerEmail]);
 
   // Load selected horse for detail/edit
   useEffect(() => {
@@ -82,49 +101,61 @@ export default function AccountHorses() {
             color: horse.color || "",
             height_cm: horse.height_cm?.toString() || "",
             birth_year: horse.birth_year?.toString() || "",
+            discipline: horse.discipline || "",
+            training_level: horse.training_level?.toString() || "",
             notes: horse.notes || "",
           });
         }
       }
     }
-    if (viewMode === "new") {
-      setForm({ name: "", breed: "", color: "", height_cm: "", birth_year: "", notes: "" });
-    }
+    if (viewMode === "new") setForm(emptyForm);
   }, [viewMode, params.id, horses]);
 
   const handleSave = async () => {
-    if (!customerId || !form.name.trim()) {
+    if (!customerEmail || !form.name.trim()) {
       toast.error("Bitte geben Sie einen Namen ein.");
       return;
     }
     setSaving(true);
-    const payload = {
-      shopify_customer_id: customerId,
+    const payload: Record<string, unknown> = {
       name: form.name.trim(),
       breed: form.breed.trim() || null,
       color: form.color.trim() || null,
       height_cm: form.height_cm ? parseInt(form.height_cm) : null,
       birth_year: form.birth_year ? parseInt(form.birth_year) : null,
-      notes: form.notes.trim() || null,
+      discipline: form.discipline || null,
+      training_level: form.training_level ? parseInt(form.training_level) : null,
     };
 
-    if (viewMode === "edit" && params.id) {
-      const { error } = await supabase.from("horse_profiles").update(payload).eq("id", params.id);
-      if (error) { toast.error("Fehler beim Speichern."); }
-      else { toast.success("Pferd aktualisiert."); await loadHorses(); navigate(localePath(`/pferde/${params.id}`)); }
-    } else {
-      const { error } = await supabase.from("horse_profiles").insert(payload);
-      if (error) { toast.error("Fehler beim Anlegen."); }
-      else { toast.success("Pferd angelegt!"); await loadHorses(); navigate(localePath("/pferde")); }
+    try {
+      if (viewMode === "edit" && params.id) {
+        payload.id = params.id;
+        await callSync("update", payload);
+        toast.success("Pferd aktualisiert.");
+        await loadHorses();
+        navigate(localePath(`/pferde/${params.id}`));
+      } else {
+        await callSync("create", payload);
+        toast.success("Pferd angelegt!");
+        await loadHorses();
+        navigate(localePath("/pferde"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Fehler beim Speichern.");
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Möchten Sie dieses Pferd wirklich löschen?")) return;
-    const { error } = await supabase.from("horse_profiles").delete().eq("id", id);
-    if (error) { toast.error("Fehler beim Löschen."); }
-    else { toast.success("Pferd gelöscht."); await loadHorses(); navigate(localePath("/pferde")); }
+    try {
+      await callSync("delete", { id });
+      toast.success("Pferd gelöscht.");
+      await loadHorses();
+      navigate(localePath("/pferde"));
+    } catch {
+      toast.error("Fehler beim Löschen.");
+    }
   };
 
   // --- FORM ---
@@ -155,6 +186,21 @@ export default function AccountHorses() {
             <Label htmlFor="horse-year">Geburtsjahr</Label>
             <Input id="horse-year" type="number" value={form.birth_year} onChange={e => setForm(f => ({ ...f, birth_year: e.target.value }))} placeholder="z.B. 2018" />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="horse-training">Ausbildungsstand (1-10)</Label>
+            <Input id="horse-training" type="number" min={1} max={10} value={form.training_level} onChange={e => setForm(f => ({ ...f, training_level: e.target.value }))} placeholder="z.B. 5" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label>Disziplin</Label>
+          <Select value={form.discipline} onValueChange={v => setForm(f => ({ ...f, discipline: v }))}>
+            <SelectTrigger><SelectValue placeholder="Bitte wählen" /></SelectTrigger>
+            <SelectContent>
+              {DISCIPLINE_OPTIONS.map(d => (
+                <SelectItem key={d} value={d}>{d}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="horse-notes">Notizen</Label>
@@ -198,6 +244,8 @@ export default function AccountHorses() {
             {selectedHorse.color && <div><dt className="text-muted-foreground">Farbe</dt><dd className="font-medium">{selectedHorse.color}</dd></div>}
             {selectedHorse.height_cm && <div><dt className="text-muted-foreground">Stockmaß</dt><dd className="font-medium">{selectedHorse.height_cm} cm</dd></div>}
             {selectedHorse.birth_year && <div><dt className="text-muted-foreground">Geburtsjahr</dt><dd className="font-medium">{selectedHorse.birth_year}</dd></div>}
+            {selectedHorse.discipline && <div><dt className="text-muted-foreground">Disziplin</dt><dd className="font-medium">{selectedHorse.discipline}</dd></div>}
+            {selectedHorse.training_level && <div><dt className="text-muted-foreground">Ausbildung</dt><dd className="font-medium">{selectedHorse.training_level}/10</dd></div>}
           </dl>
           {selectedHorse.notes && (
             <div className="mt-4 pt-4 border-t border-border">
@@ -236,7 +284,7 @@ export default function AccountHorses() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium">{horse.name}</p>
                   <p className="text-sm text-muted-foreground truncate">
-                    {[horse.breed, horse.color, horse.height_cm && `${horse.height_cm} cm`].filter(Boolean).join(" · ") || "Keine Details"}
+                    {[horse.breed, horse.color, horse.height_cm && `${horse.height_cm} cm`, horse.discipline].filter(Boolean).join(" · ") || "Keine Details"}
                   </p>
                 </div>
               </CardContent>
