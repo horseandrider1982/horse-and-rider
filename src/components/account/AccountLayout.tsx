@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
 import { useI18n } from "@/i18n";
-import { User, CreditCard, PawPrint, ShoppingBag, LogOut, ExternalLink } from "lucide-react";
+import { User, CreditCard, PawPrint, ShoppingBag, LogOut, ExternalLink, Armchair } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -74,6 +74,18 @@ export function AccountLayout({ children }: AccountLayoutProps) {
               >
                 <ShoppingBag className="h-4 w-4 shrink-0" />
                 Bestellungen
+                <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
+              </a>
+
+              {/* External: Sattelservice */}
+              <a
+                href="https://sattelservice.horse-and-rider.de/dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <Armchair className="h-4 w-4 shrink-0" />
+                Sattelservice
                 <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
               </a>
 
