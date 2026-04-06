@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     `;
 
     const response = await fetch(
-      `https://${SHOPIFY_STORE}/admin/api/2025-01/graphql.json`,
+      `https://${SHOPIFY_STORE}/admin/api/${API_VERSION}/graphql.json`,
       {
         method: "POST",
         headers: {
