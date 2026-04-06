@@ -469,12 +469,15 @@ export type Database = {
           breed: string | null
           color: string | null
           created_at: string
+          discipline: string | null
+          external_id: string | null
           height_cm: number | null
           id: string
           image_url: string | null
           name: string
           notes: string | null
           shopify_customer_id: string
+          training_level: number | null
           updated_at: string
         }
         Insert: {
@@ -482,12 +485,15 @@ export type Database = {
           breed?: string | null
           color?: string | null
           created_at?: string
+          discipline?: string | null
+          external_id?: string | null
           height_cm?: number | null
           id?: string
           image_url?: string | null
           name: string
           notes?: string | null
           shopify_customer_id: string
+          training_level?: number | null
           updated_at?: string
         }
         Update: {
@@ -495,12 +501,15 @@ export type Database = {
           breed?: string | null
           color?: string | null
           created_at?: string
+          discipline?: string | null
+          external_id?: string | null
           height_cm?: number | null
           id?: string
           image_url?: string | null
           name?: string
           notes?: string | null
           shopify_customer_id?: string
+          training_level?: number | null
           updated_at?: string
         }
         Relationships: []
