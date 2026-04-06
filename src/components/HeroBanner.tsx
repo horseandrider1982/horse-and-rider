@@ -15,8 +15,8 @@ export const HeroBanner = () => {
       <section className="relative overflow-hidden bg-primary">
         {/* Repeating snaffle-bit silhouette pattern – subtle wallpaper effect */}
         <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80' viewBox='0 0 120 80'%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.5'%3E%3Ccircle cx='18' cy='40' r='14'/%3E%3Ccircle cx='102' cy='40' r='14'/%3E%3Cpath d='M32 40 c4-6 12-8 20-8 c4 0 7 2 8 4 c1 2 4 4 8 4 c8 0 16 2 20 8' stroke-linecap='round'/%3E%3Cpath d='M32 40 c4 6 12 8 20 8 c4 0 7-2 8-4 c1-2 4-4 8-4 c8 0 16-2 20-8' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '120px 80px',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='80' viewBox='0 0 140 80'%3E%3Cg fill='%23fff' fill-rule='evenodd'%3E%3Ccircle cx='22' cy='40' r='15' fill='none' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='118' cy='40' r='15' fill='none' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M36 38 C42 34 50 32 58 34 C62 35 65 37 68 39 L70 40 L68 41 C65 43 62 45 58 46 C50 48 42 46 36 42 Z' fill='%23fff'/%3E%3Cpath d='M104 38 C98 34 90 32 82 34 C78 35 75 37 72 39 L70 40 L72 41 C75 43 78 45 82 46 C90 48 98 46 104 42 Z' fill='%23fff'/%3E%3Ccircle cx='70' cy='40' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '140px 80px',
         }} />
         <div className="relative container mx-auto px-4 py-6 sm:py-12 lg:py-20">
           <div className="max-w-3xl mx-auto text-center">
