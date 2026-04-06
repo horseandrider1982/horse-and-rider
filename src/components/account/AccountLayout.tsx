@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
 import { useI18n } from "@/i18n";
-import { User, CreditCard, PawPrint, ShoppingBag, LogOut, ExternalLink } from "lucide-react";
+import { User, CreditCard, PawPrint, ShoppingBag, LogOut, ExternalLink, Armchair } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
