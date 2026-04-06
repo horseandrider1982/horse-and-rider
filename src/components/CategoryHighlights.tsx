@@ -1,9 +1,9 @@
 import { useI18n } from "@/i18n";
 import { LocaleLink } from "./LocaleLink";
-import eventingImg from "@/assets/eventing.jpg";
-import sattelImg from "@/assets/sattel.jpg";
-import gebisseImg from "@/assets/gebisse.jpg";
-import airbagImg from "@/assets/airbag.jpg";
+import eventingImg from "@/assets/eventing.webp";
+import sattelImg from "@/assets/sattel.webp";
+import gebisseImg from "@/assets/gebisse.webp";
+import airbagImg from "@/assets/airbag.webp";
 
 export const CategoryHighlights = () => {
   const { t } = useI18n();
