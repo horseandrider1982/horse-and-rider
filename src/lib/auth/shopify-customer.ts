@@ -9,6 +9,7 @@
  */
 
 import { generateCodeVerifier, generateCodeChallenge, generateState, generateNonce } from './pkce';
+import { supabase } from '@/integrations/supabase/client';
 
 // Shopify Customer Account API configuration
 const SHOPIFY_CUSTOMER_CLIENT_ID = '6c0f10ad-d50b-4745-bd0b-70329879cfea';
