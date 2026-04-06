@@ -53,7 +53,7 @@ export default function AccountHorses() {
   const [selectedHorse, setSelectedHorse] = useState<Horse | null>(null);
   const [form, setForm] = useState(emptyForm);
 
-  const customerEmail = customer?.emailAddress?.emailAddress;
+  const customerEmail = customer?.email;
 
   // Determine view mode from URL
   const getViewMode = (): ViewMode => {
