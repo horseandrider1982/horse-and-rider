@@ -3,12 +3,21 @@ import { LocaleLink } from "./LocaleLink";
 import { useI18n } from "@/i18n";
 
 export const BrandLogosBar = () => {
-  const { data: featured = [] } = useFeaturedBrands();
+  const { data: featured = [], isLoading } = useFeaturedBrands();
   const { t } = useI18n();
-  if (featured.length === 0) return null;
+
+  // Always render the section wrapper with a fixed height to prevent CLS
+  // when brands load asynchronously and push content below down
+  if (isLoading || featured.length === 0) {
+    return (
+      <section className="py-6 border-b border-border bg-background" style={{ minHeight: '88px' }}>
+        <div className="container mx-auto px-4" />
+      </section>
+    );
+  }
 
   return (
-    <section className="py-6 border-b border-border bg-background">
+    <section className="py-6 border-b border-border bg-background" style={{ minHeight: '88px' }}>
       <div className="container mx-auto px-4">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest text-center mb-4">
           {t("brands_bar.title")}
