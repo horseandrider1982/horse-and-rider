@@ -43,8 +43,14 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ query, variables }),
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error("Shopify returned non-JSON:", response.status, text.slice(0, 200));
+      return json({ error: `Shopify returned ${response.status}` }, response.status >= 400 ? response.status : 502);
+    }
 
+    const data = await response.json();
     return json(data, response.ok ? 200 : response.status);
   } catch (err) {
     console.error("shopify-customer-proxy error:", err);
