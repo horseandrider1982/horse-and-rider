@@ -114,6 +114,34 @@ async function loadSynonyms(): Promise<Map<string, string[]>> {
   }
 }
 
+// ── German singular/plural stemming ─────────────────────────────────────
+function getGermanVariants(word: string): string[] {
+  const w = word.toLowerCase();
+  if (w.length < 3) return [];
+
+  const variants: string[] = [];
+
+  // Plural → Singular attempts
+  if (w.endsWith("nen")) variants.push(w.slice(0, -3)); // Trensen → Trense (wait, Trensen→Trens? no)
+  if (w.endsWith("en")) variants.push(w.slice(0, -2)); // Trensen → Trens... need smarter logic
+  if (w.endsWith("en")) variants.push(w.slice(0, -1)); // Trensen → Trense ✓
+  if (w.endsWith("er")) variants.push(w.slice(0, -2)); // Reiter → Reit
+  if (w.endsWith("e")) variants.push(w.slice(0, -1)); // Trense → Trens
+  if (w.endsWith("s")) variants.push(w.slice(0, -1)); // Halfters → Halfter
+  if (w.endsWith("n")) variants.push(w.slice(0, -1)); // Trensen → Trense ✓
+
+  // Singular → Plural attempts
+  variants.push(w + "n");    // Trense → Trensen
+  variants.push(w + "en");   // Halfter → Halfteren
+  variants.push(w + "e");    // Gurt → Gurte
+  variants.push(w + "er");   // Pferd → Pferder (not perfect but catches some)
+  variants.push(w + "s");    // Vorderzug → Vorderzugs
+
+  // Umlaut-less variants are hard without a dictionary, skip for now
+  // Filter out too-short results and duplicates
+  return [...new Set(variants.filter(v => v.length >= 3 && v !== w))];
+}
+
 function expandQuery(q: string, synonyms: Map<string, string[]>): string {
   const words = q.trim().toLowerCase().split(/\s+/);
   const expandedTerms = new Set<string>();
@@ -137,6 +165,15 @@ function expandQuery(q: string, synonyms: Map<string, string[]>): string {
   if (synonyms.has(fullLower)) {
     for (const syn of synonyms.get(fullLower)!) {
       expandedTerms.add(syn);
+    }
+  }
+
+  // German singular/plural expansion: for each word, try variants
+  for (const word of words) {
+    const variants = getGermanVariants(word);
+    for (const variant of variants) {
+      const expanded = words.map((w) => (w === word ? variant : w)).join(" ");
+      expandedTerms.add(expanded);
     }
   }
 
