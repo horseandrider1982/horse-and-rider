@@ -42,6 +42,13 @@ const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({
 
 const queryClient = new QueryClient();
 
+/** Redirect /products/:handle → /product/:handle */
+function ProductsRedirect() {
+  const { handle } = useParams();
+  const { locale } = useParams();
+  return <RRNavigate to={`/${locale || 'de'}/product/${handle}`} replace />;
+}
+
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
