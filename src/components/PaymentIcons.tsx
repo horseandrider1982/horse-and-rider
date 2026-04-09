@@ -175,11 +175,11 @@ export function PaymentIcons() {
   if (icons.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mt-4">
+    <div className="grid grid-cols-5 sm:grid-cols-4 md:flex md:flex-wrap items-center gap-2 mt-4">
       {icons.map(({ key, label, svg }) => (
         <div
           key={key}
-          className="h-7 w-11 rounded-sm overflow-hidden shadow-sm border border-border/50"
+          className="h-8 w-auto aspect-[3/2] rounded-sm overflow-hidden shadow-sm border border-border/50"
           title={label}
         >
           {svg}
