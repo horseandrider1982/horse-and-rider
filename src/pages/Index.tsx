@@ -18,7 +18,7 @@ const Index = () => {
   const { locale } = useI18n();
   usePageMeta({
     title: "Reitsport Online Shop",
-    description: "Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte für Reiter und Pferd – Sättel, Trensen, Reitbekleidung und mehr.",
+    description: "Eventing Equipment & Reitsportausrüstung online kaufen",
     canonicalPath: `/${locale}`,
   });
 
