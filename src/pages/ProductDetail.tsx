@@ -110,6 +110,8 @@ const ProductDetail = () => {
   const [calendlyOpen, setCalendlyOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [engravingOpen, setEngravingOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [quantityWarning, setQuantityWarning] = useState<string | null>(null);
 
   const shopifyProductId = product?.node?.id;
   const { data: configuratorData } = useProductConfigurator(shopifyProductId);
@@ -185,6 +187,45 @@ const ProductDetail = () => {
     }
     return result;
   }, [variants, options, selectedOptions, isVariantOrderable]);
+
+  // Compute max quantity for the selected variant
+  const maxQuantity = useMemo(() => {
+    if (!selectedVariant) return 99;
+    // Shopify Storefront API doesn't expose quantityAvailable in our query,
+    // so we default to 99 (unlimited) unless we add it later.
+    return 99;
+  }, [selectedVariant]);
+
+  // Cap quantity when variant changes
+  useEffect(() => {
+    if (quantity > maxQuantity) {
+      setQuantity(maxQuantity);
+      setQuantityWarning(`Nur noch ${maxQuantity} Stück verfügbar`);
+    } else {
+      setQuantityWarning(null);
+    }
+  }, [selectedVariant?.id, maxQuantity]);
+
+  const handleQuantityChange = (newVal: number) => {
+    if (newVal < 1) newVal = 1;
+    if (newVal > maxQuantity) {
+      newVal = maxQuantity;
+      setQuantityWarning(`Nur noch ${maxQuantity} Stück verfügbar`);
+    } else {
+      setQuantityWarning(null);
+    }
+    setQuantity(newVal);
+  };
+
+  const handleQuantityInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    if (raw === '') { setQuantity(1); return; }
+    handleQuantityChange(parseInt(raw, 10));
+  };
+
+  const handleQuantityBlur = () => {
+    if (quantity < 1) setQuantity(1);
+  };
 
   const handleOptionSelect = (optionName: string, value: string) => {
     setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
@@ -335,12 +376,16 @@ const ProductDetail = () => {
       variantId: selectedVariant.id,
       variantTitle: selectedVariant.title,
       price: selectedVariant.price,
-      quantity: 1,
+      quantity,
       selectedOptions: selectedVariant.selectedOptions || [],
       ...(attributes.length > 0 ? { attributes } : {}),
     });
-    trackAddToCart(product, selectedVariant.id, 1);
-    toast.success(t("products.added_to_cart"), { description: product.node.title, position: "top-center" });
+    trackAddToCart(product, selectedVariant.id, quantity);
+    toast.success(
+      quantity > 1 ? `${quantity} Artikel zum Warenkorb hinzugefügt` : t("products.added_to_cart"),
+      { description: product.node.title, position: "top-center" },
+    );
+    setQuantity(1);
   };
 
   const handleAddToCart = async () => {
@@ -603,19 +648,61 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart || !selectedVariant} className={`w-full ${canAddToCart && selectedVariant ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
-                {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
-                {!selectedVariant ? 'Bitte Variante wählen' : !canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
-              </Button>
+              {/* Quantity selector + Add to Cart */}
+              <div className="flex gap-2 items-stretch">
+                <div className={`inline-flex items-center border border-input rounded-md ${!selectedVariant || !availability.canOrder ? 'opacity-40 pointer-events-none' : ''}`}>
+                  <button
+                    type="button"
+                    aria-label="Menge verringern"
+                    disabled={quantity <= 1 || !selectedVariant || !availability.canOrder}
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    className="h-11 w-11 flex items-center justify-center text-lg transition-colors hover:bg-accent disabled:opacity-30 rounded-l-md"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    aria-label="Menge"
+                    value={quantity}
+                    onChange={handleQuantityInput}
+                    onBlur={handleQuantityBlur}
+                    disabled={!selectedVariant || !availability.canOrder}
+                    className="h-11 w-12 text-center text-sm font-medium border-x border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                  <button
+                    type="button"
+                    aria-label="Menge erhöhen"
+                    disabled={quantity >= maxQuantity || !selectedVariant || !availability.canOrder}
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                    className="h-11 w-11 flex items-center justify-center text-lg transition-colors hover:bg-accent disabled:opacity-30 rounded-r-md"
+                  >
+                    +
+                  </button>
+                </div>
+                <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart || !selectedVariant} className={`flex-1 h-11 ${canAddToCart && selectedVariant ? 'bg-primary text-primary-foreground hover:opacity-90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`} size="lg">
+                  {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
+                  {!selectedVariant ? 'Bitte Variante wählen' : !canAddToCart && isConfigurator && !configState?.isConfigured ? t("product.configure_first") : canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
+                </Button>
+              </div>
+              {quantityWarning && (
+                <p className="text-xs text-amber-600 mt-1" role="status" aria-live="polite">{quantityWarning}</p>
+              )}
 
               {/* Sticky mobile add-to-cart bar */}
               {selectedVariant && (
                 <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border p-3 flex items-center gap-3 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-shrink-0 min-w-0">
                     <p className="text-sm font-bold truncate">{basePrice.toFixed(2)} €</p>
                     {availability.deliveryTime && <p className="text-xs text-muted-foreground truncate">{availability.deliveryTime}</p>}
                   </div>
-                  <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`flex-shrink-0 ${canAddToCart ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground opacity-60'}`} size="default">
+                  <div className={`inline-flex items-center border border-input rounded-md flex-shrink-0 ${!availability.canOrder ? 'opacity-40 pointer-events-none' : ''}`}>
+                    <button type="button" aria-label="Menge verringern" disabled={quantity <= 1} onClick={() => handleQuantityChange(quantity - 1)} className="h-10 w-9 flex items-center justify-center text-base hover:bg-accent disabled:opacity-30 rounded-l-md">−</button>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" aria-label="Menge" value={quantity} onChange={handleQuantityInput} onBlur={handleQuantityBlur} className="h-10 w-9 text-center text-sm font-medium border-x border-input bg-background focus:outline-none" />
+                    <button type="button" aria-label="Menge erhöhen" disabled={quantity >= maxQuantity} onClick={() => handleQuantityChange(quantity + 1)} className="h-10 w-9 flex items-center justify-center text-base hover:bg-accent disabled:opacity-30 rounded-r-md">+</button>
+                  </div>
+                  <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`flex-1 min-w-0 ${canAddToCart ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground opacity-60'}`} size="default">
                     {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
                     {canAddToCart ? t("product.add_to_cart") : t("product.unavailable")}
                   </Button>
