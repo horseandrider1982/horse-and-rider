@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useParams, Navigate as RRNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -41,6 +42,13 @@ const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({
 
 const queryClient = new QueryClient();
 
+/** Redirect /products/:handle → /product/:handle */
+function ProductsRedirect() {
+  const { handle } = useParams();
+  const { locale } = useParams();
+  return <RRNavigate to={`/${locale || 'de'}/product/${handle}`} replace />;
+}
+
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -67,6 +75,7 @@ const AppContent = () => {
         {/* All public routes with /:locale/ prefix */}
         <Route path="/:locale" element={<><I18nLayout /><HreflangTags /></>}>
           <Route index element={<Index />} />
+          <Route path="products/:handle" element={<ProductsRedirect />} />
           <Route path="product/:handle" element={<ProductDetail />} />
           <Route path="danke" element={<ThankYou />} />
           <Route path="thank-you" element={<ThankYou />} />
