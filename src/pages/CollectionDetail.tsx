@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useShopifyMenu, type ShopifyMenuItem } from "@/hooks/useShopifyMenu";
 import { CollectionJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
+import { CollectionSeoText } from "@/components/CollectionSeoText";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
 import { fetchUntilVisible, type VisibleProductsPage } from "@/lib/fetchVisibleProducts";
@@ -325,6 +326,7 @@ export default function CollectionDetail() {
                   )}
                 </>
               )}
+              <CollectionSeoText handle={handle} locale={locale} />
             </>
           )}
         </div>
