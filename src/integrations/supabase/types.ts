@@ -248,6 +248,36 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_seo_texts: {
+        Row: {
+          body: string
+          created_at: string
+          handle: string
+          heading: string | null
+          id: string
+          locale: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          handle: string
+          heading?: string | null
+          id?: string
+          locale?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          handle?: string
+          heading?: string | null
+          id?: string
+          locale?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       configurator_group_values: {
         Row: {
           description: string | null
