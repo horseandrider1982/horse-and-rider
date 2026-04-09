@@ -656,7 +656,7 @@ const ProductDetail = () => {
                     aria-label="Menge verringern"
                     disabled={quantity <= 1 || !selectedVariant || !availability.canOrder}
                     onClick={() => handleQuantityChange(quantity - 1)}
-                    className="h-11 w-11 flex items-center justify-center text-lg transition-colors hover:bg-accent disabled:opacity-30 rounded-l-md"
+                    className="h-10 w-9 flex items-center justify-center text-base transition-colors hover:bg-accent disabled:opacity-30 rounded-l-md"
                   >
                     −
                   </button>
@@ -669,14 +669,14 @@ const ProductDetail = () => {
                     onChange={handleQuantityInput}
                     onBlur={handleQuantityBlur}
                     disabled={!selectedVariant || !availability.canOrder}
-                    className="h-11 w-12 text-center text-sm font-medium border-x border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="h-10 w-10 text-center text-sm font-medium border-x border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                   <button
                     type="button"
                     aria-label="Menge erhöhen"
                     disabled={quantity >= maxQuantity || !selectedVariant || !availability.canOrder}
                     onClick={() => handleQuantityChange(quantity + 1)}
-                    className="h-11 w-11 flex items-center justify-center text-lg transition-colors hover:bg-accent disabled:opacity-30 rounded-r-md"
+                    className="h-10 w-9 flex items-center justify-center text-base transition-colors hover:bg-accent disabled:opacity-30 rounded-r-md"
                   >
                     +
                   </button>
@@ -698,9 +698,9 @@ const ProductDetail = () => {
                     {availability.deliveryTime && <p className="text-xs text-muted-foreground truncate">{availability.deliveryTime}</p>}
                   </div>
                   <div className={`inline-flex items-center border border-input rounded-md flex-shrink-0 ${!availability.canOrder ? 'opacity-40 pointer-events-none' : ''}`}>
-                    <button type="button" aria-label="Menge verringern" disabled={quantity <= 1} onClick={() => handleQuantityChange(quantity - 1)} className="h-10 w-9 flex items-center justify-center text-base hover:bg-accent disabled:opacity-30 rounded-l-md">−</button>
-                    <input type="text" inputMode="numeric" pattern="[0-9]*" aria-label="Menge" value={quantity} onChange={handleQuantityInput} onBlur={handleQuantityBlur} className="h-10 w-9 text-center text-sm font-medium border-x border-input bg-background focus:outline-none" />
-                    <button type="button" aria-label="Menge erhöhen" disabled={quantity >= maxQuantity} onClick={() => handleQuantityChange(quantity + 1)} className="h-10 w-9 flex items-center justify-center text-base hover:bg-accent disabled:opacity-30 rounded-r-md">+</button>
+                    <button type="button" aria-label="Menge verringern" disabled={quantity <= 1} onClick={() => handleQuantityChange(quantity - 1)} className="h-9 w-8 flex items-center justify-center text-sm hover:bg-accent disabled:opacity-30 rounded-l-md">−</button>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" aria-label="Menge" value={quantity} onChange={handleQuantityInput} onBlur={handleQuantityBlur} className="h-9 w-8 text-center text-xs font-medium border-x border-input bg-background focus:outline-none" />
+                    <button type="button" aria-label="Menge erhöhen" disabled={quantity >= maxQuantity} onClick={() => handleQuantityChange(quantity + 1)} className="h-9 w-8 flex items-center justify-center text-sm hover:bg-accent disabled:opacity-30 rounded-r-md">+</button>
                   </div>
                   <Button onClick={handleAddToCart} disabled={cartLoading || !canAddToCart} className={`flex-1 min-w-0 ${canAddToCart ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground opacity-60'}`} size="default">
                     {cartLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShoppingCart className="h-4 w-4 mr-2" />}
