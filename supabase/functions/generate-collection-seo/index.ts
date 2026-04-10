@@ -159,7 +159,7 @@ ${handlesList}`;
         .map((r: any) => r.current_path.replace("/de/collections/", ""))
         .filter((h: string) => !h.includes("sale") && !["frontpage", "befreiter-steuersatz", "ermassigter-steuersatz", "geschenkgutscheine", "gutscheine"].includes(h))
     )].length;
-    const { count } = await sb.from("collection_seo_texts").select("*", { count: "exact", head: true }).eq("locale", "de");
+    const { count } = await sb.from("collection_seo_texts").select("*", { count: "exact", head: true }).eq("locale", locale);
 
     return new Response(
       JSON.stringify({ inserted, total: totalHandles, done: count, remaining: totalHandles - (count || 0), errors: errors.length > 0 ? errors : undefined }),
