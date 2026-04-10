@@ -371,7 +371,7 @@ const ProductDetail = () => {
       });
     }
     attributes.push(...extraAttributes);
-    await addItem({
+    const success = await addItem({
       product,
       variantId: selectedVariant.id,
       variantTitle: selectedVariant.title,
@@ -380,11 +380,18 @@ const ProductDetail = () => {
       selectedOptions: selectedVariant.selectedOptions || [],
       ...(attributes.length > 0 ? { attributes } : {}),
     });
-    trackAddToCart(product, selectedVariant.id, quantity);
-    toast.success(
-      quantity > 1 ? `${quantity} Artikel zum Warenkorb hinzugefügt` : t("products.added_to_cart"),
-      { description: product.node.title, position: "top-center" },
-    );
+    if (success) {
+      trackAddToCart(product, selectedVariant.id, quantity);
+      toast.success(
+        quantity > 1 ? `${quantity} Artikel zum Warenkorb hinzugefügt` : t("products.added_to_cart"),
+        { description: product.node.title, position: "top-center" },
+      );
+    } else {
+      toast.error("Artikel konnte nicht hinzugefügt werden", {
+        description: "Dieser Artikel ist derzeit leider nicht bestellbar.",
+        position: "top-center",
+      });
+    }
     setQuantity(1);
   };
 
