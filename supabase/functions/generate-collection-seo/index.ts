@@ -138,7 +138,7 @@ ${handlesList}`;
 
     for (const t of texts) {
       const { error } = await sb.from("collection_seo_texts").upsert(
-        { handle: t.handle, heading: t.heading, body: t.body, locale: "de" },
+        { handle: t.handle, heading: t.heading, body: t.body, locale },
         { onConflict: "handle,locale" }
       );
       if (error) {
