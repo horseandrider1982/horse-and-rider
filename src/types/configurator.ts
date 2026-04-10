@@ -21,6 +21,7 @@ export interface ConfiguratorProduct {
 export interface ConfiguratorGroup {
   id: string;
   name: string;
+  internal_name: string | null;
   description: string | null;
   field_type: ConfiguratorFieldType;
   is_required: boolean;

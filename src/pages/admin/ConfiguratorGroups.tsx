@@ -21,7 +21,10 @@ export default function ConfiguratorGroups() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const filtered = groups?.filter(g => g.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = groups?.filter(g =>
+    g.name.toLowerCase().includes(search.toLowerCase()) ||
+    (g.internal_name || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -54,7 +57,7 @@ export default function ConfiguratorGroups() {
             <Card key={g.id}>
               <CardContent className="flex items-center gap-4 py-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium">{g.name}</p>
+                  <p className="font-medium">{g.name}{g.internal_name ? <span className="ml-2 text-xs text-muted-foreground font-normal">({g.internal_name})</span> : null}</p>
                   <p className="text-xs text-muted-foreground">{FIELD_TYPE_LABELS[g.field_type]} • {g.is_required ? 'Pflicht' : 'Optional'}</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setEditGroup(g)}><Pencil className="h-4 w-4 mr-1" />Bearbeiten</Button>
@@ -89,6 +92,7 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
   const saveGroup = useSaveGroup();
   const [currentGroup, setCurrentGroup] = useState<ConfiguratorGroup | null>(group);
   const [name, setName] = useState(group?.name || "");
+  const [internalName, setInternalName] = useState(group?.internal_name || "");
   const [description, setDescription] = useState(group?.description || "");
   const [fieldType, setFieldType] = useState<ConfiguratorFieldType>(group?.field_type || "dropdown_single");
   const [isRequired, setIsRequired] = useState(group?.is_required ?? true);
@@ -100,7 +104,7 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
   const handleSave = async () => {
     if (!name.trim()) { toast.error("Name ist erforderlich"); return; }
     try {
-      const saved = await saveGroup.mutateAsync({ id: currentGroup?.id, name, description: description || null, field_type: fieldType, is_required: isRequired, sort_order: sortOrder });
+      const saved = await saveGroup.mutateAsync({ id: currentGroup?.id, name, internal_name: internalName || null, description: description || null, field_type: fieldType, is_required: isRequired, sort_order: sortOrder });
       toast.success(currentGroup ? "Gruppe aktualisiert" : "Gruppe erstellt");
       if (!currentGroup && saved && needsValues) {
         // Stay open in edit mode so values can be added immediately
@@ -121,11 +125,26 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
         <div className="flex-1 overflow-y-auto space-y-4 min-h-0">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Name *</Label>
+              <Label>Name (öffentlich) *</Label>
               <Input value={name} onChange={e => setName(e.target.value)} placeholder="z.B. Farbe" />
             </div>
             <div>
+              <Label>Interner Name</Label>
+              <Input value={internalName} onChange={e => setInternalName(e.target.value)} placeholder="z.B. Farbe Sattel XY" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
               <Label>Feldtyp *</Label>
+              <Select value={fieldType} onValueChange={v => setFieldType(v as ConfiguratorFieldType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(FIELD_TYPE_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
               <Select value={fieldType} onValueChange={v => setFieldType(v as ConfiguratorFieldType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
