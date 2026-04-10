@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
 
   const body = await req.json().catch(() => ({}));
   let handles: string[] = body.handles || [];
+  const locale: string = body.locale || "de";
 
   // If no handles provided, find next batch of 10 missing ones
   if (handles.length === 0) {
@@ -48,7 +49,7 @@ Deno.serve(async (req) => {
     const { data: existing } = await sb
       .from("collection_seo_texts")
       .select("handle")
-      .eq("locale", "de");
+      .eq("locale", locale);
 
     const existingSet = new Set((existing || []).map((e: any) => e.handle));
     handles = allHandles.filter((h) => !existingSet.has(h)).slice(0, 10);
@@ -62,7 +63,8 @@ Deno.serve(async (req) => {
 
   const handlesList = handles.map((h) => `- ${h} (${humanName(h)})`).join("\n");
 
-  const prompt = `Du bist SEO-Texter für Horse & Rider Luhmühlen, einen Premium-Reitsportshop.
+  const prompt = locale === "de"
+    ? `Du bist SEO-Texter für Horse & Rider Luhmühlen, einen Premium-Reitsportshop.
 Erstelle für jede der folgenden Shopify-Collection-Handles einen kurzen SEO-Text.
 
 REGELN:
@@ -77,6 +79,24 @@ Antworte NUR mit einem JSON-Array von Objekten mit den Feldern:
 - "handle": der Collection-Handle (exakt wie angegeben)
 - "heading": kurze Überschrift (max 60 Zeichen)
 - "body": der HTML-SEO-Text
+
+Collections:
+${handlesList}`
+    : `You are an SEO copywriter for Horse & Rider Luhmühlen, a premium equestrian shop based in Germany.
+Create a short SEO text for each of the following Shopify collection handles.
+
+RULES:
+- Each text should be 80-150 words
+- HTML format: Use <p>, <h2>, <h3>, <ul>, <li> tags
+- Focus on equestrian keywords and purchase intent
+- Mention Horse & Rider Luhmühlen naturally
+- Professional but inviting tone
+- No made-up facts about specific products
+
+Respond ONLY with a JSON array of objects with these fields:
+- "handle": the collection handle (exactly as given)
+- "heading": short heading (max 60 characters)
+- "body": the HTML SEO text
 
 Collections:
 ${handlesList}`;
@@ -118,7 +138,7 @@ ${handlesList}`;
 
     for (const t of texts) {
       const { error } = await sb.from("collection_seo_texts").upsert(
-        { handle: t.handle, heading: t.heading, body: t.body, locale: "de" },
+        { handle: t.handle, heading: t.heading, body: t.body, locale },
         { onConflict: "handle,locale" }
       );
       if (error) {
@@ -139,7 +159,7 @@ ${handlesList}`;
         .map((r: any) => r.current_path.replace("/de/collections/", ""))
         .filter((h: string) => !h.includes("sale") && !["frontpage", "befreiter-steuersatz", "ermassigter-steuersatz", "geschenkgutscheine", "gutscheine"].includes(h))
     )].length;
-    const { count } = await sb.from("collection_seo_texts").select("*", { count: "exact", head: true }).eq("locale", "de");
+    const { count } = await sb.from("collection_seo_texts").select("*", { count: "exact", head: true }).eq("locale", locale);
 
     return new Response(
       JSON.stringify({ inserted, total: totalHandles, done: count, remaining: totalHandles - (count || 0), errors: errors.length > 0 ? errors : undefined }),
