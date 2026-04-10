@@ -33,7 +33,7 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}/de/reset-password`,
     });
     setLoading(false);
     if (error) {

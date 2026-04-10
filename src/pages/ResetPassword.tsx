@@ -39,7 +39,7 @@ export default function ResetPassword() {
       toast.error(t("auth.error"), { description: error.message });
     } else {
       toast.success(t("auth.password_changed"));
-      navigate(localePath("/account"));
+      navigate("/admin");
     }
   };
 
