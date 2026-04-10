@@ -40,9 +40,8 @@ interface VariantNode {
   id: string;
   inventoryPolicy: string;
   inventoryItem: { id: string };
-  metafields: {
-    edges: Array<{ node: { key: string; value: string } }>;
-  };
+  ueberverkauf: { value: string } | null;
+  lieferantenbestand: { value: string } | null;
 }
 
 async function shopifyAdmin(token: string, query: string, variables: Record<string, unknown> = {}) {
