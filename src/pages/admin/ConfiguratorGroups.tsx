@@ -144,16 +144,6 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-              <Select value={fieldType} onValueChange={v => setFieldType(v as ConfiguratorFieldType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.entries(FIELD_TYPE_LABELS).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           <div>
             <Label>Beschreibung</Label>
