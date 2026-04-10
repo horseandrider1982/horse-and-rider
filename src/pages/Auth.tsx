@@ -64,7 +64,11 @@ export default function Auth() {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, { redirectTo: `${window.location.origin}/reset-password` });
+    const passwordResetRedirectUrl =
+      window.location.hostname.includes("--") && window.location.hostname.endsWith(".lovable.app")
+        ? "https://horse-and-rider.lovable.app/reset-password"
+        : `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, { redirectTo: passwordResetRedirectUrl });
     setLoading(false);
     if (error) {
       toast.error(t("auth.error"), { description: error.message });

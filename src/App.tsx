@@ -70,6 +70,7 @@ const AppContent = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+        <Route path="/reset-password" element={<AdminResetPassword />} />
         <Route path="/admin/301/monitoring" element={<RedirectMonitoring />} />
         <Route path="/admin/301/conflicts" element={<RedirectConflicts />} />
 
@@ -93,7 +94,7 @@ const AppContent = () => {
           <Route path="search" element={<Search />} />
           <Route path="unsere-marken" element={<UnsereMarken />} />
           <Route path="unsere-marken/:slug" element={<MarkenDetail />} />
-          <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="reset-password" element={<AdminResetPassword />} />
           <Route path="news" element={<News />} />
           <Route path="news/:slug" element={<NewsDetail />} />
           <Route path="impressum" element={<CmsPage />} />
