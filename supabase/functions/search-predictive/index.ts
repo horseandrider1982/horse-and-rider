@@ -119,45 +119,42 @@ async function loadSynonyms(): Promise<Map<string, string[]>> {
 function expandQuery(q: string, synonyms: Map<string, string[]>): string {
   const trimmed = q.trim().toLowerCase();
   const words = trimmed.split(/\s+/);
-  const expandedTerms = new Set<string>();
 
-  // Always include original query
+  // Multi-word queries: don't use OR expansion — Shopify can't parse it reliably.
+  // Just return the original query as-is; Shopify full-text search handles it well.
+  if (words.length > 1) {
+    // Only check full-phrase synonym (e.g. "sattelgurt" → "bauchgurt")
+    if (synonyms.has(trimmed)) {
+      const syns = synonyms.get(trimmed)!;
+      // Return just original + first synonym as OR
+      return `${trimmed} OR ${syns[0]}`;
+    }
+    return trimmed;
+  }
+
+  // Single-word queries: safe to expand with OR
+  const expandedTerms = new Set<string>();
   expandedTerms.add(trimmed);
 
-  // Check full phrase for synonyms
+  // Synonym expansion
   if (synonyms.has(trimmed)) {
     for (const syn of synonyms.get(trimmed)!) {
       expandedTerms.add(syn);
     }
   }
 
-  // Check individual words for synonyms (only for single-word replacements)
-  if (words.length <= 3) {
-    for (const word of words) {
-      if (synonyms.has(word)) {
-        for (const syn of synonyms.get(word)!) {
-          const expanded = words.map((w) => (w === word ? syn : w)).join(" ");
-          expandedTerms.add(expanded);
-        }
-      }
-    }
-  }
-
-  // For single-word queries, add basic plural/singular variant
-  if (words.length === 1) {
-    const w = words[0];
-    if (w.endsWith("n") && w.length > 3) {
-      expandedTerms.add(w.slice(0, -1)); // Trensen → Trense
-    } else if (w.endsWith("e") && w.length > 3) {
-      expandedTerms.add(w + "n"); // Trense → Trensen
-    } else if (w.endsWith("s") && w.length > 3) {
-      expandedTerms.add(w.slice(0, -1)); // Halfters → Halfter
-    }
+  // Basic plural/singular variant
+  const w = words[0];
+  if (w.endsWith("n") && w.length > 3) {
+    expandedTerms.add(w.slice(0, -1)); // Trensen → Trense
+  } else if (w.endsWith("e") && w.length > 3) {
+    expandedTerms.add(w + "n"); // Trense → Trensen
+  } else if (w.endsWith("s") && w.length > 3) {
+    expandedTerms.add(w.slice(0, -1)); // Halfters → Halfter
   }
 
   if (expandedTerms.size <= 1) return trimmed;
 
-  // Limit to max 5 OR terms to avoid overwhelming Shopify
   const terms = [...expandedTerms].slice(0, 5);
   return terms.join(" OR ");
 }
