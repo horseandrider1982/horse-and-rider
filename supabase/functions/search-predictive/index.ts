@@ -93,7 +93,6 @@ async function loadSynonyms(): Promise<Map<string, string[]>> {
     for (const row of data || []) {
       const term = row.term.toLowerCase();
       map.set(term, row.synonyms.map((s: string) => s.toLowerCase()));
-      // Also reverse-map: if user searches a synonym, expand to the term
       for (const syn of row.synonyms) {
         const synLower = syn.toLowerCase();
         if (!map.has(synLower)) {
@@ -114,73 +113,53 @@ async function loadSynonyms(): Promise<Map<string, string[]>> {
   }
 }
 
-// ── German singular/plural stemming ─────────────────────────────────────
-function getGermanVariants(word: string): string[] {
-  const w = word.toLowerCase();
-  if (w.length < 3) return [];
-
-  const variants: string[] = [];
-
-  // Plural → Singular attempts
-  if (w.endsWith("nen")) variants.push(w.slice(0, -3)); // Trensen → Trense (wait, Trensen→Trens? no)
-  if (w.endsWith("en")) variants.push(w.slice(0, -2)); // Trensen → Trens... need smarter logic
-  if (w.endsWith("en")) variants.push(w.slice(0, -1)); // Trensen → Trense ✓
-  if (w.endsWith("er")) variants.push(w.slice(0, -2)); // Reiter → Reit
-  if (w.endsWith("e")) variants.push(w.slice(0, -1)); // Trense → Trens
-  if (w.endsWith("s")) variants.push(w.slice(0, -1)); // Halfters → Halfter
-  if (w.endsWith("n")) variants.push(w.slice(0, -1)); // Trensen → Trense ✓
-
-  // Singular → Plural attempts
-  variants.push(w + "n");    // Trense → Trensen
-  variants.push(w + "en");   // Halfter → Halfteren
-  variants.push(w + "e");    // Gurt → Gurte
-  variants.push(w + "er");   // Pferd → Pferder (not perfect but catches some)
-  variants.push(w + "s");    // Vorderzug → Vorderzugs
-
-  // Umlaut-less variants are hard without a dictionary, skip for now
-  // Filter out too-short results and duplicates
-  return [...new Set(variants.filter(v => v.length >= 3 && v !== w))];
-}
-
+// ── Query expansion (simplified) ────────────────────────────────────────
+// Only apply synonym expansion, skip aggressive German stemming that
+// created enormous OR queries breaking Shopify search.
 function expandQuery(q: string, synonyms: Map<string, string[]>): string {
-  const words = q.trim().toLowerCase().split(/\s+/);
+  const trimmed = q.trim().toLowerCase();
+  const words = trimmed.split(/\s+/);
   const expandedTerms = new Set<string>();
 
   // Always include original query
-  expandedTerms.add(q.trim());
+  expandedTerms.add(trimmed);
 
-  // Check each word and multi-word combinations for synonyms
-  for (const word of words) {
-    if (synonyms.has(word)) {
-      for (const syn of synonyms.get(word)!) {
-        // Build expanded query by replacing the word with synonym
-        const expanded = words.map((w) => (w === word ? syn : w)).join(" ");
-        expandedTerms.add(expanded);
-      }
-    }
-  }
-
-  // Also check the full query as a phrase
-  const fullLower = q.trim().toLowerCase();
-  if (synonyms.has(fullLower)) {
-    for (const syn of synonyms.get(fullLower)!) {
+  // Check full phrase for synonyms
+  if (synonyms.has(trimmed)) {
+    for (const syn of synonyms.get(trimmed)!) {
       expandedTerms.add(syn);
     }
   }
 
-  // German singular/plural expansion: for each word, try variants
-  for (const word of words) {
-    const variants = getGermanVariants(word);
-    for (const variant of variants) {
-      const expanded = words.map((w) => (w === word ? variant : w)).join(" ");
-      expandedTerms.add(expanded);
+  // Check individual words for synonyms (only for single-word replacements)
+  if (words.length <= 3) {
+    for (const word of words) {
+      if (synonyms.has(word)) {
+        for (const syn of synonyms.get(word)!) {
+          const expanded = words.map((w) => (w === word ? syn : w)).join(" ");
+          expandedTerms.add(expanded);
+        }
+      }
     }
   }
 
-  // Build OR query for Shopify: (term1) OR (term2)
-  if (expandedTerms.size <= 1) return q.trim();
+  // For single-word queries, add basic plural/singular variant
+  if (words.length === 1) {
+    const w = words[0];
+    if (w.endsWith("n") && w.length > 3) {
+      expandedTerms.add(w.slice(0, -1)); // Trensen → Trense
+    } else if (w.endsWith("e") && w.length > 3) {
+      expandedTerms.add(w + "n"); // Trense → Trensen
+    } else if (w.endsWith("s") && w.length > 3) {
+      expandedTerms.add(w.slice(0, -1)); // Halfters → Halfter
+    }
+  }
 
-  return [...expandedTerms].join(" OR ");
+  if (expandedTerms.size <= 1) return trimmed;
+
+  // Limit to max 5 OR terms to avoid overwhelming Shopify
+  const terms = [...expandedTerms].slice(0, 5);
+  return terms.join(" OR ");
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────
@@ -228,14 +207,35 @@ function scoreProduct(product: ShopifyEdge["node"], queryWords: string[]): numbe
     if (title.includes(word)) score += 10;
   }
 
-  // Bonus for all query words appearing in title
   if (queryWords.every((w) => title.includes(w))) score += 20;
 
-  // Bonus for exact phrase match
   const phrase = queryWords.join(" ");
   if (title.includes(phrase)) score += 30;
 
   return score;
+}
+
+// ── Variant deduplication ───────────────────────────────────────────────
+const SIZE_SUFFIXES = new Set([
+  "pony", "pony i", "pony ii", "vollblut", "warmblut", "kaltblut",
+  "warmblut extra", "cob", "full", "extra full", "mini shetty",
+  "shetty", "xs", "s", "m", "l", "xl", "xxl",
+]);
+
+function getBaseTitle(title: string): string {
+  let t = title.toLowerCase().trim();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const suffix of SIZE_SUFFIXES) {
+      if (t.endsWith(` ${suffix}`)) {
+        t = t.slice(0, -(suffix.length + 1)).trim();
+        changed = true;
+        break;
+      }
+    }
+  }
+  return t;
 }
 
 // ── Main handler ────────────────────────────────────────────────────────
@@ -280,14 +280,16 @@ Deno.serve(async (req) => {
   };
 
   try {
-    // Load synonyms and expand query
     const synonyms = await loadSynonyms();
     const expandedQuery = expandQuery(q, synonyms);
 
-    // Only return products that are available for sale
-    const shopifyQuery = `(${expandedQuery}) AND available_for_sale:true`;
-    const variables: Record<string, unknown> = { query: shopifyQuery, first: 24 };
+    // Fetch more than needed to account for deduplication
+    const fetchSize = 48;
+    const shopifyQuery = `(${expandedQuery}) available_for_sale:true`;
+    const variables: Record<string, unknown> = { query: shopifyQuery, first: fetchSize };
     if (after) variables.after = after;
+
+    console.log("Shopify query:", shopifyQuery);
 
     const shopifyRes = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
@@ -299,7 +301,7 @@ Deno.serve(async (req) => {
     });
 
     if (!shopifyRes.ok) {
-      console.error("Shopify API error:", shopifyRes.status);
+      console.error("Shopify API error:", shopifyRes.status, await shopifyRes.text());
       return new Response(JSON.stringify(emptyResult), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -307,7 +309,7 @@ Deno.serve(async (req) => {
 
     const shopifyData = await shopifyRes.json();
     if (shopifyData.errors) {
-      console.error("Shopify GraphQL errors:", shopifyData.errors);
+      console.error("Shopify GraphQL errors:", JSON.stringify(shopifyData.errors));
     }
 
     const productsData = shopifyData.data?.products;
@@ -324,33 +326,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Deduplicate "variant-as-product" entries:
-    // Products like "Trense Mia schwarz Vollblut" / "Trense Mia schwarz Warmblut"
-    // are the same article in different sizes stored as separate Shopify products.
-    // Group by base title (strip trailing size words) and keep only the first.
-    const SIZE_SUFFIXES = new Set([
-      "pony", "pony i", "pony ii", "vollblut", "warmblut", "kaltblut",
-      "warmblut extra", "cob", "full", "extra full", "mini shetty",
-      "shetty", "xs", "s", "m", "l", "xl", "xxl",
-    ]);
-
-    function getBaseTitle(title: string): string {
-      let t = title.toLowerCase().trim();
-      // Repeatedly strip known size suffixes from the end
-      let changed = true;
-      while (changed) {
-        changed = false;
-        for (const suffix of SIZE_SUFFIXES) {
-          if (t.endsWith(` ${suffix}`)) {
-            t = t.slice(0, -(suffix.length + 1)).trim();
-            changed = true;
-            break;
-          }
-        }
-      }
-      return t;
-    }
-
+    // Deduplicate variant-as-product entries
     const seenBaseTitles = new Map<string, ShopifyEdge>();
     const deduplicatedEdges: ShopifyEdge[] = [];
     for (const edge of uniqueEdges) {
