@@ -133,17 +133,16 @@ function GroupEditorDialog({ group, open, onOpenChange }: { group: ConfiguratorG
               <Input value={internalName} onChange={e => setInternalName(e.target.value)} placeholder="z.B. Farbe Sattel XY" />
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <Label>Feldtyp *</Label>
-              <Select value={fieldType} onValueChange={v => setFieldType(v as ConfiguratorFieldType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.entries(FIELD_TYPE_LABELS).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div>
+            <Label>Feldtyp *</Label>
+            <Select value={fieldType} onValueChange={v => setFieldType(v as ConfiguratorFieldType)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(FIELD_TYPE_LABELS).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label>Beschreibung</Label>
