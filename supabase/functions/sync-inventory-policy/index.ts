@@ -19,11 +19,8 @@ const VARIANTS_QUERY = `
           id
           inventoryPolicy
           inventoryItem { id }
-          metafields(keys: ["custom.ueberverkauf", "custom.lieferantenbestand"]) {
-            edges {
-              node { key value }
-            }
-          }
+          ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
+          lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
         }
       }
     }
