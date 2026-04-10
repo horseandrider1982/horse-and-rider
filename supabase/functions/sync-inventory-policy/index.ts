@@ -90,13 +90,8 @@ Deno.serve(async (req) => {
         const variant: VariantNode = edge.node;
         stats.checked++;
 
-        const mfMap = new Map<string, string>();
-        for (const mfEdge of variant.metafields.edges) {
-          mfMap.set(mfEdge.node.key, mfEdge.node.value);
-        }
-
-        const ueberverkauf = mfMap.get("ueberverkauf");
-        const lieferantenbestand = parseInt(mfMap.get("lieferantenbestand") || "0") || 0;
+        const ueberverkauf = variant.ueberverkauf?.value;
+        const lieferantenbestand = parseInt(variant.lieferantenbestand?.value || "0") || 0;
 
         // Desired policy: CONTINUE if oversell enabled AND supplier stock > 0
         const shouldContinue = ueberverkauf === "1" && lieferantenbestand > 0;
