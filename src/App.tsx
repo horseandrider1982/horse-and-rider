@@ -18,11 +18,11 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 const Index = lazy(() => import("./pages/Index"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminResetPassword = lazy(() => import("./pages/admin/AdminResetPassword"));
 const AccountProfile = lazy(() => import("./pages/account/AccountProfile"));
 const AccountCustomerCard = lazy(() => import("./pages/account/AccountCustomerCard"));
 const AccountHorses = lazy(() => import("./pages/account/AccountHorses"));
 const Admin = lazy(() => import("./pages/Admin"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Search = lazy(() => import("./pages/Search"));
 const RedirectMonitoring = lazy(() => import("./pages/admin/RedirectMonitoring"));
 const RedirectConflicts = lazy(() => import("./pages/admin/RedirectConflicts"));
@@ -69,6 +69,7 @@ const AppContent = () => {
         {/* Admin routes (no locale prefix) */}
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/reset-password" element={<AdminResetPassword />} />
         <Route path="/admin/301/monitoring" element={<RedirectMonitoring />} />
         <Route path="/admin/301/conflicts" element={<RedirectConflicts />} />
 
