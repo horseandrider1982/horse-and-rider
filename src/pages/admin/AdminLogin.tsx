@@ -16,6 +16,11 @@ export default function AdminLogin() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgot, setShowForgot] = useState(false);
 
+  const adminResetRedirectUrl =
+    window.location.hostname.includes("--") && window.location.hostname.endsWith(".lovable.app")
+      ? "https://horse-and-rider.lovable.app/admin/reset-password"
+      : `${window.location.origin}/admin/reset-password`;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -33,7 +38,7 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/de/reset-password`,
+      redirectTo: adminResetRedirectUrl,
     });
     setLoading(false);
     if (error) {
