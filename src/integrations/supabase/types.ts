@@ -328,6 +328,7 @@ export type Database = {
           description: string | null
           field_type: Database["public"]["Enums"]["configurator_field_type"]
           id: string
+          internal_name: string | null
           is_required: boolean
           name: string
           sort_order: number
@@ -338,6 +339,7 @@ export type Database = {
           description?: string | null
           field_type?: Database["public"]["Enums"]["configurator_field_type"]
           id?: string
+          internal_name?: string | null
           is_required?: boolean
           name: string
           sort_order?: number
@@ -348,6 +350,7 @@ export type Database = {
           description?: string | null
           field_type?: Database["public"]["Enums"]["configurator_field_type"]
           id?: string
+          internal_name?: string | null
           is_required?: boolean
           name?: string
           sort_order?: number
