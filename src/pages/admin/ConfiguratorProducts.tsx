@@ -198,7 +198,7 @@ function EditGroupsDialog({ product, open, onOpenChange }: { product: Configurat
             return (
               <div key={g.id} className={`flex items-center gap-2 p-2 rounded border ${isSelected ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
                 <Checkbox checked={isSelected} onCheckedChange={() => toggleGroup(g.id)} />
-                <span className="flex-1 text-sm">{g.name}</span>
+                <span className="flex-1 text-sm">{g.name}{g.internal_name ? <span className="ml-1 text-xs text-muted-foreground">({g.internal_name})</span> : null}</span>
                 {isSelected && (
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveUp(selIdx)}>↑</Button>

@@ -110,7 +110,7 @@ export function useSaveGroup() {
       if (group.id) {
         const { data, error } = await supabase
           .from('configurator_groups')
-          .update({ name: group.name, description: group.description, field_type: group.field_type as any, is_required: group.is_required, sort_order: group.sort_order, updated_at: new Date().toISOString() })
+          .update({ name: group.name, internal_name: group.internal_name ?? null, description: group.description, field_type: group.field_type as any, is_required: group.is_required, sort_order: group.sort_order, updated_at: new Date().toISOString() })
           .eq('id', group.id)
           .select()
           .single();
@@ -119,7 +119,7 @@ export function useSaveGroup() {
       } else {
         const { data, error } = await supabase
           .from('configurator_groups')
-          .insert({ name: group.name, description: group.description, field_type: group.field_type as any, is_required: group.is_required ?? true, sort_order: group.sort_order ?? 0 })
+          .insert({ name: group.name, internal_name: group.internal_name ?? null, description: group.description, field_type: group.field_type as any, is_required: group.is_required ?? true, sort_order: group.sort_order ?? 0 })
           .select()
           .single();
         if (error) throw error;
