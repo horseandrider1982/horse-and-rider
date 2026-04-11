@@ -626,7 +626,7 @@ const ProductDetail = () => {
                         {selectedOptions[option.name] && <span className="font-normal text-muted-foreground ml-2">– {selectedOptions[option.name]}</span>}
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {option.values.map((value) => {
+                        {sortOptionValues(option.name, option.values).map((value) => {
                           const isSelected = selectedOptions[option.name] === value;
                           const isAvailable = optionAvailability[option.name]?.[value] ?? false;
                           const btn = (
