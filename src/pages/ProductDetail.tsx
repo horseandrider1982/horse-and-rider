@@ -30,6 +30,60 @@ import { SimilarProducts } from "@/components/SimilarProducts";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
+/** Sort option values in a logical order depending on the option name */
+function sortOptionValues(optionName: string, values: string[]): string[] {
+  const name = optionName.toLowerCase();
+
+  // Equestrian horse sizes – fixed order
+  const HORSE_SIZE_ORDER = [
+    'shetty', 'mini shetty', 'mini-shetty', 'minishetty',
+    'pony', 'vb', 'vollblut', 'warmblut', 'wb',
+    'cob', 'full', 'x-full', 'xfull', 'x full', 'extra full',
+    'draft', 'kaltblut', 'cold blood',
+  ];
+
+  // Check if this looks like a horse-size option
+  const isHorseSize = ['größe', 'groesse', 'size', 'pferdegroesse', 'pferdegröße'].some(k => name.includes(k))
+    || values.some(v => HORSE_SIZE_ORDER.includes(v.toLowerCase()));
+
+  if (isHorseSize) {
+    return [...values].sort((a, b) => {
+      const ia = HORSE_SIZE_ORDER.findIndex(s => a.toLowerCase() === s || a.toLowerCase().includes(s));
+      const ib = HORSE_SIZE_ORDER.findIndex(s => b.toLowerCase() === s || b.toLowerCase().includes(s));
+      // Both found in order list → sort by position
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      // One found, other not → known ones first
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      // Fallback: try numeric, then alphabetical
+      return naturalCompare(a, b);
+    });
+  }
+
+  // Default: natural/numeric sort (handles shoe sizes, cm, mm, etc.)
+  return [...values].sort(naturalCompare);
+}
+
+/** Natural compare: numeric parts compared as numbers, rest case-insensitive */
+function naturalCompare(a: string, b: string): number {
+  const re = /(\d+(?:[.,]\d+)?)/;
+  const pa = a.split(re);
+  const pb = b.split(re);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const sa = pa[i] ?? '';
+    const sb = pb[i] ?? '';
+    const na = parseFloat(sa.replace(',', '.'));
+    const nb = parseFloat(sb.replace(',', '.'));
+    if (!isNaN(na) && !isNaN(nb)) {
+      if (na !== nb) return na - nb;
+    } else {
+      const cmp = sa.localeCompare(sb, 'de', { sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+    }
+  }
+  return 0;
+}
+
 function loadConfig(productId: string): ConfigurationState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY(productId));
@@ -572,7 +626,7 @@ const ProductDetail = () => {
                         {selectedOptions[option.name] && <span className="font-normal text-muted-foreground ml-2">– {selectedOptions[option.name]}</span>}
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {option.values.map((value) => {
+                        {sortOptionValues(option.name, option.values).map((value) => {
                           const isSelected = selectedOptions[option.name] === value;
                           const isAvailable = optionAvailability[option.name]?.[value] ?? false;
                           const btn = (
