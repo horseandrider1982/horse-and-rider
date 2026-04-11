@@ -233,22 +233,35 @@ function getMf(mfs: (MetafieldNode | null)[] | undefined, key: string): string {
 
 function isProductVisible(product: ShopifyEdge["node"]): boolean {
   const variants = product.variants?.edges || [];
-
-  // Visible if at least one variant is available for sale
-  if (variants.some(v => v.node.availableForSale)) return true;
-
-  // Check supplier stock
   const isSingleVariant = variants.length <= 1;
 
-  if (isSingleVariant) {
-    // Single variant: check product-level metafields
-    const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
-    const oversell = getMf(product.metafields, 'ueberverkauf');
+  // Check variants that are availableForSale
+  for (const { node: v } of variants) {
+    if (!v.availableForSale) continue;
+
+    // Has local stock (availableForSale + NOT currentlyNotInStock)
+    if (!v.currentlyNotInStock) return true;
+
+    // currentlyNotInStock = true → only visible with supplier stock
+    if (isSingleVariant) {
+      const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
+      const oversell = getMf(product.metafields, 'ueberverkauf');
+      if (supplierStock > 0 && oversell === '1') return true;
+    }
+
+    const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
+    const oversell = getMf(v.metafields, 'ueberverkauf');
     if (supplierStock > 0 && oversell === '1') return true;
   }
 
-  // Multi-variant: check each variant's metafields
+  // Also check non-availableForSale variants with supplier stock
   for (const { node: v } of variants) {
+    if (v.availableForSale) continue;
+    if (isSingleVariant) {
+      const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
+      const oversell = getMf(product.metafields, 'ueberverkauf');
+      if (supplierStock > 0 && oversell === '1') return true;
+    }
     const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
     const oversell = getMf(v.metafields, 'ueberverkauf');
     if (supplierStock > 0 && oversell === '1') return true;
