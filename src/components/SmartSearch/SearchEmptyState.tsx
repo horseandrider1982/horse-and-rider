@@ -1,8 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { TrendingUp, Tag } from "lucide-react";
-import { storefrontApiRequest, STOREFRONT_QUERY } from "@/lib/shopify";
+import { Tag } from "lucide-react";
+import { storefrontApiRequest } from "@/lib/shopify";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n";
+
+const COLLECTION_QUERY = `
+  query GetSearchCollection($handle: String!) {
+    collection(handle: $handle) {
+      products(first: 8) {
+        edges {
+          node {
+            handle
+            title
+            vendor
+            images(first: 1) { edges { node { url } } }
+            priceRange { minVariantPrice { amount currencyCode } }
+          }
+        }
+      }
+    }
+  }
+`;
 
 const POPULAR_SEARCHES = ["Winterdecke", "Schabracke", "Airbagweste", "Reithelm", "Gamaschen", "Turnierbekleidung", "Trense", "Reithose"];
 const POPULAR_CATEGORIES = [
@@ -26,9 +44,10 @@ export const SearchEmptyState: React.FC<SearchEmptyStateProps> = ({ onChipClick,
     let cancelled = false;
     (async () => {
       try {
-        const data = await storefrontApiRequest(STOREFRONT_QUERY, { first: 8 });
+        const data = await storefrontApiRequest(COLLECTION_QUERY, { handle: "suche" });
         if (cancelled) return;
-        setTrending((data?.data?.products?.edges || []).map((e: any) => ({
+        const edges = data?.data?.collection?.products?.edges || [];
+        setTrending(edges.map((e: any) => ({
           handle: e.node.handle, title: e.node.title, imageUrl: e.node.images?.edges?.[0]?.node?.url || null,
           price: e.node.priceRange.minVariantPrice.amount, currency: e.node.priceRange.minVariantPrice.currencyCode, vendor: e.node.vendor || "",
         })));
