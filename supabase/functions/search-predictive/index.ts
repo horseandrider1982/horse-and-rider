@@ -33,6 +33,30 @@ const PRODUCTS_SEARCH_QUERY = `
             minVariantPrice { amount currencyCode }
             maxVariantPrice { amount currencyCode }
           }
+          metafields(identifiers: [
+            { namespace: "custom", key: "lieferantenbestand" },
+            { namespace: "custom", key: "ueberverkauf" }
+          ]) {
+            namespace
+            key
+            value
+          }
+          variants(first: 30) {
+            edges {
+              node {
+                availableForSale
+                currentlyNotInStock
+                metafields(identifiers: [
+                  { namespace: "custom", key: "lieferantenbestand" },
+                  { namespace: "custom", key: "ueberverkauf" }
+                ]) {
+                  namespace
+                  key
+                  value
+                }
+              }
+            }
+          }
           collections(first: 5) {
             edges {
               node {
@@ -113,44 +137,35 @@ async function loadSynonyms(): Promise<Map<string, string[]>> {
   }
 }
 
-// ── Query expansion (simplified) ────────────────────────────────────────
-// Only apply synonym expansion, skip aggressive German stemming that
-// created enormous OR queries breaking Shopify search.
+// ── Query expansion ─────────────────────────────────────────────────────
 function expandQuery(q: string, synonyms: Map<string, string[]>): string {
   const trimmed = q.trim().toLowerCase();
   const words = trimmed.split(/\s+/);
 
-  // Multi-word queries: don't use OR expansion — Shopify can't parse it reliably.
-  // Just return the original query as-is; Shopify full-text search handles it well.
   if (words.length > 1) {
-    // Only check full-phrase synonym (e.g. "sattelgurt" → "bauchgurt")
     if (synonyms.has(trimmed)) {
       const syns = synonyms.get(trimmed)!;
-      // Return just original + first synonym as OR
       return `${trimmed} OR ${syns[0]}`;
     }
     return trimmed;
   }
 
-  // Single-word queries: safe to expand with OR
   const expandedTerms = new Set<string>();
   expandedTerms.add(trimmed);
 
-  // Synonym expansion
   if (synonyms.has(trimmed)) {
     for (const syn of synonyms.get(trimmed)!) {
       expandedTerms.add(syn);
     }
   }
 
-  // Basic plural/singular variant
   const w = words[0];
   if (w.endsWith("n") && w.length > 3) {
-    expandedTerms.add(w.slice(0, -1)); // Trensen → Trense
+    expandedTerms.add(w.slice(0, -1));
   } else if (w.endsWith("e") && w.length > 3) {
-    expandedTerms.add(w + "n"); // Trense → Trensen
+    expandedTerms.add(w + "n");
   } else if (w.endsWith("s") && w.length > 3) {
-    expandedTerms.add(w.slice(0, -1)); // Halfters → Halfter
+    expandedTerms.add(w.slice(0, -1));
   }
 
   if (expandedTerms.size <= 1) return trimmed;
@@ -177,6 +192,18 @@ function buildPriceText(
   return minVal < maxVal ? `ab ${formatted}` : formatted;
 }
 
+interface MetafieldNode {
+  namespace: string;
+  key: string;
+  value: string;
+}
+
+interface VariantNode {
+  availableForSale: boolean;
+  currentlyNotInStock?: boolean;
+  metafields: (MetafieldNode | null)[];
+}
+
 interface ShopifyEdge {
   node: {
     id: string;
@@ -189,10 +216,45 @@ interface ShopifyEdge {
       minVariantPrice: { amount: string; currencyCode: string };
       maxVariantPrice: { amount: string; currencyCode: string };
     };
+    metafields: (MetafieldNode | null)[];
+    variants: {
+      edges: Array<{ node: VariantNode }>;
+    };
     collections: {
       edges: Array<{ node: { id: string; title: string; handle: string } }>;
     };
   };
+}
+
+// ── Availability filter (same logic as isProductVisibleInListing) ────────
+function getMf(mfs: (MetafieldNode | null)[] | undefined, key: string): string {
+  return mfs?.find(m => m?.key === key)?.value || '';
+}
+
+function isProductVisible(product: ShopifyEdge["node"]): boolean {
+  const variants = product.variants?.edges || [];
+
+  // Visible if at least one variant is available for sale
+  if (variants.some(v => v.node.availableForSale)) return true;
+
+  // Check supplier stock
+  const isSingleVariant = variants.length <= 1;
+
+  if (isSingleVariant) {
+    // Single variant: check product-level metafields
+    const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
+    const oversell = getMf(product.metafields, 'ueberverkauf');
+    if (supplierStock > 0 && oversell === '1') return true;
+  }
+
+  // Multi-variant: check each variant's metafields
+  for (const { node: v } of variants) {
+    const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
+    const oversell = getMf(v.metafields, 'ueberverkauf');
+    if (supplierStock > 0 && oversell === '1') return true;
+  }
+
+  return false;
 }
 
 // ── Title-relevance scoring ─────────────────────────────────────────────
@@ -280,7 +342,7 @@ Deno.serve(async (req) => {
     const synonyms = await loadSynonyms();
     const expandedQuery = expandQuery(q, synonyms);
 
-    // Fetch more than needed to account for deduplication
+    // Fetch more than needed to account for deduplication + availability filtering
     const fetchSize = 48;
     const shopifyQuery = `(${expandedQuery}) available_for_sale:true`;
     const variables: Record<string, unknown> = { query: shopifyQuery, first: fetchSize };
@@ -313,7 +375,7 @@ Deno.serve(async (req) => {
     const edges: ShopifyEdge[] = productsData?.edges || [];
     const pageInfo = productsData?.pageInfo || { hasNextPage: false, endCursor: null };
 
-    // Deduplicate by product ID (OR queries can return duplicates)
+    // Deduplicate by product ID
     const seenIds = new Set<string>();
     const uniqueEdges: ShopifyEdge[] = [];
     for (const edge of edges) {
@@ -323,10 +385,13 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Filter by availability (same logic as isProductVisibleInListing)
+    const visibleEdges = uniqueEdges.filter(edge => isProductVisible(edge.node));
+
     // Deduplicate variant-as-product entries
     const seenBaseTitles = new Map<string, ShopifyEdge>();
     const deduplicatedEdges: ShopifyEdge[] = [];
-    for (const edge of uniqueEdges) {
+    for (const edge of visibleEdges) {
       const base = getBaseTitle(edge.node.title);
       if (!seenBaseTitles.has(base)) {
         seenBaseTitles.set(base, edge);
