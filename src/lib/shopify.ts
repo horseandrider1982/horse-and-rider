@@ -198,24 +198,40 @@ export const STOREFRONT_PAGINATED_QUERY = `
 export function isProductVisibleInListing(product: ShopifyProduct['node']): boolean {
   const variants = product.variants?.edges || [];
 
-  // Product is visible if at least one variant is available for sale (includes untracked inventory)
-  if (variants.some(v => v.node.availableForSale)) return true;
-
-  // Check supplier stock: if ANY variant (or product-level for single-variant) has supplier stock + oversell
-  const isSingleVariant = variants.length <= 1;
-
   const getMf = (mfs: (ShopifyMetafield | null)[] | undefined, key: string) =>
     mfs?.find(m => m?.key === key)?.value || '';
 
-  if (isSingleVariant) {
-    // Single variant: check product-level metafields
-    const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
-    const oversell = getMf(product.metafields, 'ueberverkauf');
+  const isSingleVariant = variants.length <= 1;
+
+  // Check if at least one variant has real availability
+  for (const { node: v } of variants) {
+    if (!v.availableForSale) continue;
+
+    // Has local stock (availableForSale + NOT currentlyNotInStock)
+    if (!v.currentlyNotInStock) return true;
+
+    // currentlyNotInStock = true → only visible with supplier stock
+    // For single-variant products, check product-level metafields
+    if (isSingleVariant) {
+      const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
+      const oversell = getMf(product.metafields, 'ueberverkauf');
+      if (supplierStock > 0 && oversell === '1') return true;
+    }
+
+    // Check variant-level metafields
+    const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
+    const oversell = getMf(v.metafields, 'ueberverkauf');
     if (supplierStock > 0 && oversell === '1') return true;
   }
 
-  // Multi-variant: check each variant's metafields
+  // Also check non-availableForSale variants with supplier stock
   for (const { node: v } of variants) {
+    if (v.availableForSale) continue;
+    if (isSingleVariant) {
+      const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
+      const oversell = getMf(product.metafields, 'ueberverkauf');
+      if (supplierStock > 0 && oversell === '1') return true;
+    }
     const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
     const oversell = getMf(v.metafields, 'ueberverkauf');
     if (supplierStock > 0 && oversell === '1') return true;
