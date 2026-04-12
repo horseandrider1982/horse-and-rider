@@ -106,6 +106,36 @@ export default function MarkenDetail() {
             )}
         </section>
 
+        {bottomLinks.length > 0 && (
+          <section className="container mx-auto px-4 mt-2 mb-6">
+            <div className="space-y-6">
+              {bottomLinks.map((group) => (
+                <div key={group.id}>
+                  <LocaleLink
+                    to={group.url}
+                    className="text-base font-semibold text-foreground hover:text-primary transition-colors"
+                  >
+                    {group.title}
+                  </LocaleLink>
+                  {group.items && group.items.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {group.items.map((sub) => (
+                        <LocaleLink
+                          key={sub.id}
+                          to={sub.url}
+                          className="inline-flex items-center px-4 py-2 rounded-full border border-border bg-card text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                        >
+                          {sub.title}
+                        </LocaleLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="container mx-auto px-4 pb-12">
           {brand.seoText ? <div className="prose prose-sm max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: brand.seoText }} /> : <DefaultSeoText brand={brand.name} />}
         </section>
