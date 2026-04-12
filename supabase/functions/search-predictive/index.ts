@@ -137,9 +137,37 @@ async function loadSynonyms(): Promise<Map<string, string[]>> {
   }
 }
 
+// ── Natural-language keyword extraction ─────────────────────────────────
+const STOP_WORDS = new Set([
+  "welches","welche","welcher","welchem","welchen",
+  "was","wie","warum","wann","wo","wer","wem","wen",
+  "ist","das","der","die","den","dem","des","ein","eine","einen","einem","einer",
+  "für","fur","mein","meine","meinen","meinem","meiner",
+  "ich","mir","mich","du","er","sie","es","wir","ihr",
+  "kann","soll","brauche","brauch","braucht","eignet","passt","empfehl","hilf",
+  "sich","und","oder","von","zu","am","im","auf","an","bei","mit","nach","über",
+  "richtige","richtigen","richtig","beste","besten","gut","gute","guten",
+  "pferd","pferde","pferdes","reiter","reiterin",
+]);
+
+function extractSearchKeywords(q: string): string {
+  const trimmed = q.trim().replace(/[?!.]+$/, "");
+  const words = trimmed.split(/\s+/).filter(w => w.length >= 2);
+  const keywords = words.filter(w => !STOP_WORDS.has(w.toLowerCase()));
+  return keywords.length > 0 ? keywords.join(" ") : trimmed;
+}
+
+function isNaturalLanguageQuery(q: string): boolean {
+  const t = q.trim().toLowerCase();
+  if (t.endsWith("?")) return true;
+  return /^(welch|was |wie |warum|wann|wo |kann ich|soll ich|brauche ich|brauch|eignet sich|passt|empfehl|unterschied|hilf)/i.test(t);
+}
+
 // ── Query expansion ─────────────────────────────────────────────────────
 function expandQuery(q: string, synonyms: Map<string, string[]>): string {
-  const trimmed = q.trim().toLowerCase();
+  // For natural language queries, extract keywords first
+  const input = isNaturalLanguageQuery(q) ? extractSearchKeywords(q) : q;
+  const trimmed = input.trim().toLowerCase();
   const words = trimmed.split(/\s+/);
 
   if (words.length > 1) {
