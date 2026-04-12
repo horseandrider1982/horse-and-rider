@@ -10,6 +10,16 @@ import { useI18n } from "@/i18n";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
+
+/** SHA-256 hash a string and return hex – used for Enhanced Conversions */
+async function sha256(value: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(value.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 const ThankYou = () => {
   const { t } = useI18n();
@@ -19,33 +29,61 @@ const ThankYou = () => {
   const [showConsent, setShowConsent] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
 
+  const { customer } = useShopifyCustomer();
+
   usePageMeta({
     title: "Vielen Dank für Ihre Bestellung",
     description: "Ihre Bestellung bei Horse & Rider Luhmühlen wurde erfolgreich aufgegeben.",
     noIndex: true,
   });
 
-  // GA4 purchase + Google Ads conversion – fire once on page load
+  // GA4 purchase + Google Ads Enhanced Conversion – fire once on page load
   useEffect(() => {
     const w = window as any;
     w.dataLayer = w.dataLayer || [];
-    w.dataLayer.push({ ecommerce: null });
-    w.dataLayer.push({
-      event: "purchase",
-      ecommerce: {
-        currency: "EUR",
-        transaction_id: `order_${Date.now()}`,
-        value: 0, // actual value not available from Shopify redirect
-        items: [],
-      },
-    });
-    // Google Ads conversion event
-    w.dataLayer.push({
-      event: "ads_conversion_purchase",
-      ads_conversion_id: "AW-1051638393",
-      ads_conversion_label: "NMdMCIOE2pMcEPn0uvUD",
-    });
-  }, []);
+
+    // Build Enhanced Conversions user_data from logged-in customer
+    const fireConversion = async () => {
+      const userData: Record<string, string> = {};
+
+      if (customer?.email) {
+        userData.sha256_email_address = await sha256(customer.email);
+      }
+      if (customer?.firstName) {
+        userData.address = userData.address || ({} as any);
+        (userData as any).address.sha256_first_name = await sha256(customer.firstName);
+      }
+      if (customer?.lastName) {
+        userData.address = userData.address || ({} as any);
+        (userData as any).address.sha256_last_name = await sha256(customer.lastName);
+      }
+
+      // Clear previous ecommerce object
+      w.dataLayer.push({ ecommerce: null });
+
+      // GA4 purchase event with Enhanced Conversions user_data
+      w.dataLayer.push({
+        event: "purchase",
+        ecommerce: {
+          currency: "EUR",
+          transaction_id: `order_${Date.now()}`,
+          value: 0,
+          items: [],
+        },
+        ...(Object.keys(userData).length > 0 ? { user_data: userData } : {}),
+      });
+
+      // Google Ads conversion event with user_data for Enhanced Conversions
+      w.dataLayer.push({
+        event: "ads_conversion_purchase",
+        ads_conversion_id: "AW-1051638393",
+        ads_conversion_label: "NMdMCIOE2pMcEPn0uvUD",
+        ...(Object.keys(userData).length > 0 ? { user_data: userData } : {}),
+      });
+    };
+
+    fireConversion();
+  }, [customer]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
