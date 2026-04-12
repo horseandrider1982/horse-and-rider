@@ -31,6 +31,60 @@ const PRODUCTS_SEARCH_QUERY = `
   }
 `;
 
+const COLLECTIONS_SEARCH_QUERY = `
+  query SearchCollections($query: String!, $first: Int!) {
+    collections(first: $first, query: $query) {
+      edges {
+        node {
+          title
+          handle
+        }
+      }
+    }
+  }
+`;
+
+async function fetchCollectionHandles(
+  categoryNames: string[],
+  storefrontToken: string,
+): Promise<Record<string, string>> {
+  const map: Record<string, string> = {};
+  if (categoryNames.length === 0) return map;
+
+  try {
+    // Search for each category name in Shopify collections
+    const searches = categoryNames.map(async (cat) => {
+      const res = await fetch(SHOPIFY_STOREFRONT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Storefront-Access-Token": storefrontToken,
+        },
+        body: JSON.stringify({
+          query: COLLECTIONS_SEARCH_QUERY,
+          variables: { query: cat, first: 5 },
+        }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const edges = data.data?.collections?.edges || [];
+      // Find best match by title similarity
+      const catLower = cat.toLowerCase();
+      for (const e of edges) {
+        const title = e.node.title.toLowerCase();
+        if (title === catLower || title.includes(catLower) || catLower.includes(title)) {
+          map[cat] = e.node.handle;
+          break;
+        }
+      }
+    });
+    await Promise.all(searches);
+  } catch (e) {
+    console.error("Collection lookup error:", e);
+  }
+  return map;
+}
+
 // Extract search keywords from a natural language query
 function extractSearchKeywords(query: string): string {
   const stopWords = new Set([
@@ -327,6 +381,18 @@ Antworte AUSSCHLIESSLICH mit dem JSON-Objekt, ohne Markdown-Codeblöcke.`;
         recommendedProducts: [],
         categories: [],
       };
+    }
+
+    // Enrich categories with collection handles
+    const categoryNames: string[] = parsed.categories || [];
+    if (categoryNames.length > 0) {
+      const handleMap = await fetchCollectionHandles(categoryNames, storefrontToken);
+      parsed.categories = categoryNames.map((name: string) => ({
+        name,
+        handle: handleMap[name] || null,
+      }));
+    } else {
+      parsed.categories = [];
     }
 
     return new Response(JSON.stringify(parsed), {

@@ -105,7 +105,13 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
 
   const handleChipClick = (chip: string) => { handleQueryChange(chip); inputRef.current?.focus(); };
   const handleProductClick = (handle: string) => { onClose(); reset(); navigate(localePath(`/product/${handle}`)); };
-  const handleCategoryClick = (category: string) => { handleQueryChange(category); inputRef.current?.focus(); };
+  const handleCategoryClick = (name: string, handle: string | null) => {
+    if (handle) {
+      onClose(); reset(); navigate(localePath(`/collections/${handle}`));
+    } else {
+      handleQueryChange(name); inputRef.current?.focus();
+    }
+  };
   const handleClose = () => { onClose(); reset(); };
 
   if (!isOpen) return null;
