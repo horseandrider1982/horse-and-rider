@@ -163,6 +163,26 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
               {/* Results */}
               <div className="flex-1 overflow-y-auto">
                 <div className={cn("px-4 sm:px-8 lg:px-8 py-6", "flex flex-col gap-6")}>
+                  {/* Sattelservice hint */}
+                  {query.trim().toLowerCase().includes("sattelservice") && (
+                    <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-4 sm:p-5 flex items-start gap-4">
+                      <span className="text-2xl flex-shrink-0">🐴</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground mb-1">Sattelservice von Horse&nbsp;&amp;&nbsp;Rider</p>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Professionelle Sattelanpassung, Sattelberatung und Sattelservice – buchen Sie direkt einen Termin über unsere Sattelservice-Seite.
+                        </p>
+                        <a
+                          href="https://sattelservice.horse-and-rider.de"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                        >
+                          Zum Sattelservice →
+                        </a>
+                      </div>
+                    </div>
+                  )}
                   {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} />}
                   <SearchProductGrid
                     results={filteredResults}
