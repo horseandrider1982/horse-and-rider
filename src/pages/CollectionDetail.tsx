@@ -147,6 +147,14 @@ export default function CollectionDetail() {
   const { data: menuItems } = useShopifyMenu('kategoriemenu');
   const { data: mainMenuItems } = useShopifyMenu('main-menu');
 
+  // Collection-specific bottom menus (handle → Shopify menu handle)
+  const COLLECTION_BOTTOM_MENUS: Record<string, string> = {
+    'gebisse': 'gebisse-menu',
+  };
+  const bottomMenuHandle = handle ? COLLECTION_BOTTOM_MENUS[handle] : undefined;
+  const { data: bottomMenuItems } = useShopifyMenu(bottomMenuHandle || 'main-menu');
+  const bottomLinks = bottomMenuHandle ? (bottomMenuItems || []) : [];
+
   const subcategories = useMemo(() => {
     if (!handle) return [];
     const findChildren = (items: ShopifyMenuItem[]): ShopifyMenuItem[] => {
