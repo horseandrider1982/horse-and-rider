@@ -98,39 +98,55 @@ async function fetchCmsPages(sb: any, query: string): Promise<string> {
 
 async function fetchBrandKnowledge(sb: any, query: string): Promise<string> {
   try {
-    // Get all brand knowledge and do simple text matching
-    const { data } = await sb
-      .from("brand_knowledge")
-      .select("page_title, content, source_url, brand_id")
-      .limit(100);
+    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
 
-    if (!data || data.length === 0) return "";
-
-    // Also get brand names
-    const brandIds = [...new Set(data.map((d: any) => d.brand_id))];
-    const { data: brands } = await sb
+    // Step 1: Find brands whose name matches any query word
+    const { data: allBrands } = await sb
       .from("brands")
       .select("id, name")
-      .in("id", brandIds);
+      .eq("is_active", true);
 
-    const brandMap = new Map((brands || []).map((b: any) => [b.id, b.name]));
+    const brandMap = new Map((allBrands || []).map((b: any) => [b.id, b.name]));
 
-    // Filter by relevance: check if query words appear in content
-    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
-    const relevant = data.filter((d: any) => {
-      const text = `${d.page_title || ""} ${d.content}`.toLowerCase();
-      return queryWords.some(w => text.includes(w));
-    }).slice(0, 10);
+    // Find brand IDs matching the query (e.g. "Sprenger" in query → match brand "Sprenger")
+    const matchedBrandIds = (allBrands || [])
+      .filter((b: any) => queryWords.some(w => b.name.toLowerCase().includes(w)))
+      .map((b: any) => b.id);
 
-    if (relevant.length === 0) {
-      // Return first few entries as general context
-      return data.slice(0, 5).map((d: any) => {
-        const brand = brandMap.get(d.brand_id) || "Unbekannt";
-        return `[${brand} - ${d.page_title || d.source_url}] ${d.content.slice(0, 400)}`;
-      }).join("\n\n");
+    const results: any[] = [];
+
+    // Step 2: Fetch knowledge for matched brands (high priority)
+    if (matchedBrandIds.length > 0) {
+      const { data: brandData } = await sb
+        .from("brand_knowledge")
+        .select("page_title, content, source_url, brand_id")
+        .in("brand_id", matchedBrandIds)
+        .limit(20);
+
+      if (brandData) results.push(...brandData);
     }
 
-    return relevant.map((d: any) => {
+    // Step 3: Also do a text search across all brand knowledge for additional context
+    // Use ilike for simple matching since full-text search isn't set up on this table
+    if (results.length < 15) {
+      const searchTerm = queryWords.join("%");
+      const { data: textData } = await sb
+        .from("brand_knowledge")
+        .select("page_title, content, source_url, brand_id")
+        .or(`content.ilike.%${searchTerm}%,page_title.ilike.%${searchTerm}%`)
+        .limit(10);
+
+      if (textData) {
+        const existingUrls = new Set(results.map((r: any) => r.source_url));
+        for (const d of textData) {
+          if (!existingUrls.has(d.source_url)) results.push(d);
+        }
+      }
+    }
+
+    if (results.length === 0) return "";
+
+    return results.slice(0, 15).map((d: any) => {
       const brand = brandMap.get(d.brand_id) || "Unbekannt";
       return `[${brand} - ${d.page_title || d.source_url}] ${d.content.slice(0, 600)}`;
     }).join("\n\n");
