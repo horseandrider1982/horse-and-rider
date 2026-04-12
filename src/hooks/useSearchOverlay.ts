@@ -80,13 +80,22 @@ function scoreAiRecommendationMatch(recommendedTitle: string, product: SearchPro
   const recommendedNormalized = normalizeAiRecommendationText(recommendedTitle);
   const productNormalized = normalizeAiRecommendationText(product.title);
   const recommendedTokens = tokenizeAiRecommendation(recommendedTitle);
-  const productTokens = new Set(tokenizeAiRecommendation(product.title));
+  const productTokensArr = tokenizeAiRecommendation(product.title);
+  const productTokens = new Set(productTokensArr);
   const vendorTokens = new Set(tokenizeAiRecommendation(product.vendor || ""));
   let score = 0;
 
   for (const token of recommendedTokens) {
     if (productTokens.has(token)) {
       score += token.length >= 5 ? 4 : 3;
+    } else {
+      // Partial/prefix matching: "airbag" matches "airbagvorgang" and vice versa
+      for (const pt of productTokensArr) {
+        if (pt.length >= 4 && token.length >= 4 && (pt.startsWith(token) || token.startsWith(pt))) {
+          score += Math.min(pt.length, token.length) >= 5 ? 3 : 2;
+          break;
+        }
+      }
     }
     if (vendorTokens.has(token)) {
       score += 6;
@@ -95,6 +104,13 @@ function scoreAiRecommendationMatch(recommendedTitle: string, product: SearchPro
 
   if (productNormalized.includes(recommendedNormalized)) score += 20;
   if (recommendedNormalized.includes(productNormalized)) score += 10;
+
+  // Check if product name is contained in recommendation (handling hallucinated extra words)
+  for (const pt of productTokensArr) {
+    if (pt.length >= 5 && recommendedNormalized.includes(pt)) {
+      score += 2;
+    }
+  }
 
   const leadingPhrase = recommendedTokens.slice(0, 3).join(" ");
   if (leadingPhrase && productNormalized.includes(leadingPhrase)) score += 12;
