@@ -105,6 +105,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
 
   const handleChipClick = (chip: string) => { handleQueryChange(chip); inputRef.current?.focus(); };
   const handleProductClick = (handle: string) => { onClose(); reset(); navigate(localePath(`/product/${handle}`)); };
+  const handleCategoryClick = (category: string) => { handleQueryChange(category); inputRef.current?.focus(); };
   const handleClose = () => { onClose(); reset(); };
 
   if (!isOpen) return null;
@@ -205,7 +206,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                       </div>
                     </div>
                   )}
-                  {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} />}
+                  {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} onCategoryClick={handleCategoryClick} />}
                   <SearchProductGrid
                     results={filteredResults}
                     isLoading={isLoading}
