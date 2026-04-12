@@ -33,6 +33,75 @@ export interface AIAdvisorResult {
   isLoading: boolean;
 }
 
+const AI_RECOMMENDATION_STOP_WORDS = new Set([
+  "gebiss",
+  "gebisse",
+  "mit",
+  "und",
+  "fur",
+  "fuer",
+]);
+
+function normalizeAiRecommendationText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeAiRecommendation(value: string): string[] {
+  return normalizeAiRecommendationText(value)
+    .split(" ")
+    .filter(
+      (token) =>
+        token.length > 1 &&
+        !AI_RECOMMENDATION_STOP_WORDS.has(token) &&
+        !/^\d+$/.test(token) &&
+        !/^\d+mm$/.test(token)
+    );
+}
+
+function buildAiRecommendationQueries(value: string): string[] {
+  const tokens = tokenizeAiRecommendation(value);
+  const queries = [
+    tokens.slice(0, 4).join(" "),
+    tokens.slice(0, 3).join(" "),
+    tokens.slice(0, 2).join(" "),
+  ].filter((query, index, arr) => query.length >= 3 && arr.indexOf(query) === index);
+
+  return queries.length > 0 ? queries : [value.trim()];
+}
+
+function scoreAiRecommendationMatch(recommendedTitle: string, product: SearchProductResult): number {
+  const recommendedNormalized = normalizeAiRecommendationText(recommendedTitle);
+  const productNormalized = normalizeAiRecommendationText(product.title);
+  const recommendedTokens = tokenizeAiRecommendation(recommendedTitle);
+  const productTokens = new Set(tokenizeAiRecommendation(product.title));
+  const vendorTokens = new Set(tokenizeAiRecommendation(product.vendor || ""));
+  let score = 0;
+
+  for (const token of recommendedTokens) {
+    if (productTokens.has(token)) {
+      score += token.length >= 5 ? 4 : 3;
+    }
+    if (vendorTokens.has(token)) {
+      score += 6;
+    }
+  }
+
+  if (productNormalized.includes(recommendedNormalized)) score += 20;
+  if (recommendedNormalized.includes(productNormalized)) score += 10;
+
+  const leadingPhrase = recommendedTokens.slice(0, 3).join(" ");
+  if (leadingPhrase && productNormalized.includes(leadingPhrase)) score += 12;
+
+  return score;
+}
+
 export function useSearchOverlay() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
@@ -165,40 +234,51 @@ export function useSearchOverlay() {
         isLoading: false,
       });
 
-      // Fetch products matching AI recommendations
       if (recommended.length > 0) {
         const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const headers = {
+          Authorization: `Bearer ${anonKey}`,
+          apikey: anonKey,
+        };
 
-        // Search for each recommended product name
-        const fetches = recommended.slice(0, 5).map(async (name) => {
-          try {
-            const url = `https://${projectId}.supabase.co/functions/v1/search-predictive?q=${encodeURIComponent(name)}&limit=3`;
-            const res = await fetch(url, {
-              headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey },
-              signal: controller.signal,
-            });
-            if (!res.ok) return [];
-            const searchData: SearchResults = await res.json();
-            return searchData.groups?.products || [];
-          } catch { return []; }
-        });
+        const resolvedProducts = await Promise.all(
+          recommended.slice(0, 5).map(async (name) => {
+            const candidates: SearchProductResult[] = [];
 
-        const allRec = await Promise.all(fetches);
+            for (const derivedQuery of buildAiRecommendationQueries(name)) {
+              try {
+                const url = `https://${projectId}.supabase.co/functions/v1/search-predictive?q=${encodeURIComponent(derivedQuery)}`;
+                const res = await fetch(url, {
+                  headers,
+                  signal: controller.signal,
+                });
+
+                if (!res.ok) continue;
+
+                const searchData: SearchResults = await res.json();
+                candidates.push(...(searchData.groups?.products || []));
+
+                if (candidates.length >= 8) break;
+              } catch (err: unknown) {
+                if (err instanceof DOMException && err.name === "AbortError") throw err;
+              }
+            }
+
+            const uniqueCandidates = [...new Map(candidates.map((product) => [product.id, product])).values()];
+            const bestMatch = uniqueCandidates
+              .map((product) => ({ product, score: scoreAiRecommendationMatch(name, product) }))
+              .sort((a, b) => b.score - a.score)[0];
+
+            return bestMatch && bestMatch.score >= 18 ? bestMatch.product : null;
+          })
+        );
+
         if (controller.signal.aborted) return;
 
-        // Deduplicate by id
-        const seen = new Set<string>();
-        const unique: SearchProductResult[] = [];
-        for (const products of allRec) {
-          for (const p of products) {
-            if (!seen.has(p.id)) {
-              seen.add(p.id);
-              unique.push(p);
-            }
-          }
-        }
-        setAiProducts(unique);
+        const uniqueResolved = resolvedProducts.filter((product): product is SearchProductResult => Boolean(product));
+        const dedupedResolved = [...new Map(uniqueResolved.map((product) => [product.id, product])).values()];
+        setAiProducts(dedupedResolved);
       }
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") return;
