@@ -147,6 +147,14 @@ export default function CollectionDetail() {
   const { data: menuItems } = useShopifyMenu('kategoriemenu');
   const { data: mainMenuItems } = useShopifyMenu('main-menu');
 
+  // Collection-specific bottom menus (handle → Shopify menu handle)
+  const COLLECTION_BOTTOM_MENUS: Record<string, string> = {
+    'gebisse': 'gebisse-menu',
+  };
+  const bottomMenuHandle = handle ? COLLECTION_BOTTOM_MENUS[handle] : undefined;
+  const { data: bottomMenuItems } = useShopifyMenu(bottomMenuHandle || 'main-menu');
+  const bottomLinks = bottomMenuHandle ? (bottomMenuItems || []) : [];
+
   const subcategories = useMemo(() => {
     if (!handle) return [];
     const findChildren = (items: ShopifyMenuItem[]): ShopifyMenuItem[] => {
@@ -323,6 +331,21 @@ export default function CollectionDetail() {
                         </Button>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+              {bottomLinks.length > 0 && (
+                <div className="mt-10 mb-6">
+                  <div className="flex flex-wrap gap-2">
+                    {bottomLinks.map((item) => (
+                      <LocaleLink
+                        key={item.id}
+                        to={item.url}
+                        className="inline-flex items-center px-4 py-2 rounded-full border border-border bg-card text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                      >
+                        {item.title}
+                      </LocaleLink>
+                    ))}
                   </div>
                 </div>
               )}
