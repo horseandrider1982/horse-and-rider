@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,41 +10,24 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from "@/lib/shopify";
 import { fetchUntilVisible } from "@/lib/fetchVisibleProducts";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { ListingProductCard } from "@/components/ListingProductCard";
+import {
+  ListingFilterSidebar,
+  MobileFilterToggle,
+  useListingFilters,
+  EMPTY_LISTING_FILTERS,
+  type ListingFilters,
+} from "@/components/ListingFilterSidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PAGE_SIZE = 24;
-
-const SearchProductCard = ({ product }: { product: ShopifyProduct }) => {
-  const { locale } = useI18n();
-  const image = product.node.images.edges[0]?.node;
-  const price = product.node.priceRange.minVariantPrice;
-
-  return (
-    <LocaleLink
-      to={`/product/${product.node.handle}`}
-      className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block"
-    >
-      <div className="aspect-square overflow-hidden bg-white">
-        {image ? (
-          <img src={image.url} alt={image.altText || product.node.title} width={400} height={400} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>
-        )}
-      </div>
-      <div className="p-4">
-        {product.node.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.node.vendor}</p>}
-        <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
-        <span className="font-bold text-primary">
-          {new Intl.NumberFormat(locale, { style: "currency", currency: price.currencyCode }).format(parseFloat(price.amount))}
-        </span>
-      </div>
-    </LocaleLink>
-  );
-};
 
 const Search = () => {
   const { t, locale, shopifyLanguage } = useI18n();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
+  const isMobile = useIsMobile();
+  const [filters, setFilters] = useState<ListingFilters>(EMPTY_LISTING_FILTERS);
 
   const {
     data,
@@ -82,7 +66,8 @@ const Search = () => {
     enabled: !!query,
   });
 
-  const products = data?.pages.flatMap(p => p.products) || [];
+  const allProducts = data?.pages.flatMap(p => p.products) || [];
+  const filteredProducts = useListingFilters(allProducts, filters);
 
   usePageMeta({
     title: query ? `${t("search.search")}: ${query}` : t("search.search"),
@@ -106,12 +91,19 @@ const Search = () => {
           <h1 className="font-heading text-2xl md:text-3xl font-bold">
             {query ? t("search.results_for").replace("{query}", query) : t("search.search")}
           </h1>
-          {!isLoading && products.length > 0 && (
+          {!isLoading && allProducts.length > 0 && (
             <p className="text-muted-foreground mt-1">
-              {products.length === 1 ? t("search.result_one") : t("search.result_other").replace("{count}", String(products.length))}
+              {allProducts.length === 1 ? t("search.result_one") : t("search.result_other").replace("{count}", String(allProducts.length))}
             </p>
           )}
         </div>
+
+        {/* Mobile filter toggle */}
+        {isMobile && allProducts.length > 0 && (
+          <div className="mb-4">
+            <MobileFilterToggle products={allProducts} filters={filters} onFilterChange={setFilters} />
+          </div>
+        )}
 
         {isLoading && (
           <div className="flex justify-center py-16">
@@ -123,31 +115,50 @@ const Search = () => {
           <div className="text-center py-16 text-muted-foreground">{t("search.loading_error")}</div>
         )}
 
-        {!isLoading && !error && products.length === 0 && query && (
+        {!isLoading && !error && allProducts.length === 0 && query && (
           <div className="text-center py-16">
             <p className="text-lg text-muted-foreground">{t("search.no_results").replace("{query}", query)}</p>
           </div>
         )}
 
-        {products.length > 0 && (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {products.map((product) => (
-                <SearchProductCard key={product.node.id} product={product} />
-              ))}
-            </div>
-            {hasNextPage && (
-              <div className="flex justify-center mt-8">
-                <Button variant="outline" size="lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                  {isFetchingNextPage ? (
-                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />{t("products.loading")}</>
-                  ) : (
-                    t("products.load_more")
-                  )}
-                </Button>
+        {allProducts.length > 0 && (
+          <div className="flex gap-8">
+            {/* Desktop filter sidebar */}
+            {!isMobile && (
+              <div className="w-56 xl:w-64 flex-shrink-0 hidden lg:block">
+                <div className="sticky top-4">
+                  <ListingFilterSidebar
+                    products={allProducts}
+                    filters={filters}
+                    onFilterChange={setFilters}
+                  />
+                </div>
               </div>
             )}
-          </>
+
+            {/* Product grid */}
+            <div className="flex-1 min-w-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {filteredProducts.map((product) => (
+                  <ListingProductCard key={product.node.id} product={product} />
+                ))}
+              </div>
+              {filteredProducts.length === 0 && allProducts.length > 0 && (
+                <p className="text-muted-foreground py-8 text-center">{t("search.no_results").replace("{query}", query)}</p>
+              )}
+              {hasNextPage && filters.vendors.size === 0 && (
+                <div className="flex justify-center mt-8">
+                  <Button variant="outline" size="lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                    {isFetchingNextPage ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" />{t("products.loading")}</>
+                    ) : (
+                      t("products.load_more")
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </main>
       <Footer />
