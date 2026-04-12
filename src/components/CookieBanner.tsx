@@ -5,6 +5,13 @@ import { useI18n } from "@/i18n";
 
 const CONSENT_KEY = "cookie-consent";
 
+// Global event to re-open the cookie banner
+const REOPEN_EVENT = "cookie-banner:reopen";
+
+export function reopenCookieBanner() {
+  window.dispatchEvent(new CustomEvent(REOPEN_EVENT));
+}
+
 export const CookieBanner = () => {
   const [visible, setVisible] = useState(false);
   // useI18n may not be available if rendered outside I18nProvider (e.g. on admin pages)
@@ -29,6 +36,10 @@ export const CookieBanner = () => {
   useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
     if (!consent) setVisible(true);
+
+    const handleReopen = () => setVisible(true);
+    window.addEventListener(REOPEN_EVENT, handleReopen);
+    return () => window.removeEventListener(REOPEN_EVENT, handleReopen);
   }, []);
 
   const accept = (value: "all" | "essential") => {
