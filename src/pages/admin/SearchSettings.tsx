@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2, X, Save } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-const SearchLogTable = lazy(() => import("@/components/admin/SearchLogTable"));
 
 interface Synonym {
   id: string;
@@ -189,13 +187,6 @@ export default function SearchSettings() {
           )}
         </CardContent>
       </Card>
-
-      {/* Search Logs */}
-      <div className="mt-8">
-        <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
-          <SearchLogTable />
-        </Suspense>
-      </div>
     </>
   );
 }
