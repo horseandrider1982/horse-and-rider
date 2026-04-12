@@ -257,6 +257,7 @@ export function useSearchOverlay() {
     setAllProducts([]);
     setAiResult(null);
     setAiLoading(false);
+    setAiProducts([]);
     setIsLoading(false);
     setHasNextPage(false);
     setEndCursor(null);
@@ -278,6 +279,7 @@ export function useSearchOverlay() {
     isOpen,
     aiResult,
     aiLoading,
+    aiProducts,
     hasNextPage,
     handleQueryChange,
     loadMore,
