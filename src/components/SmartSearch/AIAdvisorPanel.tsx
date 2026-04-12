@@ -9,9 +9,10 @@ interface AIAdvisorPanelProps {
   isLoading: boolean;
   query: string;
   onProductClick: (handle: string) => void;
+  onCategoryClick?: (category: string) => void;
 }
 
-export const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ result, isLoading, query }) => {
+export const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ result, isLoading, query, onCategoryClick }) => {
   const { t } = useI18n();
   if (!isLoading && !result) return null;
 
@@ -42,9 +43,13 @@ export const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ result, isLoadin
           {result?.categories && result.categories.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {result.categories.map(cat => (
-                <span key={cat} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                <button
+                  key={cat}
+                  onClick={() => onCategoryClick?.(cat)}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                >
                   <ArrowRight className="w-3 h-3" />{cat}
-                </span>
+                </button>
               ))}
             </div>
           )}
