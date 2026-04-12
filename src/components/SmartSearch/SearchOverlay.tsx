@@ -47,23 +47,45 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
     setFilters(EMPTY_FILTERS);
   }, [query]);
 
-  // Apply client-side filters
+  // Apply client-side filters + boost AI-recommended products to top
   const filteredResults = useMemo((): SearchResults | null => {
     if (!results) return null;
-    if (!hasActiveFilters) return results;
 
-    const filtered = results.groups.products.filter((p) => {
-      if (filters.vendors.size > 0 && (!p.vendor || !filters.vendors.has(p.vendor))) return false;
-      if (filters.collections.size > 0) {
-        const productCollections = p.collections || [];
-        const match = productCollections.some((c) => filters.collections.has(c.handle));
-        if (!match) return false;
+    let products = results.groups.products;
+
+    // Filter by vendor/collection
+    if (hasActiveFilters) {
+      products = products.filter((p) => {
+        if (filters.vendors.size > 0 && (!p.vendor || !filters.vendors.has(p.vendor))) return false;
+        if (filters.collections.size > 0) {
+          const productCollections = p.collections || [];
+          const match = productCollections.some((c) => filters.collections.has(c.handle));
+          if (!match) return false;
+        }
+        return true;
+      });
+    }
+
+    // Boost AI-recommended products to the top
+    if (aiResult?.recommendedProducts && aiResult.recommendedProducts.length > 0) {
+      const recNames = aiResult.recommendedProducts.map((n) => n.toLowerCase());
+      const boosted: typeof products = [];
+      const rest: typeof products = [];
+
+      for (const p of products) {
+        const titleLower = p.title.toLowerCase();
+        const isBoosted = recNames.some(
+          (rec) => titleLower.includes(rec) || rec.includes(titleLower)
+        );
+        if (isBoosted) boosted.push(p);
+        else rest.push(p);
       }
-      return true;
-    });
 
-    return { ...results, groups: { ...results.groups, products: filtered } };
-  }, [results, filters, hasActiveFilters]);
+      products = [...boosted, ...rest];
+    }
+
+    return { ...results, groups: { ...results.groups, products } };
+  }, [results, filters, hasActiveFilters, aiResult]);
 
   useEffect(() => {
     if (isOpen) {
