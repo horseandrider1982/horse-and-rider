@@ -23,6 +23,7 @@ function DefaultSeoText({ brand }: { brand: string }) {
 
 const BRAND_BOTTOM_MENUS: Record<string, string> = {
   'barbour': 'barbour-menu',
+  'hans-melzer-horse-equipment': 'melzer-menu',
 };
 
 export default function MarkenDetail() {
