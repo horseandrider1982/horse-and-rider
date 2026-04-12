@@ -31,8 +31,35 @@ const PRODUCTS_SEARCH_QUERY = `
   }
 `;
 
+// Extract search keywords from a natural language query
+function extractSearchKeywords(query: string): string {
+  const stopWords = new Set([
+    "welches", "welche", "welcher", "welchem", "welchen",
+    "ist", "das", "die", "der", "den", "dem", "des",
+    "ein", "eine", "einer", "einem", "einen",
+    "für", "mein", "meine", "meinen", "meinem",
+    "was", "wie", "wo", "wer", "warum", "wann",
+    "kann", "können", "soll", "sollte", "würde",
+    "richtige", "richtig", "beste", "besten", "gute", "guten",
+    "pferd", "reiter", "brauche", "suche", "empfehlen",
+    "gibt", "haben", "hat", "sind", "bin", "mir", "ich",
+    "und", "oder", "aber", "auch", "noch", "schon",
+    "von", "mit", "bei", "aus", "nach", "über", "unter",
+  ]);
+
+  const words = query.toLowerCase()
+    .replace(/[?!.,;:'"()]/g, "")
+    .split(/\s+/)
+    .filter(w => w.length >= 2 && !stopWords.has(w));
+
+  return words.join(" ") || query;
+}
+
 async function fetchShopifyProducts(query: string, storefrontToken: string): Promise<string> {
   try {
+    const keywords = extractSearchKeywords(query);
+    console.log(`Shopify search keywords: "${keywords}" (from: "${query}")`);
+
     const res = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
       headers: {
@@ -41,7 +68,7 @@ async function fetchShopifyProducts(query: string, storefrontToken: string): Pro
       },
       body: JSON.stringify({
         query: PRODUCTS_SEARCH_QUERY,
-        variables: { query, first: 8 },
+        variables: { query: keywords, first: 12 },
       }),
     });
 
