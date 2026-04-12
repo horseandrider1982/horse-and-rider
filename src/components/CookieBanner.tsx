@@ -33,6 +33,28 @@ export const CookieBanner = () => {
 
   const accept = (value: "all" | "essential") => {
     localStorage.setItem(CONSENT_KEY, value);
+
+    // Push Google Consent Mode v2 update
+    const w = window as any;
+    w.dataLayer = w.dataLayer || [];
+    const gtag = (...args: any[]) => w.dataLayer.push(args);
+
+    if (value === "all") {
+      gtag("consent", "update", {
+        ad_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+        analytics_storage: "granted",
+      });
+    } else {
+      gtag("consent", "update", {
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        analytics_storage: "denied",
+      });
+    }
+
     setVisible(false);
   };
 
