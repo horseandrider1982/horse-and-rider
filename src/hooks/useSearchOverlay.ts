@@ -42,6 +42,7 @@ export function useSearchOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [aiResult, setAiResult] = useState<AIAdvisorResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiProducts, setAiProducts] = useState<SearchProductResult[]>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
@@ -145,6 +146,7 @@ export function useSearchOverlay() {
 
     setAiLoading(true);
     setAiResult(null);
+    setAiProducts([]);
 
     try {
       const { data, error } = await supabase.functions.invoke("search-ai-advisor", {
@@ -154,12 +156,50 @@ export function useSearchOverlay() {
       if (error) throw error;
       if (controller.signal.aborted) return;
 
+      const recommended: string[] = data.recommendedProducts || [];
+
       setAiResult({
         answer: data.answer || "",
-        recommendedProducts: data.recommendedProducts || [],
+        recommendedProducts: recommended,
         categories: data.categories || [],
         isLoading: false,
       });
+
+      // Fetch products matching AI recommendations
+      if (recommended.length > 0) {
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+        // Search for each recommended product name
+        const fetches = recommended.slice(0, 5).map(async (name) => {
+          try {
+            const url = `https://${projectId}.supabase.co/functions/v1/search-predictive?q=${encodeURIComponent(name)}&limit=3`;
+            const res = await fetch(url, {
+              headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+              signal: controller.signal,
+            });
+            if (!res.ok) return [];
+            const searchData: SearchResults = await res.json();
+            return searchData.groups?.products || [];
+          } catch { return []; }
+        });
+
+        const allRec = await Promise.all(fetches);
+        if (controller.signal.aborted) return;
+
+        // Deduplicate by id
+        const seen = new Set<string>();
+        const unique: SearchProductResult[] = [];
+        for (const products of allRec) {
+          for (const p of products) {
+            if (!seen.has(p.id)) {
+              seen.add(p.id);
+              unique.push(p);
+            }
+          }
+        }
+        setAiProducts(unique);
+      }
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       console.error("AI advisor error:", err);
@@ -195,6 +235,7 @@ export function useSearchOverlay() {
         } else {
           setAiResult(null);
           setAiLoading(false);
+          setAiProducts([]);
         }
       }, DEBOUNCE_MS);
     },
@@ -217,6 +258,7 @@ export function useSearchOverlay() {
     setAllProducts([]);
     setAiResult(null);
     setAiLoading(false);
+    setAiProducts([]);
     setIsLoading(false);
     setHasNextPage(false);
     setEndCursor(null);
@@ -238,6 +280,7 @@ export function useSearchOverlay() {
     isOpen,
     aiResult,
     aiLoading,
+    aiProducts,
     hasNextPage,
     handleQueryChange,
     loadMore,
