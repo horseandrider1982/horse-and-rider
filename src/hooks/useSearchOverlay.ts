@@ -42,6 +42,7 @@ export function useSearchOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [aiResult, setAiResult] = useState<AIAdvisorResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiProducts, setAiProducts] = useState<SearchProductResult[]>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
