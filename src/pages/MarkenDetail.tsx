@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
+import { useShopifyMenu } from "@/hooks/useShopifyMenu";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ListingProductCard } from "@/components/ListingProductCard";
