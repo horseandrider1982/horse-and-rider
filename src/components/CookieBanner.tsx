@@ -5,6 +5,13 @@ import { useI18n } from "@/i18n";
 
 const CONSENT_KEY = "cookie-consent";
 
+// Global event to re-open the cookie banner
+const REOPEN_EVENT = "cookie-banner:reopen";
+
+export function reopenCookieBanner() {
+  window.dispatchEvent(new CustomEvent(REOPEN_EVENT));
+}
+
 export const CookieBanner = () => {
   const [visible, setVisible] = useState(false);
   // useI18n may not be available if rendered outside I18nProvider (e.g. on admin pages)
