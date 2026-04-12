@@ -9,29 +9,8 @@ import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { type ShopifyProduct } from "@/lib/shopify";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-
-function ProductCard({ product }: { product: ShopifyProduct }) {
-  const { locale } = useI18n();
-  const image = product.node.images.edges[0]?.node;
-  const price = product.node.priceRange.minVariantPrice;
-
-  return (
-    <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
-      <div className="aspect-square overflow-hidden bg-white">
-        {image ? <img src={image.url} alt={image.altText || product.node.title} width={400} height={400} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">🛍️</div>}
-      </div>
-      <div className="p-4">
-        {product.node.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate uppercase tracking-wider">{product.node.vendor}</p>}
-        <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.node.title}</h3>
-        <span className="font-bold text-primary">
-          {new Intl.NumberFormat(locale, { style: "currency", currency: price.currencyCode }).format(parseFloat(price.amount))}
-        </span>
-      </div>
-    </LocaleLink>
-  );
-}
+import { ListingProductCard } from "@/components/ListingProductCard";
 
 function DefaultSeoText({ brand }: { brand: string }) {
   return (
@@ -102,7 +81,9 @@ export default function MarkenDetail() {
           {productsLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             : products.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{products.map(p => <ProductCard key={p.node.id} product={p} />)}</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {products.map(p => <ListingProductCard key={p.node.id} product={p} />)}
+                </div>
                 {hasNextPage && (
                   <div className="flex justify-center mt-8">
                     <Button variant="outline" size="lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>

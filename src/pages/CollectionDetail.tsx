@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { BackToTop } from "@/components/BackToTop";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useI18n } from "@/i18n";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -16,6 +16,15 @@ import { CollectionSeoText } from "@/components/CollectionSeoText";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { isProductVisibleInListing, type ShopifyProduct } from "@/lib/shopify";
 import { fetchUntilVisible, type VisibleProductsPage } from "@/lib/fetchVisibleProducts";
+import { ListingProductCard } from "@/components/ListingProductCard";
+import {
+  ListingFilterSidebar,
+  MobileFilterToggle,
+  useListingFilters,
+  EMPTY_LISTING_FILTERS,
+  type ListingFilters,
+} from "@/components/ListingFilterSidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
@@ -115,7 +124,6 @@ async function fetchCollectionPage(handle: string, locale: string, cursor?: stri
     return { edges, pageInfo, _collection: collection };
   };
 
-  // We need the collection metadata from the first fetch
   let collectionMeta: any = null;
   const result = await fetchUntilVisible(
     async (c?: string) => {
@@ -132,6 +140,8 @@ async function fetchCollectionPage(handle: string, locale: string, cursor?: stri
 export default function CollectionDetail() {
   const { handle } = useParams<{ handle: string }>();
   const { t, locale } = useI18n();
+  const isMobile = useIsMobile();
+  const [filters, setFilters] = useState<ListingFilters>(EMPTY_LISTING_FILTERS);
 
   const { data: menuItems } = useShopifyMenu('kategoriemenu');
   const { data: mainMenuItems } = useShopifyMenu('main-menu');
@@ -173,10 +183,12 @@ export default function CollectionDetail() {
   });
 
   const collection = data?.pages?.[0]?.collection || null;
-  const products = useMemo(() => {
+  const allProducts = useMemo(() => {
     if (!data?.pages) return [];
     return data.pages.flatMap((page) => page.products || []);
   }, [data]);
+
+  const filteredProducts = useListingFilters(allProducts, filters);
 
   const collectionMetaDesc = collection
     ? collection.description?.slice(0, 120)
@@ -198,7 +210,7 @@ export default function CollectionDetail() {
             name={collection.title}
             description={collection.description}
             handle={handle || ""}
-            products={products.map((e: any) => ({
+            products={allProducts.map((e: any) => ({
               name: e.node.title,
               handle: e.node.handle,
               image: e.node.images?.edges?.[0]?.node?.url,
@@ -256,75 +268,62 @@ export default function CollectionDetail() {
                   ))}
                 </div>
               )}
-              {products.length === 0 ? (
+
+              {/* Mobile filter toggle */}
+              {isMobile && allProducts.length > 0 && (
+                <div className="mb-4">
+                  <MobileFilterToggle products={allProducts} filters={filters} onFilterChange={setFilters} />
+                </div>
+              )}
+
+              {allProducts.length === 0 ? (
                 <p className="text-muted-foreground py-8">{t("products.empty")}</p>
               ) : (
-                <>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {products.map(({ node: product }: any) => {
-                      const image = product.images?.edges?.[0]?.node;
-                      const price = product.priceRange?.minVariantPrice;
-
-                      return (
-                        <LocaleLink
-                          key={product.id}
-                          to={`/product/${product.handle}`}
-                          className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow block"
-                        >
-                          <div className="aspect-square bg-white overflow-hidden">
-                            {image ? (
-                              <img
-                                src={image.url}
-                                alt={image.altText || product.title}
-                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                                {t("news.no_image")}
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-3">
-                            {product.vendor && (
-                              <p className="text-xs text-muted-foreground mb-0.5">{product.vendor}</p>
-                            )}
-                            <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                              {product.title}
-                            </h3>
-                            {price && (
-                              <p className="text-sm font-bold text-foreground mt-1">
-                                {new Intl.NumberFormat(locale, {
-                                  style: "currency",
-                                  currency: price.currencyCode,
-                                }).format(parseFloat(price.amount))}
-                              </p>
-                            )}
-                          </div>
-                        </LocaleLink>
-                      );
-                    })}
-                  </div>
-                  {hasNextPage && (
-                    <div className="flex justify-center mt-8">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        onClick={() => fetchNextPage()}
-                        disabled={isFetchingNextPage}
-                      >
-                        {isFetchingNextPage ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            {t("products.loading") || "Laden..."}
-                          </>
-                        ) : (
-                          t("products.load_more") || "Mehr laden"
-                        )}
-                      </Button>
+                <div className="flex gap-8">
+                  {/* Desktop filter sidebar */}
+                  {!isMobile && (
+                    <div className="w-56 xl:w-64 flex-shrink-0 hidden lg:block">
+                      <div className="sticky top-4">
+                        <ListingFilterSidebar
+                          products={allProducts}
+                          filters={filters}
+                          onFilterChange={setFilters}
+                        />
+                      </div>
                     </div>
                   )}
-                </>
+
+                  {/* Product grid */}
+                  <div className="flex-1 min-w-0">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                      {filteredProducts.map((product) => (
+                        <ListingProductCard key={product.node.id} product={product} />
+                      ))}
+                    </div>
+                    {filteredProducts.length === 0 && allProducts.length > 0 && (
+                      <p className="text-muted-foreground py-8 text-center">{t("search.no_results").replace("{query}", "")}</p>
+                    )}
+                    {hasNextPage && filters.vendors.size === 0 && (
+                      <div className="flex justify-center mt-8">
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={() => fetchNextPage()}
+                          disabled={isFetchingNextPage}
+                        >
+                          {isFetchingNextPage ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              {t("products.loading")}
+                            </>
+                          ) : (
+                            t("products.load_more")
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
               <CollectionSeoText handle={handle} locale={locale} />
             </>
