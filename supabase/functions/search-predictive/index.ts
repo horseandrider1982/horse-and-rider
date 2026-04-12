@@ -493,6 +493,24 @@ Deno.serve(async (req) => {
 
     setCache(cacheKey, result);
 
+    // Log search query (fire-and-forget, only for first page)
+    if (!after) {
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const sb = createClient(supabaseUrl, serviceKey);
+        sb.from("search_logs").insert({
+          query: q,
+          result_count: scored.length,
+          is_natural_language: isNaturalLanguageQuery(q),
+        }).then(({ error: logErr }) => {
+          if (logErr) console.error("Search log error:", logErr.message);
+        });
+      } catch (logErr) {
+        console.error("Search log error:", logErr);
+      }
+    }
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -898,6 +898,30 @@ export type Database = {
         }
         Relationships: []
       }
+      search_logs: {
+        Row: {
+          id: string
+          is_natural_language: boolean
+          query: string
+          result_count: number
+          searched_at: string
+        }
+        Insert: {
+          id?: string
+          is_natural_language?: boolean
+          query: string
+          result_count?: number
+          searched_at?: string
+        }
+        Update: {
+          id?: string
+          is_natural_language?: boolean
+          query?: string
+          result_count?: number
+          searched_at?: string
+        }
+        Relationships: []
+      }
       search_synonyms: {
         Row: {
           created_at: string
