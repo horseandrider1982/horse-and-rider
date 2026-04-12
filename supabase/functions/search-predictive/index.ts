@@ -494,7 +494,7 @@ Deno.serve(async (req) => {
     setCache(cacheKey, result);
 
     // Log search query (fire-and-forget, only for first page)
-    // Deduplication: delete recent prefix queries so only the final typed term is kept
+    // Deduplication: remove recent prefix queries (same user typing session)
     if (!after) {
       try {
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -502,20 +502,25 @@ Deno.serve(async (req) => {
         const sb = createClient(supabaseUrl, serviceKey);
         const qLower = q.trim().toLowerCase();
 
-        // Delete recent logs (last 15s) where the current query starts with the old query (prefix typing)
+        // Find and delete recent logs (last 15s) that are prefixes of the current query
         sb.from("search_logs")
-          .delete()
+          .select("id, query")
           .gte("searched_at", new Date(Date.now() - 15_000).toISOString())
-          .filter("query", "neq", qLower)
-          .then(() => {
-            // Now insert the current (longest) query
-            return sb.from("search_logs").insert({
+          .then(async ({ data: recentLogs }) => {
+            if (recentLogs && recentLogs.length > 0) {
+              const prefixIds = recentLogs
+                .filter((log) => qLower.startsWith(log.query) && log.query !== qLower)
+                .map((log) => log.id);
+              if (prefixIds.length > 0) {
+                await sb.from("search_logs").delete().in("id", prefixIds);
+              }
+            }
+            // Insert the current query
+            const { error: logErr } = await sb.from("search_logs").insert({
               query: qLower,
               result_count: scored.length,
               is_natural_language: isNaturalLanguageQuery(q),
             });
-          })
-          .then(({ error: logErr }) => {
             if (logErr) console.error("Search log error:", logErr.message);
           });
       } catch (logErr) {
