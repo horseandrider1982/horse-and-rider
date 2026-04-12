@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
 import { useBrands, useBrandProducts } from "@/hooks/useBrands";
+import { useShopifyMenu } from "@/hooks/useShopifyMenu";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ListingProductCard } from "@/components/ListingProductCard";
@@ -20,6 +21,10 @@ function DefaultSeoText({ brand }: { brand: string }) {
   );
 }
 
+const BRAND_BOTTOM_MENUS: Record<string, string> = {
+  'barbour': 'barbour-menu',
+};
+
 export default function MarkenDetail() {
   const { t, locale } = useI18n();
   const { slug } = useParams<{ slug: string }>();
@@ -28,6 +33,10 @@ export default function MarkenDetail() {
   const vendorName = brand?.name || "";
   const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
   const products = productsData?.pages.flatMap(p => p.products) || [];
+
+  const bottomMenuHandle = slug ? BRAND_BOTTOM_MENUS[slug] : undefined;
+  const { data: bottomMenuItems } = useShopifyMenu(bottomMenuHandle || 'main-menu');
+  const bottomLinks = bottomMenuHandle ? (bottomMenuItems || []) : [];
 
   const brandMetaDesc = brand
     ? brand.seoText
@@ -96,6 +105,36 @@ export default function MarkenDetail() {
               <p className="text-muted-foreground py-8 text-center">{t("brands.no_products").replace("{name}", brand.name)}</p>
             )}
         </section>
+
+        {bottomLinks.length > 0 && (
+          <section className="container mx-auto px-4 mt-2 mb-6">
+            <div className="space-y-6">
+              {bottomLinks.map((group) => (
+                <div key={group.id}>
+                  <LocaleLink
+                    to={group.url}
+                    className="text-base font-semibold text-foreground hover:text-primary transition-colors"
+                  >
+                    {group.title}
+                  </LocaleLink>
+                  {group.items && group.items.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {group.items.map((sub) => (
+                        <LocaleLink
+                          key={sub.id}
+                          to={sub.url}
+                          className="inline-flex items-center px-4 py-2 rounded-full border border-border bg-card text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                        >
+                          {sub.title}
+                        </LocaleLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="container mx-auto px-4 pb-12">
           {brand.seoText ? <div className="prose prose-sm max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: brand.seoText }} /> : <DefaultSeoText brand={brand.name} />}
