@@ -206,7 +206,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                       </div>
                     </div>
                   )}
-                  {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} />}
+                  {(isAdvisory || aiResult || aiLoading) && <AIAdvisorPanel result={aiResult} isLoading={aiLoading} query={query} onProductClick={handleProductClick} onCategoryClick={handleCategoryClick} />}
                   <SearchProductGrid
                     results={filteredResults}
                     isLoading={isLoading}
