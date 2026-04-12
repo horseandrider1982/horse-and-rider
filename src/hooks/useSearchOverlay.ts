@@ -21,10 +21,15 @@ function isAdvisoryQuery(q: string): boolean {
   return patterns.some((p) => p.test(trimmed));
 }
 
+export interface AIAdvisorCategory {
+  name: string;
+  handle: string | null;
+}
+
 export interface AIAdvisorResult {
   answer: string;
   recommendedProducts: string[];
-  categories: string[];
+  categories: AIAdvisorCategory[];
   isLoading: boolean;
 }
 
