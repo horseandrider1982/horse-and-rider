@@ -383,6 +383,18 @@ Antworte AUSSCHLIESSLICH mit dem JSON-Objekt, ohne Markdown-Codeblöcke.`;
       };
     }
 
+    // Enrich categories with collection handles
+    const categoryNames: string[] = parsed.categories || [];
+    if (categoryNames.length > 0) {
+      const handleMap = await fetchCollectionHandles(categoryNames, storefrontToken);
+      parsed.categories = categoryNames.map((name: string) => ({
+        name,
+        handle: handleMap[name] || null,
+      }));
+    } else {
+      parsed.categories = [];
+    }
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
