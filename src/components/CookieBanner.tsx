@@ -36,6 +36,10 @@ export const CookieBanner = () => {
   useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
     if (!consent) setVisible(true);
+
+    const handleReopen = () => setVisible(true);
+    window.addEventListener(REOPEN_EVENT, handleReopen);
+    return () => window.removeEventListener(REOPEN_EVENT, handleReopen);
   }, []);
 
   const accept = (value: "all" | "essential") => {
