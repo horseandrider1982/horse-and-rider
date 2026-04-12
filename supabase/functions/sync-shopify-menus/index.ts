@@ -166,7 +166,7 @@ serve(async (req) => {
     }
     console.log("Using token:", accessToken.startsWith("shpat_") ? "shpat_***" : "***");
 
-    const menuHandles: string[] = handles || ["kategoriemenu", "main-menu", "footer", "hauptmenu-kundenkonto", "gebisse-menu", "barbour-menu"];
+    const menuHandles: string[] = handles || ["kategoriemenu", "main-menu", "footer", "hauptmenu-kundenkonto", "gebisse-menu", "barbour-menu", "melzer-menu"];
     const menuLocales: string[] = locales || ["de", "en"];
     const results: Array<{ handle: string; locale: string; status: string; itemCount?: number }> = [];
     const handleAliases = new Map<string, string>([["hauptmenu-kundenkonto", "customer-account-main-menu"]]);
