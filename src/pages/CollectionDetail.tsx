@@ -80,6 +80,7 @@ const COLLECTION_QUERY = `
                     currencyCode
                   }
                   availableForSale
+                  currentlyNotInStock
                   metafields(identifiers: [
                     {namespace: "custom", key: "lieferantenbestand"},
                     {namespace: "custom", key: "ueberverkauf"}
