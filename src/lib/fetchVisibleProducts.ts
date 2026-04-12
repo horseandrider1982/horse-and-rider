@@ -23,7 +23,12 @@ export async function fetchUntilVisible(
   let hasMore = true;
   let iterations = 0;
 
-  while (visible.length < target && hasMore && iterations < MAX_ITERATIONS) {
+  const effectiveMax = (iter: number) =>
+    iter >= MAX_ITERATIONS && visible.length < MIN_VISIBLE
+      ? EXTENDED_MAX_ITERATIONS
+      : MAX_ITERATIONS;
+
+  while (visible.length < target && hasMore && iterations < effectiveMax(iterations)) {
     iterations++;
     const result = await fetcher(cursor);
     const edges = result.edges || [];
