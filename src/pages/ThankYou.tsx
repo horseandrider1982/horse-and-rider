@@ -10,6 +10,16 @@ import { useI18n } from "@/i18n";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useShopifyCustomer } from "@/lib/auth/ShopifyCustomerContext";
+
+/** SHA-256 hash a string and return hex – used for Enhanced Conversions */
+async function sha256(value: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(value.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 const ThankYou = () => {
   const { t } = useI18n();
