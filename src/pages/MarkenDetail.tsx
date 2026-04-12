@@ -21,6 +21,10 @@ function DefaultSeoText({ brand }: { brand: string }) {
   );
 }
 
+const BRAND_BOTTOM_MENUS: Record<string, string> = {
+  'barbour': 'barbour-menu',
+};
+
 export default function MarkenDetail() {
   const { t, locale } = useI18n();
   const { slug } = useParams<{ slug: string }>();
@@ -29,6 +33,10 @@ export default function MarkenDetail() {
   const vendorName = brand?.name || "";
   const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
   const products = productsData?.pages.flatMap(p => p.products) || [];
+
+  const bottomMenuHandle = slug ? BRAND_BOTTOM_MENUS[slug] : undefined;
+  const { data: bottomMenuItems } = useShopifyMenu(bottomMenuHandle || 'main-menu');
+  const bottomLinks = bottomMenuHandle ? (bottomMenuItems || []) : [];
 
   const brandMetaDesc = brand
     ? brand.seoText
