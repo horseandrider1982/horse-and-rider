@@ -235,6 +235,7 @@ export function useSearchOverlay() {
         } else {
           setAiResult(null);
           setAiLoading(false);
+          setAiProducts([]);
         }
       }, DEBOUNCE_MS);
     },
