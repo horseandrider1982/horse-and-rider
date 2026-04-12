@@ -1,6 +1,8 @@
 import { isProductVisibleInListing, type ShopifyProduct } from './shopify';
 
-const MAX_ITERATIONS = 5; // safety limit to avoid infinite loops
+const MAX_ITERATIONS = 5; // initial iteration limit
+const MIN_VISIBLE = 12; // minimum visible products before stopping
+const EXTENDED_MAX_ITERATIONS = 15; // extended limit when below MIN_VISIBLE
 
 export interface VisibleProductsPage {
   products: ShopifyProduct[];
@@ -21,7 +23,12 @@ export async function fetchUntilVisible(
   let hasMore = true;
   let iterations = 0;
 
-  while (visible.length < target && hasMore && iterations < MAX_ITERATIONS) {
+  const effectiveMax = (iter: number) =>
+    iter >= MAX_ITERATIONS && visible.length < MIN_VISIBLE
+      ? EXTENDED_MAX_ITERATIONS
+      : MAX_ITERATIONS;
+
+  while (visible.length < target && hasMore && iterations < effectiveMax(iterations)) {
     iterations++;
     const result = await fetcher(cursor);
     const edges = result.edges || [];
