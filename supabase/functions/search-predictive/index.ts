@@ -494,18 +494,30 @@ Deno.serve(async (req) => {
     setCache(cacheKey, result);
 
     // Log search query (fire-and-forget, only for first page)
+    // Deduplication: delete recent prefix queries so only the final typed term is kept
     if (!after) {
       try {
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
         const sb = createClient(supabaseUrl, serviceKey);
-        sb.from("search_logs").insert({
-          query: q,
-          result_count: scored.length,
-          is_natural_language: isNaturalLanguageQuery(q),
-        }).then(({ error: logErr }) => {
-          if (logErr) console.error("Search log error:", logErr.message);
-        });
+        const qLower = q.trim().toLowerCase();
+
+        // Delete recent logs (last 15s) where the current query starts with the old query (prefix typing)
+        sb.from("search_logs")
+          .delete()
+          .gte("searched_at", new Date(Date.now() - 15_000).toISOString())
+          .filter("query", "neq", qLower)
+          .then(() => {
+            // Now insert the current (longest) query
+            return sb.from("search_logs").insert({
+              query: qLower,
+              result_count: scored.length,
+              is_natural_language: isNaturalLanguageQuery(q),
+            });
+          })
+          .then(({ error: logErr }) => {
+            if (logErr) console.error("Search log error:", logErr.message);
+          });
       } catch (logErr) {
         console.error("Search log error:", logErr);
       }
