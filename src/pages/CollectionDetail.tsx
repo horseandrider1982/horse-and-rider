@@ -334,6 +334,21 @@ export default function CollectionDetail() {
                   </div>
                 </div>
               )}
+              {bottomLinks.length > 0 && (
+                <div className="mt-10 mb-6">
+                  <div className="flex flex-wrap gap-2">
+                    {bottomLinks.map((item) => (
+                      <LocaleLink
+                        key={item.id}
+                        to={item.url}
+                        className="inline-flex items-center px-4 py-2 rounded-full border border-border bg-card text-sm font-medium text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                      >
+                        {item.title}
+                      </LocaleLink>
+                    ))}
+                  </div>
+                </div>
+              )}
               <CollectionSeoText handle={handle} locale={locale} />
             </>
           )}
