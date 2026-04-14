@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useProducts } from '@/hooks/useProducts';
+import { useQuery } from '@tanstack/react-query';
+import { storefrontApiRequest, STOREFRONT_QUERY, type ShopifyProduct } from '@/lib/shopify';
+import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, X, Plus, GripVertical } from 'lucide-react';
-import type { ShopifyProduct } from '@/lib/shopify';
 
 interface ShopifyProductPickerProps {
   selectedHandles: string[];
