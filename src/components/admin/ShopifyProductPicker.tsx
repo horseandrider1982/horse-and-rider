@@ -95,9 +95,9 @@ export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProdu
 
       {/* Results */}
       <div className="border border-border rounded-md max-h-64 overflow-y-auto">
-        {searchQuery.length < 2 ? (
+        {debouncedQuery.length < 2 ? (
           <p className="p-4 text-sm text-muted-foreground text-center">Mind. 2 Zeichen eingeben…</p>
-        ) : isLoading ? (
+        ) : (isLoading || isFetching) ? (
           <div className="p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Lade alle Ergebnisse…</span>
