@@ -89,16 +89,24 @@ export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProdu
 
       {/* Results */}
       <div className="border border-border rounded-md max-h-64 overflow-y-auto">
-        {isLoading ? (
-          <p className="p-4 text-sm text-muted-foreground text-center">Suche…</p>
+        {searchQuery.length < 2 ? (
+          <p className="p-4 text-sm text-muted-foreground text-center">Mind. 2 Zeichen eingeben…</p>
+        ) : isLoading ? (
+          <div className="p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Lade alle Ergebnisse…</span>
+          </div>
         ) : availableProducts.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground text-center">
-            {searchQuery ? 'Keine Produkte gefunden.' : 'Suchbegriff eingeben…'}
-          </p>
+          <p className="p-4 text-sm text-muted-foreground text-center">Keine Produkte gefunden.</p>
         ) : (
-          availableProducts.map((product) => (
-            <ProductRow key={product.node.handle} product={product} onAdd={() => addProduct(product.node.handle)} />
-          ))
+          <>
+            <p className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border bg-muted/10">
+              {resultCount} Ergebnis{resultCount !== 1 ? 'se' : ''} gefunden
+            </p>
+            {availableProducts.map((product) => (
+              <ProductRow key={product.node.handle} product={product} onAdd={() => addProduct(product.node.handle)} />
+            ))}
+          </>
         )}
       </div>
     </div>
