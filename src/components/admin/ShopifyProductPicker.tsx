@@ -1,11 +1,33 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { storefrontApiRequest, STOREFRONT_QUERY, type ShopifyProduct } from '@/lib/shopify';
+import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from '@/lib/shopify';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, X, Plus, GripVertical } from 'lucide-react';
+import { Search, X, Plus, GripVertical, Loader2 } from 'lucide-react';
+
+/** Fetch ALL pages of products matching the query via cursor pagination */
+async function fetchAllProducts(query: string | undefined, language: string): Promise<ShopifyProduct[]> {
+  const all: ShopifyProduct[] = [];
+  let cursor: string | null = null;
+  let hasNext = true;
+
+  while (hasNext) {
+    const variables: Record<string, unknown> = { first: 250, language };
+    if (query) variables.query = query;
+    if (cursor) variables.after = cursor;
+
+    const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
+    const products = data?.data?.products;
+    if (!products) break;
+
+    all.push(...(products.edges as ShopifyProduct[]));
+    hasNext = products.pageInfo.hasNextPage;
+    cursor = products.pageInfo.endCursor;
+  }
+  return all;
+}
 
 interface ShopifyProductPickerProps {
   selectedHandles: string[];
@@ -16,18 +38,15 @@ export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProdu
   const [searchQuery, setSearchQuery] = useState('');
   const { shopifyLanguage } = useI18n();
 
-  // Admin picker: no available_for_sale filter, higher limit
+  // Fetch all products matching the search (debounce happens naturally via queryKey)
   const { data: products, isLoading } = useQuery({
-    queryKey: ['shopify-products-admin', searchQuery, shopifyLanguage],
-    queryFn: async () => {
-      const variables: Record<string, unknown> = { first: 50, language: shopifyLanguage };
-      if (searchQuery) {
-        variables.query = searchQuery;
-      }
-      const data = await storefrontApiRequest(STOREFRONT_QUERY, variables);
-      return (data?.data?.products?.edges || []) as ShopifyProduct[];
-    },
+    queryKey: ['shopify-products-admin-all', searchQuery, shopifyLanguage],
+    queryFn: () => fetchAllProducts(searchQuery || undefined, shopifyLanguage),
+    enabled: searchQuery.length >= 2,
+    staleTime: 60_000,
   });
+
+  const resultCount = products?.length ?? 0;
 
   const addProduct = (handle: string) => {
     if (!selectedHandles.includes(handle)) {
@@ -70,16 +89,24 @@ export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProdu
 
       {/* Results */}
       <div className="border border-border rounded-md max-h-64 overflow-y-auto">
-        {isLoading ? (
-          <p className="p-4 text-sm text-muted-foreground text-center">Suche…</p>
+        {searchQuery.length < 2 ? (
+          <p className="p-4 text-sm text-muted-foreground text-center">Mind. 2 Zeichen eingeben…</p>
+        ) : isLoading ? (
+          <div className="p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Lade alle Ergebnisse…</span>
+          </div>
         ) : availableProducts.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground text-center">
-            {searchQuery ? 'Keine Produkte gefunden.' : 'Suchbegriff eingeben…'}
-          </p>
+          <p className="p-4 text-sm text-muted-foreground text-center">Keine Produkte gefunden.</p>
         ) : (
-          availableProducts.map((product) => (
-            <ProductRow key={product.node.handle} product={product} onAdd={() => addProduct(product.node.handle)} />
-          ))
+          <>
+            <p className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border bg-muted/10">
+              {resultCount} Ergebnis{resultCount !== 1 ? 'se' : ''} gefunden
+            </p>
+            {availableProducts.map((product) => (
+              <ProductRow key={product.node.handle} product={product} onAdd={() => addProduct(product.node.handle)} />
+            ))}
+          </>
         )}
       </div>
     </div>
