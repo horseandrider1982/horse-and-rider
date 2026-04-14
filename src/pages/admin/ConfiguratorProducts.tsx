@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useConfiguratorProducts, useAddConfiguratorProduct, useRemoveConfiguratorProduct, useConfiguratorGroups, useProductGroupAssignments, useSaveProductGroups } from "@/hooks/useConfigurator";
-import { useProducts } from "@/hooks/useProducts";
+import { useQuery } from "@tanstack/react-query";
+import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
