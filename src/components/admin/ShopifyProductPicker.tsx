@@ -14,7 +14,20 @@ interface ShopifyProductPickerProps {
 
 export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProductPickerProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: products, isLoading } = useProducts(20, searchQuery || undefined);
+  const { shopifyLanguage } = useI18n();
+
+  // Admin picker: no available_for_sale filter, higher limit
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['shopify-products-admin', searchQuery, shopifyLanguage],
+    queryFn: async () => {
+      const variables: Record<string, unknown> = { first: 50, language: shopifyLanguage };
+      if (searchQuery) {
+        variables.query = searchQuery;
+      }
+      const data = await storefrontApiRequest(STOREFRONT_QUERY, variables);
+      return (data?.data?.products?.edges || []) as ShopifyProduct[];
+    },
+  });
 
   const addProduct = (handle: string) => {
     if (!selectedHandles.includes(handle)) {
