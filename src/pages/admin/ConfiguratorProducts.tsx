@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2, Settings2, GripVertical, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { ShopifyProduct } from "@/lib/shopify";
 import type { ConfiguratorProduct } from "@/types/configurator";
 
 export default function ConfiguratorProducts() {
