@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from '@/lib/shopify';
 import { useI18n } from '@/i18n';
@@ -36,13 +36,19 @@ interface ShopifyProductPickerProps {
 
 export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProductPickerProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const { shopifyLanguage } = useI18n();
 
-  // Fetch all products matching the search (debounce happens naturally via queryKey)
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['shopify-products-admin-all', searchQuery, shopifyLanguage],
-    queryFn: () => fetchAllProducts(searchQuery || undefined, shopifyLanguage),
-    enabled: searchQuery.length >= 2,
+  // Debounce search input by 400ms
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: products, isLoading, isFetching } = useQuery({
+    queryKey: ['shopify-products-admin-all', debouncedQuery, shopifyLanguage],
+    queryFn: () => fetchAllProducts(debouncedQuery || undefined, shopifyLanguage),
+    enabled: debouncedQuery.length >= 2,
     staleTime: 60_000,
   });
 
@@ -89,9 +95,9 @@ export function ShopifyProductPicker({ selectedHandles, onChange }: ShopifyProdu
 
       {/* Results */}
       <div className="border border-border rounded-md max-h-64 overflow-y-auto">
-        {searchQuery.length < 2 ? (
+        {debouncedQuery.length < 2 ? (
           <p className="p-4 text-sm text-muted-foreground text-center">Mind. 2 Zeichen eingeben…</p>
-        ) : isLoading ? (
+        ) : (isLoading || isFetching) ? (
           <div className="p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Lade alle Ergebnisse…</span>
