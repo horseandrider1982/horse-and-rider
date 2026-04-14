@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useConfiguratorProducts, useAddConfiguratorProduct, useRemoveConfiguratorProduct, useConfiguratorGroups, useProductGroupAssignments, useSaveProductGroups } from "@/hooks/useConfigurator";
-import { useProducts } from "@/hooks/useProducts";
+import { useQuery } from "@tanstack/react-query";
+import { storefrontApiRequest, STOREFRONT_PAGINATED_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2, Settings2, GripVertical, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { ShopifyProduct } from "@/lib/shopify";
 import type { ConfiguratorProduct } from "@/types/configurator";
 
 export default function ConfiguratorProducts() {
@@ -108,7 +109,25 @@ export default function ConfiguratorProducts() {
 
 function AddProductDialog({ open, onOpenChange, onAdd }: { open: boolean; onOpenChange: (o: boolean) => void; onAdd: (p: ShopifyProduct) => void }) {
   const [query, setQuery] = useState("");
-  const { data: shopifyProducts, isLoading } = useProducts(20, query || undefined);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const { shopifyLanguage } = useI18n();
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 400);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const { data: shopifyProducts, isLoading } = useQuery({
+    queryKey: ['shopify-products-admin-configurator', debouncedQuery, shopifyLanguage],
+    queryFn: async () => {
+      const variables: Record<string, unknown> = { first: 250, language: shopifyLanguage };
+      if (debouncedQuery) variables.query = debouncedQuery;
+      const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
+      return (data?.data?.products?.edges || []) as ShopifyProduct[];
+    },
+    enabled: debouncedQuery.length >= 2,
+    staleTime: 60_000,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,20 +136,30 @@ function AddProductDialog({ open, onOpenChange, onAdd }: { open: boolean; onOpen
           <DialogTitle>Shopify-Artikel hinzufügen</DialogTitle>
           <DialogDescription>Suche einen Shopify-Artikel und füge ihn als Konfigurator-Artikel hinzu.</DialogDescription>
         </DialogHeader>
-        <Input placeholder="Artikelname suchen…" value={query} onChange={e => setQuery(e.target.value)} />
+        <Input placeholder="Artikelname suchen (mind. 2 Zeichen)…" value={query} onChange={e => setQuery(e.target.value)} />
         <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
-          {isLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div> :
-            shopifyProducts?.map(p => (
-              <button key={p.node.id} onClick={() => onAdd(p)} className="w-full flex items-center gap-3 p-2 rounded hover:bg-muted transition-colors text-left">
-                <div className="w-10 h-10 bg-muted rounded overflow-hidden flex-shrink-0">
-                  {p.node.images.edges[0] && <img src={p.node.images.edges[0].node.url} alt="" className="w-full h-full object-cover" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{p.node.title}</p>
-                  <p className="text-xs text-muted-foreground">{parseFloat(p.node.priceRange.minVariantPrice.amount).toFixed(2)} €</p>
-                </div>
-              </button>
-            ))}
+          {debouncedQuery.length < 2 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Mind. 2 Zeichen eingeben…</p>
+          ) : isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
+          ) : !shopifyProducts?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Keine Produkte gefunden.</p>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground px-2">{shopifyProducts.length} Ergebnis{shopifyProducts.length !== 1 ? 'se' : ''}</p>
+              {shopifyProducts.map(p => (
+                <button key={p.node.id} onClick={() => onAdd(p)} className="w-full flex items-center gap-3 p-2 rounded hover:bg-muted transition-colors text-left">
+                  <div className="w-10 h-10 bg-muted rounded overflow-hidden flex-shrink-0">
+                    {p.node.images.edges[0] && <img src={p.node.images.edges[0].node.url} alt="" className="w-full h-full object-cover" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{p.node.title}</p>
+                    <p className="text-xs text-muted-foreground">{parseFloat(p.node.priceRange.minVariantPrice.amount).toFixed(2)} €</p>
+                  </div>
+                </button>
+              ))}
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
