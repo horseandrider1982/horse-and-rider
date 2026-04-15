@@ -34,6 +34,15 @@ const Index = () => {
         <HeroBanner />
         <BrandLogosBar />
         <ServiceCards />
+        <div className="container mx-auto px-4 -mt-4 mb-8">
+          <LocaleLink
+            to="/product/GUTSCHEIN-5"
+            className="flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-6 py-4 text-center text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Gift className="h-5 w-5" />
+            Geschenkgutschein
+          </LocaleLink>
+        </div>
         <ProductGrid />
         <CategoryHighlights />
         <NewsletterSection />
