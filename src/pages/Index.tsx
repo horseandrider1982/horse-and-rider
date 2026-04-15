@@ -1,6 +1,7 @@
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { LocaleLink } from "@/components/LocaleLink";
+import { Gift } from "lucide-react";
 import { HeroBanner } from "@/components/HeroBanner";
 import { BrandLogosBar } from "@/components/BrandLogosBar";
 import { ProductGrid } from "@/components/ProductGrid";
