@@ -292,7 +292,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
         value
         type
       }
-      variants(first: 20) {
+      variants(first: 100) {
         edges {
           node {
             id
