@@ -42,7 +42,7 @@ async function syncToBrevo(email: string, sourceTag: string): Promise<void> {
     return;
   }
 
-  const listId = Number(BREVO_LIST_ID.trim());
+  const listId = Number(BREVO_LIST_ID.replace(/[^0-9]/g, ""));
   if (isNaN(listId)) {
     console.error("BREVO_NEWSLETTER_LIST_ID is not a valid number:", BREVO_LIST_ID);
     return;
