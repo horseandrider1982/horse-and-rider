@@ -99,7 +99,7 @@ const ThankYou = () => {
     setErrorMsg("");
     try {
       const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email: email.trim() },
+        body: { email: email.trim(), source: "thankyou" },
       });
       if (error) throw error;
       if (data?.success) {
