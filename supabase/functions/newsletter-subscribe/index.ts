@@ -42,7 +42,11 @@ async function syncToBrevo(email: string, sourceTag: string): Promise<void> {
     return;
   }
 
-  const listId = parseInt(BREVO_LIST_ID, 10);
+  const listId = Number(BREVO_LIST_ID.trim());
+  if (isNaN(listId)) {
+    console.error("BREVO_NEWSLETTER_LIST_ID is not a valid number:", BREVO_LIST_ID);
+    return;
+  }
 
   // Brevo Contacts API – createContact (or update if exists)
   const res = await fetch("https://api.brevo.com/v3/contacts", {
