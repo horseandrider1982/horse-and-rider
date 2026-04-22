@@ -55,7 +55,7 @@ const faqs = [
     items: [
       {
         q: "Wie kann ich einen Artikel zurückgeben?",
-        a: "Sie können Artikel innerhalb von 30 Tagen nach Erhalt zurückgeben. Kontaktieren Sie uns und wir senden Ihnen ein Rücksendeetikett zu. Weitere Informationen finden Sie unter Widerrufsrecht.",
+        a: "Sie können Artikel innerhalb von 30 Tagen nach Erhalt zurückgeben. Bitte organisieren Sie die Rücksendung selbstständig – die Kosten hierfür tragen wir selbstverständlich für Sie. Bei Fragen helfen wir Ihnen gerne weiter. Weitere Informationen finden Sie unter Widerrufsrecht.",
       },
       {
         q: "Wann erhalte ich meine Rückerstattung?",
