@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
 import { useProductProperties } from "@/hooks/useProductProperties";
 import { Tag } from "lucide-react";
