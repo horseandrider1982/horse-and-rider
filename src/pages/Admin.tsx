@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home, ClipboardList } from "lucide-react";
+import { Loader2, BarChart3, Settings, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home, ClipboardList, Sparkles } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
@@ -20,6 +20,7 @@ import CalendlySettings from "@/pages/admin/CalendlySettings";
 import SearchSettings from "@/pages/admin/SearchSettings";
 import SearchLogs from "@/pages/admin/SearchLogs";
 import HomepageProducts from "@/pages/admin/HomepageProducts";
+import PropertyConfigManager from "@/pages/admin/PropertyConfigManager";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { key: "redirects", label: "301", icon: ArrowRightLeft },
   
   { key: "configurator", label: "Konfigurator", icon: Settings },
+  { key: "properties", label: "Eigenschaften", icon: Sparkles },
   { key: "calendly", label: "Calendly", icon: Calendar },
   { key: "search", label: "Suche", icon: SearchIcon },
   { key: "search-logs", label: "Suchprotokoll", icon: ClipboardList },
@@ -176,6 +178,12 @@ export default function Admin() {
           {activeSection === "redirects" && <RedirectsSection />}
           
           {activeSection === "configurator" && <ConfiguratorSection />}
+          {activeSection === "properties" && (
+            <>
+              <h1 className="text-2xl font-heading font-bold mb-6">Produkt-Eigenschaften</h1>
+              <PropertyConfigManager />
+            </>
+          )}
           {activeSection === "calendly" && <CalendlySettings />}
           {activeSection === "search" && <SearchSettings />}
           {activeSection === "search-logs" && <SearchLogs />}
