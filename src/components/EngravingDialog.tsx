@@ -1,4 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const ENGRAVING_FONTS_HREF =
+  "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Alegreya+SC:wght@400;700&display=swap";
+
+function loadEngravingFonts() {
+  if (typeof document === "undefined") return;
+  if (document.querySelector(`link[data-engraving-fonts]`)) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = ENGRAVING_FONTS_HREF;
+  link.setAttribute("data-engraving-fonts", "true");
+  document.head.appendChild(link);
+}
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
