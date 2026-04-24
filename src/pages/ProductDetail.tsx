@@ -27,6 +27,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 import { SimilarProducts } from "@/components/SimilarProducts";
+import { ProductProperties } from "@/components/ProductProperties";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
@@ -771,6 +772,8 @@ const ProductDetail = () => {
               )}
 
               <PaymentIcons />
+
+              <ProductProperties handle={handle || ""} selectedVariantId={selectedVariant?.id} />
 
               {/* Beratungs-Strip */}
               <div className="mt-6 pt-6 border-t border-border">

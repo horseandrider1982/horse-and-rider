@@ -630,6 +630,48 @@ export type Database = {
         }
         Relationships: []
       }
+      product_property_display_config: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon_generated_at: string | null
+          icon_prompt: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          label: string
+          shopify_key: string
+          shopify_namespace: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon_generated_at?: string | null
+          icon_prompt?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          shopify_key: string
+          shopify_namespace?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon_generated_at?: string | null
+          icon_prompt?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          shopify_key?: string
+          shopify_namespace?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
