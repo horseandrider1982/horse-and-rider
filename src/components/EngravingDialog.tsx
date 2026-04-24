@@ -48,6 +48,10 @@ export function EngravingDialog({ open, onOpenChange, onSkip, onConfirm, product
   const [text, setText] = useState("");
   const [font, setFont] = useState<FontId>("modern");
 
+  useEffect(() => {
+    if (open) loadEngravingFonts();
+  }, [open]);
+
   const selectedFont = FONTS.find(f => f.id === font)!;
 
   const handleSkip = () => {
