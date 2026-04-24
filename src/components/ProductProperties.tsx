@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
 import { useProductProperties } from "@/hooks/useProductProperties";
 import { Tag } from "lucide-react";
@@ -13,14 +14,34 @@ interface ProductPropertiesProps {
  * block is hidden when no values are present.
  */
 export function ProductProperties({ handle, selectedVariantId }: ProductPropertiesProps) {
-  const { data: configs } = useActivePropertyConfigs();
+  const { data: configs, isLoading: configsLoading, error: configsError } = useActivePropertyConfigs();
   const identifiers = (configs ?? []).map((c) => ({
     namespace: c.shopify_namespace,
     key: c.shopify_key,
   }));
-  const { data: props } = useProductProperties(handle, identifiers);
+  const { data: props, isLoading: propsLoading, error: propsError } = useProductProperties(handle, identifiers);
 
-  if (!configs || configs.length === 0 || !props) return null;
+  // Debug logging
+  useEffect(() => {
+    console.log("[ProductProperties] Debug:", {
+      handle,
+      selectedVariantId,
+      configsLoading,
+      configsError,
+      configsCount: configs?.length ?? 0,
+      propsLoading,
+      propsError,
+      hasProps: !!props,
+      productKeys: props ? Object.keys(props.product) : [],
+      variantKeys: props ? Object.keys(props.variants) : [],
+    });
+  }, [handle, selectedVariantId, configs, configsLoading, configsError, props, propsLoading, propsError]);
+
+  if (configsLoading || propsLoading) return null;
+  if (!configs || configs.length === 0 || !props) {
+    console.log("[ProductProperties] Returning null - configs:", configs?.length, "props:", props);
+    return null;
+  }
 
   const rows = configs
     .map((c) => {
