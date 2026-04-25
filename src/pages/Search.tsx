@@ -20,7 +20,7 @@ import {
 } from "@/components/ListingFilterSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
-import { useMemo } from "react";
+
 
 const PAGE_SIZE = 24;
 
