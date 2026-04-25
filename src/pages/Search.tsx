@@ -22,7 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
 
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 100;
 
 const Search = () => {
   const { t, locale, shopifyLanguage } = useI18n();
