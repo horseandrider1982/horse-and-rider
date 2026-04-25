@@ -81,7 +81,7 @@ const SitemapPage = () => {
       <TopBar />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
-        <Breadcrumbs items={[{ name: "Sitemap", url: `/${locale}/sitemap` }]} />
+        <Breadcrumbs items={[{ label: "Sitemap" }]} />
         <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-4 mb-2">
           Sitemap
         </h1>
