@@ -201,6 +201,17 @@ export default function CollectionDetail() {
     return findChildren(mainMenuItems || []);
   }, [handle, menuItems, mainMenuItems]);
 
+  const { data: propertyConfigs } = useActivePropertyConfigs();
+  const xentralIds = useMemo(
+    () =>
+      (propertyConfigs || []).map((c) => ({
+        namespace: c.shopify_namespace,
+        key: c.shopify_key,
+      })),
+    [propertyConfigs],
+  );
+  const xentralIdsSig = xentralIds.map((i) => `${i.namespace}.${i.key}`).join(",");
+
   const {
     data,
     isLoading,
@@ -209,15 +220,15 @@ export default function CollectionDetail() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["collection", handle, locale],
+    queryKey: ["collection", handle, locale, xentralIdsSig],
     queryFn: async ({ pageParam }) => {
-      return fetchCollectionPage(handle!, locale, pageParam);
+      return fetchCollectionPage(handle!, locale, xentralIds, pageParam);
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
       return lastPage?.pageInfo?.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
-    enabled: !!handle,
+    enabled: !!handle && propertyConfigs !== undefined,
   });
 
   // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
