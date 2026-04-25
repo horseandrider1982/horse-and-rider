@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,14 @@ const Search = () => {
       lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined,
     enabled: !!query,
   });
+
+  // Auto-Nachladen aller Seiten im Hintergrund (max 30), damit Filter-Counts vollständig sind
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      const loadedPages = data?.pages?.length || 0;
+      if (loadedPages < 30) fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, data?.pages?.length, fetchNextPage]);
 
   const allProducts = data?.pages.flatMap(p => p.products) || [];
   const filteredProducts = useListingFilters(allProducts, filters);
