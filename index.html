@@ -247,12 +247,18 @@
             ogType = 'product';
             var pName = slugToTitle(segments[1]);
             var pCat = detectCategory(segments[1]);
-            // Kategorie nur anhängen wenn nicht schon im Namen
-            var pTitleCore = (pCat && pName.toLowerCase().indexOf(pCat.toLowerCase()) === -1)
-              ? pName + ' ' + pCat
-              : pName;
+            // Kategorie nur anhängen wenn nicht schon im Namen (Singular/Plural-tolerant)
+            // z.B. wenn Name "Streichkappe" enthält und Kategorie "Streichkappen" wäre → nicht anhängen
+            var nameLower = pName.toLowerCase();
+            var catLower = pCat.toLowerCase();
+            var catSingular = catLower.replace(/n$/, '').replace(/e$/, ''); // "Streichkappen" → "Streichkapp" / "Decken" → "Deck"
+            var alreadyContainsCat = pCat && (
+              nameLower.indexOf(catLower) !== -1 ||
+              (catSingular.length > 4 && nameLower.indexOf(catSingular) !== -1)
+            );
+            var pTitleCore = (pCat && !alreadyContainsCat) ? pName + ' ' + pCat : pName;
             pageTitle = truncate(pTitleCore + ' | ' + siteName, 60);
-            pageDesc = truncate(pName + (pCat ? ' (' + pCat + ')' : '') + ' online kaufen bei ' + siteName + '. Hochwertige Reitsportausrüstung, schneller Versand und Fachberatung aus Luhmühlen.', 155);
+            pageDesc = truncate(pName + ' online kaufen bei ' + siteName + '. Hochwertige Reitsportausrüstung, schneller Versand und Fachberatung aus Luhmühlen.', 155);
           } else if (segments[0] === 'collections' && segments[1]) {
             var cName = slugToTitle(segments[1]);
             pageTitle = truncate(cName + ' | ' + siteName, 60);
