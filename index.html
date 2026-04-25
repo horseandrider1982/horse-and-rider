@@ -184,12 +184,21 @@
           setMeta('name', 'twitter:image', origin + '/og-default.jpg');
 
           // ---------- Hreflang aus Pfad ableiten ----------
+          // WICHTIG: data-i18n-hreflang setzen, damit HreflangTags.tsx diese sauber ersetzen kann
           var pathWithoutLocale = '/' + segments.join('/');
           if (pathWithoutLocale === '/') pathWithoutLocale = '';
+          function addHreflang(loc, href) {
+            var l = document.createElement('link');
+            l.setAttribute('rel', 'alternate');
+            l.setAttribute('hreflang', loc);
+            l.setAttribute('href', href);
+            l.setAttribute('data-i18n-hreflang', 'true');
+            document.head.appendChild(l);
+          }
           supportedLocales.forEach(function(loc){
-            setLink('alternate', origin + '/' + loc + pathWithoutLocale, loc);
+            addHreflang(loc, origin + '/' + loc + pathWithoutLocale);
           });
-          setLink('alternate', origin + '/de' + pathWithoutLocale, 'x-default');
+          addHreflang('x-default', origin + '/de' + pathWithoutLocale);
 
           // ---------- Strukturierte Daten: Organization + WebSite (statisch, garantiert sichtbar) ----------
           if (!document.getElementById('jsonld-organization')) {
