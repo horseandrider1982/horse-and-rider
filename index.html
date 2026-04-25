@@ -249,13 +249,20 @@
             var pCat = detectCategory(segments[1]);
             // Kategorie nur anhängen wenn nicht schon im Namen (Singular/Plural-tolerant)
             // z.B. wenn Name "Streichkappe" enthält und Kategorie "Streichkappen" wäre → nicht anhängen
+            // z.B. wenn Name "Decke" enthält und Kategorie "Decken" wäre → nicht anhängen
             var nameLower = pName.toLowerCase();
             var catLower = pCat.toLowerCase();
-            var catSingular = catLower.replace(/n$/, '').replace(/e$/, ''); // "Streichkappen" → "Streichkapp" / "Decken" → "Deck"
-            var alreadyContainsCat = pCat && (
-              nameLower.indexOf(catLower) !== -1 ||
-              (catSingular.length > 4 && nameLower.indexOf(catSingular) !== -1)
-            );
+            // Generiere mehrere Singular-Kandidaten aus Plural
+            var catVariants = [catLower];
+            if (catLower.length > 4) {
+              if (catLower.slice(-1) === 'n') catVariants.push(catLower.slice(0, -1));   // Decken → Decke, Streichkappen → Streichkappe
+              if (catLower.slice(-2) === 'en') catVariants.push(catLower.slice(0, -2));  // Reithosen → Reithos
+              if (catLower.slice(-1) === 'e') catVariants.push(catLower.slice(0, -1));   // Hufglocke → Hufglock
+              if (catLower.slice(-2) === 'el') catVariants.push(catLower.slice(0, -1));  // Sättel → Sätte
+            }
+            var alreadyContainsCat = pCat && catVariants.some(function(v){
+              return v.length > 3 && nameLower.indexOf(v) !== -1;
+            });
             var pTitleCore = (pCat && !alreadyContainsCat) ? pName + ' ' + pCat : pName;
             pageTitle = truncate(pTitleCore + ' | ' + siteName, 60);
             pageDesc = truncate(pName + ' online kaufen bei ' + siteName + '. Hochwertige Reitsportausrüstung, schneller Versand und Fachberatung aus Luhmühlen.', 155);
