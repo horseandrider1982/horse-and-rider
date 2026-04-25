@@ -36,6 +36,7 @@ export interface ShopifyProduct {
       }>;
     };
     metafields?: (ShopifyMetafield | null)[];
+    xentralMetafields?: (ShopifyMetafield | null)[];
     variants: {
       edges: Array<{
         node: {
@@ -50,6 +51,7 @@ export interface ShopifyProduct {
           sku?: string;
           barcode?: string;
           metafields?: (ShopifyMetafield | null)[];
+          xentralMetafields?: (ShopifyMetafield | null)[];
           selectedOptions: Array<{
             name: string;
             value: string;
