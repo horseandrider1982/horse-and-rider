@@ -31,7 +31,7 @@ const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/grap
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
 
 const COLLECTION_QUERY = `
-  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]!) @inContext(language: $language) {
+  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]! = []) @inContext(language: $language) {
     collection(handle: $handle) {
       id
       title
