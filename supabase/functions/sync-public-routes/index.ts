@@ -20,6 +20,7 @@ const PRODUCTS_QUERY = `
           handle
           title
           updatedAt
+          featuredImage { url }
         }
       }
     }
@@ -36,6 +37,7 @@ const COLLECTIONS_QUERY = `
           handle
           title
           updatedAt
+          image { url }
         }
       }
     }
@@ -43,7 +45,7 @@ const COLLECTIONS_QUERY = `
 `;
 
 async function shopifyFetchAll(token: string, query: string) {
-  const results: Array<{ id: string; handle: string; title: string; updatedAt: string }> = [];
+  const results: Array<{ id: string; handle: string; title: string; updatedAt: string; featuredImage?: { url: string } | null; image?: { url: string } | null }> = [];
   let cursor: string | null = null;
   let hasNext = true;
 
@@ -97,13 +99,14 @@ Deno.serve(async (req) => {
     const products = await shopifyFetchAll(token, PRODUCTS_QUERY);
     stats.products = products.length;
 
-    const productRows = products.map((p) => ({
+    const productRows = products.map((p: any) => ({
       entity_type: "product" as const,
       entity_id: p.id,
       title: p.title,
       current_path: `/de/product/${p.handle}`,
       canonical_key: `product:${p.id}`,
       is_public: true,
+      image_url: p.featuredImage?.url ?? null,
       last_synced_at: new Date().toISOString(),
     }));
 
@@ -120,13 +123,14 @@ Deno.serve(async (req) => {
     const collections = await shopifyFetchAll(token, COLLECTIONS_QUERY);
     stats.collections = collections.length;
 
-    const collectionRows = collections.map((c) => ({
+    const collectionRows = collections.map((c: any) => ({
       entity_type: "collection" as const,
       entity_id: c.id,
       title: c.title,
       current_path: `/de/collections/${c.handle}`,
       canonical_key: `collection:${c.id}`,
       is_public: true,
+      image_url: c.image?.url ?? null,
       last_synced_at: new Date().toISOString(),
     }));
 
