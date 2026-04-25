@@ -231,15 +231,17 @@ export default function CollectionDetail() {
       return lastPage?.pageInfo?.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
     enabled: !!handle && propertyConfigs !== undefined,
+    staleTime: 10 * 60 * 1000, // 10 min: Filter sind beim Zurückkehren sofort da
+    gcTime: 30 * 60 * 1000,
   });
 
   // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
   // (Vendor-Counts) die GESAMTE Kollektion widerspiegeln, nicht nur die
-  // initial geladenen Produkte. Schutz: max. 30 Iterationen.
+  // initial geladenen Produkte. Mit PAGE_SIZE=100 reichen wenige Iterationen.
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       const loadedPages = data?.pages?.length || 0;
-      if (loadedPages < 30) {
+      if (loadedPages < 10) {
         fetchNextPage();
       }
     }
