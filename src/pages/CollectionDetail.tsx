@@ -31,7 +31,7 @@ const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/grap
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
 
 const COLLECTION_QUERY = `
-  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode) @inContext(language: $language) {
+  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]!) @inContext(language: $language) {
     collection(handle: $handle) {
       id
       title
@@ -71,6 +71,12 @@ const COLLECTION_QUERY = `
               value
               type
             }
+            xentralMetafields: metafields(identifiers: $xentralIds) {
+              namespace
+              key
+              value
+              type
+            }
             variants(first: 10) {
               edges {
                 node {
@@ -91,6 +97,12 @@ const COLLECTION_QUERY = `
                     value
                     type
                   }
+                  xentralMetafields: metafields(identifiers: $xentralIds) {
+                    namespace
+                    key
+                    value
+                    type
+                  }
                   selectedOptions {
                     name
                     value
@@ -105,7 +117,12 @@ const COLLECTION_QUERY = `
   }
 `;
 
-async function fetchCollectionPage(handle: string, locale: string, cursor?: string): Promise<VisibleProductsPage & { collection: any }> {
+async function fetchCollectionPage(
+  handle: string,
+  locale: string,
+  xentralIds: Array<{ namespace: string; key: string }>,
+  cursor?: string,
+): Promise<VisibleProductsPage & { collection: any }> {
   const fetcher = async (innerCursor?: string) => {
     const res = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
@@ -115,7 +132,13 @@ async function fetchCollectionPage(handle: string, locale: string, cursor?: stri
       },
       body: JSON.stringify({
         query: COLLECTION_QUERY,
-        variables: { handle, first: 24, after: innerCursor || cursor || null, language: locale.toUpperCase() },
+        variables: {
+          handle,
+          first: 24,
+          after: innerCursor || cursor || null,
+          language: locale.toUpperCase(),
+          xentralIds,
+        },
       }),
     });
     const json = await res.json();
