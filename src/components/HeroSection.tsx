@@ -6,7 +6,15 @@ export const HeroSection = () => {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0">
-        <img src={heroImage} alt="Horse & Rider - Reitsport" className="w-full h-full object-cover" />
+        <img
+          src={heroImage}
+          alt="Horse & Rider - Reitsport"
+          width={1600}
+          height={600}
+          fetchPriority="high"
+          decoding="async"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
       </div>
       <div className="relative container mx-auto px-4 py-20 md:py-32">
