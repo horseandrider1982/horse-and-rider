@@ -39,17 +39,65 @@ export function OrganizationJsonLd() {
       "Seit 1982 Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte namhafter Marken für Reiter und Pferd.",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Zum Hesterberg 8",
+      streetAddress: "Alte Dorfstraße 8",
       addressLocality: "Salzhausen OT Luhmühlen",
       postalCode: "21376",
       addressCountry: "DE",
     },
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+49-4172-9696-0",
+      telephone: "+49-4172-6403",
       contactType: "customer service",
       availableLanguage: ["German", "English"],
     },
+    sameAs: [
+      "https://www.facebook.com/HorseAndRiderLuhmuehlen",
+      "https://www.instagram.com/horseandrider_luhmuehlen",
+    ],
+  });
+  return null;
+}
+
+/* ── LocalBusiness / Store (Homepage) ── */
+
+export function LocalBusinessJsonLd() {
+  useJsonLd("jsonld-localbusiness", {
+    "@context": "https://schema.org",
+    "@type": "SportingGoodsStore",
+    "@id": `${SITE_URL}/#store`,
+    name: ORG_NAME,
+    image: `${SITE_URL}/og-default.jpg`,
+    url: SITE_URL,
+    logo: ORG_LOGO,
+    telephone: "+49-4172-6403",
+    email: "info@horse-and-rider.de",
+    priceRange: "€€",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Alte Dorfstraße 8",
+      addressLocality: "Salzhausen OT Luhmühlen",
+      postalCode: "21376",
+      addressCountry: "DE",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 53.2469,
+      longitude: 10.1939,
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "18:00",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: "Saturday",
+        opens: "09:00",
+        closes: "13:00",
+      },
+    ],
     sameAs: [
       "https://www.facebook.com/HorseAndRiderLuhmuehlen",
       "https://www.instagram.com/horseandrider_luhmuehlen",
@@ -124,7 +172,43 @@ export function ProductJsonLd({
       availability: available
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: ORG_NAME },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "5.95",
+          currency: currency,
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "DE",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 1,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "DE",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 14,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
     },
   });
   return null;

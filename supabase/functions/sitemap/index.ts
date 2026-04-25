@@ -149,7 +149,7 @@ async function buildEntitySitemap(
   page: number,
 ): Promise<string> {
   const from = (page - 1) * MAX_URLS_PER_SITEMAP;
-  const allRoutes: Array<{ current_path: string; entity_type: string; updated_at: string }> = [];
+  const allRoutes: Array<{ current_path: string; entity_type: string; updated_at: string; image_url?: string | null; title?: string | null }> = [];
   let offset = from;
   const batchSize = 1000;
   const limit = from + MAX_URLS_PER_SITEMAP;
@@ -158,7 +158,7 @@ async function buildEntitySitemap(
     const fetchSize = Math.min(batchSize, limit - offset);
     const { data, error } = await supabase
       .from("public_routes")
-      .select("current_path, entity_type, updated_at")
+      .select("current_path, entity_type, updated_at, image_url, title")
       .eq("is_public", true)
       .eq("entity_type", entityType)
       .order("current_path")
@@ -172,15 +172,24 @@ async function buildEntitySitemap(
   }
 
   const today = new Date().toISOString().split("T")[0];
+  const includeImages = entityType === "product" || entityType === "collection";
   const urlEntries = allRoutes.map((route) => {
     const lastmod = route.updated_at ? route.updated_at.split("T")[0] : today;
     const priority = PRIORITY_MAP[route.entity_type] || "0.5";
     const changefreq = CHANGEFREQ_MAP[route.entity_type] || "monthly";
-    return urlEntry(BASE_URL + route.current_path, lastmod, changefreq, priority);
+    return urlEntry(
+      BASE_URL + route.current_path,
+      lastmod,
+      changefreq,
+      priority,
+      includeImages && route.image_url ? { url: route.image_url, title: route.title || "" } : undefined,
+    );
   });
 
+  const xmlnsImage = includeImages ? ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"' : '';
+
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${xmlnsImage}>
 ${urlEntries.join("\n")}
 </urlset>`;
 }
@@ -194,12 +203,25 @@ function sitemapEntry(loc: string, lastmod: string): string {
   </sitemap>`;
 }
 
-function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string): string {
+function urlEntry(
+  loc: string,
+  lastmod: string,
+  changefreq: string,
+  priority: string,
+  image?: { url: string; title: string },
+): string {
+  const imageBlock = image
+    ? `
+    <image:image>
+      <image:loc>${escapeXml(image.url)}</image:loc>
+      ${image.title ? `<image:title>${escapeXml(image.title)}</image:title>` : ""}
+    </image:image>`
+    : "";
   return `  <url>
     <loc>${escapeXml(loc)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
+    <priority>${priority}</priority>${imageBlock}
   </url>`;
 }
 

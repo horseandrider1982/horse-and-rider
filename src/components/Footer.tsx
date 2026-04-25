@@ -247,6 +247,10 @@ export const Footer = () => {
         <div className="border-t border-background/20 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-background/50">
           <span>{t("footer.copyright").replace("{year}", String(new Date().getFullYear()))}</span>
           <span className="hidden sm:inline">·</span>
+          <LocaleLink to="/sitemap" className="underline underline-offset-2 hover:text-background/80 transition-colors">
+            Sitemap
+          </LocaleLink>
+          <span className="hidden sm:inline">·</span>
           <button
             type="button"
             onClick={() => { import("@/components/CookieBanner").then(m => m.reopenCookieBanner()); }}

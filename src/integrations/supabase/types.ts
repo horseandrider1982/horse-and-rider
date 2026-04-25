@@ -706,6 +706,7 @@ export type Database = {
           entity_id: string
           entity_type: Database["public"]["Enums"]["redirect_entity_type"]
           id: string
+          image_url: string | null
           is_public: boolean
           last_synced_at: string
           sku: string | null
@@ -718,6 +719,7 @@ export type Database = {
           entity_id: string
           entity_type: Database["public"]["Enums"]["redirect_entity_type"]
           id?: string
+          image_url?: string | null
           is_public?: boolean
           last_synced_at?: string
           sku?: string | null
@@ -730,6 +732,7 @@ export type Database = {
           entity_id?: string
           entity_type?: Database["public"]["Enums"]["redirect_entity_type"]
           id?: string
+          image_url?: string | null
           is_public?: boolean
           last_synced_at?: string
           sku?: string | null

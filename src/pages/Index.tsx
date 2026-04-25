@@ -9,7 +9,7 @@ import { NewsletterSection } from "@/components/NewsletterSection";
 import { TrustedShopsSection } from "@/components/TrustedShopsSection";
 import { AboutTeamSection } from "@/components/AboutTeamSection";
 import { Footer } from "@/components/Footer";
-import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/JsonLd";
+import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from "@/components/JsonLd";
 import { BackToTop } from "@/components/BackToTop";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useI18n } from "@/i18n";
@@ -25,6 +25,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <OrganizationJsonLd />
+      <LocalBusinessJsonLd />
       <WebSiteJsonLd />
       <TopBar />
       <Header />
