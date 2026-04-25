@@ -25,12 +25,13 @@ import {
   type ListingFilters,
 } from "@/components/ListingFilterSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
 
 const COLLECTION_QUERY = `
-  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode) @inContext(language: $language) {
+  query GetCollection($handle: String!, $first: Int!, $after: String, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]! = []) @inContext(language: $language) {
     collection(handle: $handle) {
       id
       title
@@ -70,6 +71,12 @@ const COLLECTION_QUERY = `
               value
               type
             }
+            xentralMetafields: metafields(identifiers: $xentralIds) {
+              namespace
+              key
+              value
+              type
+            }
             variants(first: 10) {
               edges {
                 node {
@@ -90,6 +97,12 @@ const COLLECTION_QUERY = `
                     value
                     type
                   }
+                  xentralMetafields: metafields(identifiers: $xentralIds) {
+                    namespace
+                    key
+                    value
+                    type
+                  }
                   selectedOptions {
                     name
                     value
@@ -104,7 +117,12 @@ const COLLECTION_QUERY = `
   }
 `;
 
-async function fetchCollectionPage(handle: string, locale: string, cursor?: string): Promise<VisibleProductsPage & { collection: any }> {
+async function fetchCollectionPage(
+  handle: string,
+  locale: string,
+  xentralIds: Array<{ namespace: string; key: string }>,
+  cursor?: string,
+): Promise<VisibleProductsPage & { collection: any }> {
   const fetcher = async (innerCursor?: string) => {
     const res = await fetch(SHOPIFY_STOREFRONT_URL, {
       method: "POST",
@@ -114,7 +132,13 @@ async function fetchCollectionPage(handle: string, locale: string, cursor?: stri
       },
       body: JSON.stringify({
         query: COLLECTION_QUERY,
-        variables: { handle, first: 24, after: innerCursor || cursor || null, language: locale.toUpperCase() },
+        variables: {
+          handle,
+          first: 24,
+          after: innerCursor || cursor || null,
+          language: locale.toUpperCase(),
+          xentralIds,
+        },
       }),
     });
     const json = await res.json();
@@ -177,6 +201,17 @@ export default function CollectionDetail() {
     return findChildren(mainMenuItems || []);
   }, [handle, menuItems, mainMenuItems]);
 
+  const { data: propertyConfigs } = useActivePropertyConfigs();
+  const xentralIds = useMemo(
+    () =>
+      (propertyConfigs || []).map((c) => ({
+        namespace: c.shopify_namespace,
+        key: c.shopify_key,
+      })),
+    [propertyConfigs],
+  );
+  const xentralIdsSig = xentralIds.map((i) => `${i.namespace}.${i.key}`).join(",");
+
   const {
     data,
     isLoading,
@@ -185,15 +220,15 @@ export default function CollectionDetail() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["collection", handle, locale],
+    queryKey: ["collection", handle, locale, xentralIdsSig],
     queryFn: async ({ pageParam }) => {
-      return fetchCollectionPage(handle!, locale, pageParam);
+      return fetchCollectionPage(handle!, locale, xentralIds, pageParam);
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
       return lastPage?.pageInfo?.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
-    enabled: !!handle,
+    enabled: !!handle && propertyConfigs !== undefined,
   });
 
   // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
@@ -329,7 +364,7 @@ export default function CollectionDetail() {
                     {filteredProducts.length === 0 && allProducts.length > 0 && (
                       <p className="text-muted-foreground py-8 text-center">{t("search.no_results").replace("{query}", "")}</p>
                     )}
-                    {hasNextPage && filters.vendors.size === 0 && (
+                    {hasNextPage && filters.vendors.size === 0 && Object.keys(filters.properties).length === 0 && (
                       <div className="flex justify-center mt-8">
                         <Button
                           variant="outline"
