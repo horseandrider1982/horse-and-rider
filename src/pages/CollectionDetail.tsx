@@ -144,6 +144,11 @@ export default function CollectionDetail() {
   const isMobile = useIsMobile();
   const [filters, setFilters] = useState<ListingFilters>(EMPTY_LISTING_FILTERS);
 
+  // Reset filters when switching to a different collection
+  useEffect(() => {
+    setFilters(EMPTY_LISTING_FILTERS);
+  }, [handle]);
+
   const { data: menuItems } = useShopifyMenu('kategoriemenu');
   const { data: mainMenuItems } = useShopifyMenu('main-menu');
 
