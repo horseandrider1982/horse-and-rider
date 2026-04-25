@@ -295,6 +295,7 @@ export function MobileFilterToggle({
   filters,
   onFilterChange,
   hideVendors,
+  cachedFacets,
 }: ListingFilterSidebarProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -309,6 +310,12 @@ export function MobileFilterToggle({
 
   // Decide whether to show the toggle at all (sidebar would render nothing?)
   const wouldRender = useMemo(() => {
+    // Server cache shortcut
+    if (cachedFacets) {
+      const v = hideVendors ? 0 : cachedFacets.vendors.length;
+      if (v > 1) return true;
+      if (cachedFacets.properties.some((g) => g.values.length > 1)) return true;
+    }
     const uniqueVendors = hideVendors
       ? 0
       : new Set(products.map((p) => p.node.vendor).filter(Boolean)).size;
@@ -333,7 +340,7 @@ export function MobileFilterToggle({
       }
     }
     return false;
-  }, [products, hideVendors, propertyConfigs]);
+  }, [products, hideVendors, propertyConfigs, cachedFacets]);
 
   if (!wouldRender) return null;
 
