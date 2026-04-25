@@ -70,6 +70,7 @@ async function fetchBrandProductsPage(
         query: `vendor:"${vendor}"`,
         after: cursor || after || null,
         language,
+        xentralIds: [],
       });
       return {
         edges: (data?.data?.products?.edges || []) as ShopifyProduct[],
