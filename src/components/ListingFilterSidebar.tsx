@@ -375,6 +375,7 @@ export function MobileFilterToggle({
               filters={filters}
               onFilterChange={onFilterChange}
               hideVendors={hideVendors}
+              cachedFacets={cachedFacets}
             />
           </div>
         </div>
