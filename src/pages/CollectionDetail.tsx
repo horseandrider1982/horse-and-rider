@@ -215,6 +215,9 @@ export default function CollectionDetail() {
   );
   const xentralIdsSig = xentralIds.map((i) => `${i.namespace}.${i.key}`).join(",");
 
+  // Sofort verfügbare Filter-Daten aus dem Server-Cache (täglich aktualisiert)
+  const { data: cachedFacets } = useCollectionFacets(handle, locale);
+
   const {
     data,
     isLoading,
