@@ -19,20 +19,20 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-query": ["@tanstack/react-query"],
-          "vendor-ui": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-accordion",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-select",
-          ],
+        manualChunks(id) {
+          // Heavy admin-only deps must NOT land in public bundles
+          if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+          if (id.includes("@tiptap") || id.includes("prosemirror")) return "vendor-editor";
+          if (id.includes("xlsx") || id.includes("exceljs")) return "vendor-xlsx";
+          if (id.includes("node_modules")) {
+            if (id.includes("react-router") || id.includes("/react-dom/") || id.includes("/react/")) return "vendor-react";
+            if (id.includes("@tanstack/react-query")) return "vendor-query";
+            if (id.includes("@radix-ui")) return "vendor-ui";
+            if (id.includes("lucide-react")) return "vendor-icons";
+          }
         },
       },
     },
