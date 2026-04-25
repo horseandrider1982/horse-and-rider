@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.crawl-brand-knowledge]
 verify_jwt = false
+
+[functions.compute-collection-facets]
+verify_jwt = false

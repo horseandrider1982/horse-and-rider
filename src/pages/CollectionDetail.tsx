@@ -26,6 +26,7 @@ import {
 } from "@/components/ListingFilterSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
+import { useCollectionFacets } from "@/hooks/useCollectionFacets";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
@@ -214,6 +215,9 @@ export default function CollectionDetail() {
   );
   const xentralIdsSig = xentralIds.map((i) => `${i.namespace}.${i.key}`).join(",");
 
+  // Sofort verfügbare Filter-Daten aus dem Server-Cache (täglich aktualisiert)
+  const { data: cachedFacets } = useCollectionFacets(handle, locale);
+
   const {
     data,
     isLoading,
@@ -335,9 +339,14 @@ export default function CollectionDetail() {
               )}
 
               {/* Mobile filter toggle */}
-              {isMobile && allProducts.length > 0 && (
+              {isMobile && (allProducts.length > 0 || cachedFacets) && (
                 <div className="mb-4">
-                  <MobileFilterToggle products={allProducts} filters={filters} onFilterChange={setFilters} />
+                  <MobileFilterToggle
+                    products={allProducts}
+                    filters={filters}
+                    onFilterChange={setFilters}
+                    cachedFacets={cachedFacets}
+                  />
                 </div>
               )}
 
@@ -353,6 +362,7 @@ export default function CollectionDetail() {
                           products={allProducts}
                           filters={filters}
                           onFilterChange={setFilters}
+                          cachedFacets={cachedFacets}
                         />
                       </div>
                     </div>
