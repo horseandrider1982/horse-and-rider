@@ -143,7 +143,7 @@ function computeAvailability(
   if (hasSupplierStock && allowOversell) {
     return {
       canOrder: true,
-      deliveryTime: bestLieferzeit || 'Lieferzeit auf Anfrage',
+      deliveryTime: formatSupplierDeliveryTime(bestLieferzeit),
       isSupplierStock: true,
     };
   }
