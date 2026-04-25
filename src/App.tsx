@@ -39,6 +39,7 @@ const ThankYou = lazy(() => import("./pages/ThankYou"));
 const ShopifyCallback = lazy(() => import("./pages/ShopifyCallback"));
 const ShopifyLogin = lazy(() => import("./pages/ShopifyLogin"));
 const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({ default: m.CookieBanner })));
+const SitemapPage = lazy(() => import("./pages/SitemapPage"));
 
 const queryClient = new QueryClient();
 
@@ -110,6 +111,7 @@ const AppContent = () => {
           <Route path="test-vor-kauf" element={<CmsPage />} />
           <Route path="gravur" element={<CmsPage />} />
           <Route path="faq" element={<FAQ />} />
+          <Route path="sitemap" element={<SitemapPage />} />
           <Route path="pages/:slug" element={<CmsPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
