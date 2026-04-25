@@ -339,9 +339,14 @@ export default function CollectionDetail() {
               )}
 
               {/* Mobile filter toggle */}
-              {isMobile && allProducts.length > 0 && (
+              {isMobile && (allProducts.length > 0 || cachedFacets) && (
                 <div className="mb-4">
-                  <MobileFilterToggle products={allProducts} filters={filters} onFilterChange={setFilters} />
+                  <MobileFilterToggle
+                    products={allProducts}
+                    filters={filters}
+                    onFilterChange={setFilters}
+                    cachedFacets={cachedFacets}
+                  />
                 </div>
               )}
 
@@ -357,6 +362,7 @@ export default function CollectionDetail() {
                           products={allProducts}
                           filters={filters}
                           onFilterChange={setFilters}
+                          cachedFacets={cachedFacets}
                         />
                       </div>
                     </div>
