@@ -23,10 +23,8 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Heavy admin-only deps must NOT land in public bundles
-          if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
-          if (id.includes("@tiptap") || id.includes("prosemirror")) return "vendor-editor";
-          if (id.includes("xlsx") || id.includes("exceljs")) return "vendor-xlsx";
+          // Admin-only heavy deps: lassen wir Rollup automatisch via dynamic imports splitten,
+          // um Circular-Init-Bugs (TDZ "Cannot access '_' before initialization") zu vermeiden.
           if (id.includes("node_modules")) {
             if (id.includes("react-router") || id.includes("/react-dom/") || id.includes("/react/")) return "vendor-react";
             if (id.includes("@tanstack/react-query")) return "vendor-query";
