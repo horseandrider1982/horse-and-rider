@@ -117,6 +117,8 @@ const COLLECTION_QUERY = `
   }
 `;
 
+const PAGE_SIZE = 100;
+
 async function fetchCollectionPage(
   handle: string,
   locale: string,
@@ -134,7 +136,7 @@ async function fetchCollectionPage(
         query: COLLECTION_QUERY,
         variables: {
           handle,
-          first: 24,
+          first: PAGE_SIZE,
           after: innerCursor || cursor || null,
           language: locale.toUpperCase(),
           xentralIds,
@@ -156,7 +158,7 @@ async function fetchCollectionPage(
       if (!collectionMeta && r._collection) collectionMeta = r._collection;
       return { edges: r.edges, pageInfo: r.pageInfo };
     },
-    24,
+    PAGE_SIZE,
   );
 
   return { ...result, collection: collectionMeta };
@@ -229,15 +231,17 @@ export default function CollectionDetail() {
       return lastPage?.pageInfo?.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined;
     },
     enabled: !!handle && propertyConfigs !== undefined,
+    staleTime: 10 * 60 * 1000, // 10 min: Filter sind beim Zurückkehren sofort da
+    gcTime: 30 * 60 * 1000,
   });
 
   // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
   // (Vendor-Counts) die GESAMTE Kollektion widerspiegeln, nicht nur die
-  // initial geladenen Produkte. Schutz: max. 30 Iterationen.
+  // initial geladenen Produkte. Mit PAGE_SIZE=100 reichen wenige Iterationen.
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       const loadedPages = data?.pages?.length || 0;
-      if (loadedPages < 30) {
+      if (loadedPages < 10) {
         fetchNextPage();
       }
     }

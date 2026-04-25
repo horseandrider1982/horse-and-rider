@@ -1,8 +1,8 @@
 import { isProductVisibleInListing, type ShopifyProduct } from './shopify';
 
-const MAX_ITERATIONS = 5; // initial iteration limit
+const MAX_ITERATIONS = 3; // initial iteration limit (page size now 100, so fewer needed)
 const MIN_VISIBLE = 12; // minimum visible products before stopping
-const EXTENDED_MAX_ITERATIONS = 15; // extended limit when below MIN_VISIBLE
+const EXTENDED_MAX_ITERATIONS = 8; // extended limit when below MIN_VISIBLE
 
 export interface VisibleProductsPage {
   products: ShopifyProduct[];
