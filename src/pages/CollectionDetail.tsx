@@ -26,6 +26,7 @@ import {
 } from "@/components/ListingFilterSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
+import { useCollectionFacets } from "@/hooks/useCollectionFacets";
 
 const SHOPIFY_STOREFRONT_URL = "https://bpjvam-c1.myshopify.com/api/2025-07/graphql.json";
 const SHOPIFY_STOREFRONT_TOKEN = "d69c81decdb58ced137c44fa1b033aa3";
