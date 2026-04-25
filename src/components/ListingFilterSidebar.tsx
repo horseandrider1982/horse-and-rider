@@ -7,6 +7,7 @@ import { X, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ShopifyProduct, ShopifyMetafield } from "@/lib/shopify";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
+import type { CollectionFacets } from "@/hooks/useCollectionFacets";
 
 export interface ListingFilters {
   vendors: Set<string>;
@@ -20,6 +21,8 @@ interface ListingFilterSidebarProps {
   onFilterChange: (filters: ListingFilters) => void;
   /** Hide the vendor section (e.g. on brand pages where all products share the same vendor) */
   hideVendors?: boolean;
+  /** Pre-computed facets from server cache (sofortige Anzeige, bevor Produkte geladen sind) */
+  cachedFacets?: CollectionFacets | null;
 }
 
 export const EMPTY_LISTING_FILTERS: ListingFilters = {
