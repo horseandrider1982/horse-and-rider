@@ -107,6 +107,29 @@ interface AvailabilityInfo {
   isSupplierStock: boolean;
 }
 
+/**
+ * Formatiert den Lieferanten-Lieferzeit-Wert.
+ * - Reine Zahl (z.B. "2") → wird auf Standard 1-3 Werktage addiert → "3 - 5 Werktage"
+ * - Bereits formatierter String (z.B. "3 - 5 Werktage") → wird unverändert übernommen
+ * - Leer/ungültig → Fallback "Lieferzeit auf Anfrage"
+ */
+function formatSupplierDeliveryTime(raw: string | null | undefined): string {
+  if (!raw) return 'Lieferzeit auf Anfrage';
+  const trimmed = raw.trim();
+  if (!trimmed) return 'Lieferzeit auf Anfrage';
+
+  // Reine ganze Zahl (z.B. "2", "10") → auf Standardlieferzeit aufaddieren
+  if (/^\d+$/.test(trimmed)) {
+    const extra = parseInt(trimmed, 10);
+    if (Number.isFinite(extra) && extra >= 0) {
+      return `${1 + extra} - ${3 + extra} Werktage`;
+    }
+  }
+
+  // Sonst: bestehender String wird durchgereicht (z.B. "3 - 5 Werktage")
+  return trimmed;
+}
+
 function computeAvailability(
   variantAvailableForSale: boolean,
   variantCurrentlyNotInStock?: boolean,
