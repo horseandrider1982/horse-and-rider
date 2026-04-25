@@ -41,6 +41,37 @@ export function usePageMeta(options: PageMetaOptions) {
   const location = useLocation();
 
   useEffect(() => {
+    // ────────────────────────────────────────────────────────────────────
+    // WICHTIG: Wenn weder title noch description übergeben werden, ist die
+    // Seite vermutlich noch im Loading-State (z. B. Produkt wird noch
+    // gefetcht). In diesem Fall NICHTS überschreiben, damit das Inline-
+    // Script aus index.html (das pfad-basierte Defaults setzt) die Kontrolle
+    // behält. Erst wenn echte Daten da sind, übernehmen wir die Hoheit.
+    //
+    // Robots, Canonical, OG-URL, html-lang setzen wir trotzdem immer, weil
+    // diese unabhängig von Produktdaten sind.
+    // ────────────────────────────────────────────────────────────────────
+    const hasRealContent = !!(options.title || options.description);
+
+    const canonicalUrl = options.canonicalPath
+      ? `${BASE_URL}${options.canonicalPath}`
+      : `${BASE_URL}${location.pathname}`;
+
+    document.documentElement.lang = locale;
+    setCanonical(canonicalUrl);
+    setMeta("og:url", canonicalUrl, "property");
+
+    if (!options.noIndex) {
+      setMeta("robots", "index, follow");
+    } else {
+      setMeta("robots", "noindex, nofollow");
+    }
+
+    if (!hasRealContent) {
+      // Loading-State: Inline-Script-Defaults intakt lassen.
+      return;
+    }
+
     const fullTitle = options.title
       ? `${options.title} | ${SITE_NAME}`
       : SITE_NAME;
@@ -48,31 +79,14 @@ export function usePageMeta(options: PageMetaOptions) {
     const ogImage = options.ogImage || DEFAULT_OG_IMAGE;
     const ogType = options.ogType || "website";
 
-    // Auto-derive canonical from current pathname if not explicitly provided
-    const canonicalUrl = options.canonicalPath
-      ? `${BASE_URL}${options.canonicalPath}`
-      : `${BASE_URL}${location.pathname}`;
-
-    // Title
     document.title = fullTitle;
-
-    // html lang
-    document.documentElement.lang = locale;
-
-    // Standard meta
     setMeta("description", description);
-
-    // Robots – always set explicitly
-    if (!options.noIndex) {
-      setMeta("robots", "index, follow");
-    }
 
     // OG
     setMeta("og:title", fullTitle, "property");
     setMeta("og:description", description, "property");
     setMeta("og:image", ogImage, "property");
     setMeta("og:type", ogType, "property");
-    setMeta("og:url", canonicalUrl, "property");
     setMeta("og:site_name", SITE_NAME, "property");
     setMeta("og:locale", locale === "de" ? "de_DE" : locale, "property");
 
@@ -82,20 +96,10 @@ export function usePageMeta(options: PageMetaOptions) {
     setMeta("twitter:image", ogImage);
     setMeta("twitter:card", "summary_large_image");
 
-    // Canonical
-    setCanonical(canonicalUrl);
-
-    // noindex
-    if (options.noIndex) {
-      setMeta("robots", "noindex, nofollow");
-    }
-
     return () => {
-      // Reset to defaults on unmount
-      document.title = `${SITE_NAME} | Reitsport Online Shop`;
-      if (options.noIndex) {
-        setMeta("robots", "index, follow");
-      }
+      // Beim Unmount NICHT auf einen generischen Default zurücksetzen –
+      // sonst flackert der Title kurz auf der nächsten Seite, bevor deren
+      // usePageMeta läuft. Die nächste Seite überschreibt die Werte sowieso.
     };
   }, [
     options.title,
