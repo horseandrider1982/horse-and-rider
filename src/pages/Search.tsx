@@ -78,13 +78,15 @@ const Search = () => {
     getNextPageParam: (lastPage) =>
       lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined,
     enabled: !!query && propertyConfigs !== undefined,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
-  // Auto-Nachladen aller Seiten im Hintergrund (max 30), damit Filter-Counts vollständig sind
+  // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Counts vollständig sind
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       const loadedPages = data?.pages?.length || 0;
-      if (loadedPages < 30) fetchNextPage();
+      if (loadedPages < 10) fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, data?.pages?.length, fetchNextPage]);
 
