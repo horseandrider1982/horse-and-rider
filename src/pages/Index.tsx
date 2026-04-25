@@ -1,18 +1,21 @@
+import { lazy, Suspense } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { HeroBanner } from "@/components/HeroBanner";
 import { BrandLogosBar } from "@/components/BrandLogosBar";
 import { ProductGrid } from "@/components/ProductGrid";
-import { CategoryHighlights } from "@/components/CategoryHighlights";
 import { ServiceCards } from "@/components/ServiceCards";
-import { NewsletterSection } from "@/components/NewsletterSection";
-import { TrustedShopsSection } from "@/components/TrustedShopsSection";
-import { AboutTeamSection } from "@/components/AboutTeamSection";
-import { Footer } from "@/components/Footer";
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from "@/components/JsonLd";
-import { BackToTop } from "@/components/BackToTop";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useI18n } from "@/i18n";
+
+// Below-the-fold: lazy-load to shrink initial bundle (Footer ~95KB, Newsletter, TrustedShops, AboutTeam)
+const CategoryHighlights = lazy(() => import("@/components/CategoryHighlights").then(m => ({ default: m.CategoryHighlights })));
+const NewsletterSection = lazy(() => import("@/components/NewsletterSection").then(m => ({ default: m.NewsletterSection })));
+const TrustedShopsSection = lazy(() => import("@/components/TrustedShopsSection").then(m => ({ default: m.TrustedShopsSection })));
+const AboutTeamSection = lazy(() => import("@/components/AboutTeamSection").then(m => ({ default: m.AboutTeamSection })));
+const Footer = lazy(() => import("@/components/Footer").then(m => ({ default: m.Footer })));
+const BackToTop = lazy(() => import("@/components/BackToTop").then(m => ({ default: m.BackToTop })));
 
 const Index = () => {
   const { locale } = useI18n();
@@ -34,13 +37,25 @@ const Index = () => {
         <BrandLogosBar />
         <ServiceCards />
         <ProductGrid />
-        <CategoryHighlights />
-        <NewsletterSection />
-        <TrustedShopsSection />
-        <AboutTeamSection />
+        <Suspense fallback={<div style={{ minHeight: 300 }} />}>
+          <CategoryHighlights />
+        </Suspense>
+        <Suspense fallback={<div style={{ minHeight: 200 }} />}>
+          <NewsletterSection />
+        </Suspense>
+        <Suspense fallback={<div style={{ minHeight: 250 }} />}>
+          <TrustedShopsSection />
+        </Suspense>
+        <Suspense fallback={<div style={{ minHeight: 400 }} />}>
+          <AboutTeamSection />
+        </Suspense>
       </main>
-      <Footer />
-      <BackToTop />
+      <Suspense fallback={<div style={{ minHeight: 500 }} />}>
+        <Footer />
+      </Suspense>
+      <Suspense fallback={null}>
+        <BackToTop />
+      </Suspense>
     </div>
   );
 };

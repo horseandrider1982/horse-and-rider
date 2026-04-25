@@ -34,12 +34,30 @@
         } catch(e) {}
       })();
     </script>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-T39J3HHC');</script>
+    <!-- Google Tag Manager (deferred: lädt nach LCP / 2.5s / erstem User-Input, je nachdem was zuerst kommt) -->
+    <script>
+      (function(w,d,s,l,i){
+        var loaded = false;
+        function loadGTM(){
+          if (loaded) return; loaded = true;
+          w[l]=w[l]||[]; w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+          var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),
+              dl=l!='dataLayer'?'&l='+l:'';
+          j.async=true; j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+          f.parentNode.insertBefore(j,f);
+        }
+        // Load on first user interaction OR after 2.5s (whichever first) — keeps render thread free for LCP
+        var events = ['scroll','mousemove','touchstart','keydown','click'];
+        function onInteract(){ events.forEach(function(e){ w.removeEventListener(e, onInteract, {passive:true}); }); loadGTM(); }
+        events.forEach(function(e){ w.addEventListener(e, onInteract, {passive:true, once:true}); });
+        if ('requestIdleCallback' in w) {
+          w.requestIdleCallback(loadGTM, { timeout: 2500 });
+        } else {
+          setTimeout(loadGTM, 2500);
+        }
+      })(window,document,'script','dataLayer','GTM-T39J3HHC');
+    </script>
     <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
@@ -408,31 +426,61 @@
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Trusted Shops Trustbadge -->
-    <script async data-desktop-y-offset="0" data-mobile-y-offset="10" data-desktop-disable-reviews="false" data-desktop-enable-custom="false" data-desktop-position="left" data-desktop-custom-width="156" data-desktop-enable-fadeout="false" data-disable-mobile="false" data-disable-trustbadge="false" data-mobile-custom-width="80" data-mobile-disable-reviews="false" data-mobile-enable-custom="false" data-mobile-position="left" data-mobile-enable-topbar="false" data-mobile-enable-fadeout="true" charset="UTF-8" src="//widgets.trustedshops.com/js/XD9E26EDF6E35468A4F6C9BDFD0A6E540.js"></script>
-    <!-- Trusted Shops Review Sticker -->
+    <!-- Trusted Shops Trustbadge & Review Sticker — DEFERRED bis nach Window-Load + 3s, um LCP/TBT nicht zu blockieren -->
     <script>
-      (function() {
-        var _tsRatingConfig = {
-          tsid: 'XD9E26EDF6E35468A4F6C9BDFD0A6E540',
-          variant: 'skyscraper_horizontal',
-          theme: 'light',
-          reviews: 5,
-          betterThan: 3.0,
-          richSnippets: 'on',
-          backgroundColor: 'transparent',
-          linkColor: '#FFFFFF',
-          quotationMarkColor: '#FFFFFF',
-          fontFamily: 'inherit',
-          reviewMinLength: 10
-        };
-        var _ts = document.createElement('script');
-        _ts.type = 'text/javascript';
-        _ts.charset = 'utf-8';
-        _ts.async = true;
-        _ts.src = '//widgets.trustedshops.com/reviews/tsSticker/tsProductStickerSummary.js';
-        var __ts = document.getElementsByTagName('script')[0];
-        __ts.parentNode.insertBefore(_ts, __ts);
+      (function(){
+        function loadTrustedShops(){
+          // 1) Trustbadge
+          var tb = document.createElement('script');
+          tb.async = true; tb.charset = 'UTF-8';
+          tb.setAttribute('data-desktop-y-offset', '0');
+          tb.setAttribute('data-mobile-y-offset', '10');
+          tb.setAttribute('data-desktop-disable-reviews', 'false');
+          tb.setAttribute('data-desktop-enable-custom', 'false');
+          tb.setAttribute('data-desktop-position', 'left');
+          tb.setAttribute('data-desktop-custom-width', '156');
+          tb.setAttribute('data-desktop-enable-fadeout', 'false');
+          tb.setAttribute('data-disable-mobile', 'false');
+          tb.setAttribute('data-disable-trustbadge', 'false');
+          tb.setAttribute('data-mobile-custom-width', '80');
+          tb.setAttribute('data-mobile-disable-reviews', 'false');
+          tb.setAttribute('data-mobile-enable-custom', 'false');
+          tb.setAttribute('data-mobile-position', 'left');
+          tb.setAttribute('data-mobile-enable-topbar', 'false');
+          tb.setAttribute('data-mobile-enable-fadeout', 'true');
+          tb.src = '//widgets.trustedshops.com/js/XD9E26EDF6E35468A4F6C9BDFD0A6E540.js';
+          document.body.appendChild(tb);
+
+          // 2) Review Sticker (Rich-Snippets)
+          window._tsRatingConfig = {
+            tsid: 'XD9E26EDF6E35468A4F6C9BDFD0A6E540',
+            variant: 'skyscraper_horizontal',
+            theme: 'light',
+            reviews: 5,
+            betterThan: 3.0,
+            richSnippets: 'on',
+            backgroundColor: 'transparent',
+            linkColor: '#FFFFFF',
+            quotationMarkColor: '#FFFFFF',
+            fontFamily: 'inherit',
+            reviewMinLength: 10
+          };
+          var rs = document.createElement('script');
+          rs.type = 'text/javascript'; rs.charset = 'utf-8'; rs.async = true;
+          rs.src = '//widgets.trustedshops.com/reviews/tsSticker/tsProductStickerSummary.js';
+          document.body.appendChild(rs);
+        }
+        // Warte auf window.load + 3s, oder erste User-Interaktion
+        var triggered = false;
+        function trigger(){ if (triggered) return; triggered = true; loadTrustedShops(); }
+        if (document.readyState === 'complete') {
+          setTimeout(trigger, 3000);
+        } else {
+          window.addEventListener('load', function(){ setTimeout(trigger, 3000); }, { once: true });
+        }
+        ['scroll','touchstart','click'].forEach(function(e){
+          window.addEventListener(e, trigger, { once: true, passive: true });
+        });
       })();
     </script>
   </body>
