@@ -191,6 +191,18 @@ export default function CollectionDetail() {
     enabled: !!handle,
   });
 
+  // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
+  // (Vendor-Counts) die GESAMTE Kollektion widerspiegeln, nicht nur die
+  // initial geladenen Produkte. Schutz: max. 30 Iterationen.
+  React.useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      const loadedPages = data?.pages?.length || 0;
+      if (loadedPages < 30) {
+        fetchNextPage();
+      }
+    }
+  }, [hasNextPage, isFetchingNextPage, data?.pages?.length, fetchNextPage]);
+
   const collection = data?.pages?.[0]?.collection || null;
   const allProducts = useMemo(() => {
     if (!data?.pages) return [];
