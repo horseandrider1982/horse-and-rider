@@ -194,7 +194,7 @@ export default function CollectionDetail() {
   // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
   // (Vendor-Counts) die GESAMTE Kollektion widerspiegeln, nicht nur die
   // initial geladenen Produkte. Schutz: max. 30 Iterationen.
-  React.useEffect(() => {
+  useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       const loadedPages = data?.pages?.length || 0;
       if (loadedPages < 30) {
