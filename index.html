@@ -56,21 +56,47 @@
     <link rel="dns-prefetch" href="https://ehiemefjuylqfkrkfqgs.supabase.co" />
     <title>Horse &amp; Rider Luhmühlen - Reitsport Online Shop</title>
     <meta name="description" content="Eventing Equipment & Reitsportausrüstung online kaufen ✓ Hochwertige Marken für Vielseitigkeit, Jagdreiten & Training ✓ Schneller Versand & Top-Service bei Horse & Rider Luhmühlen">
-    <link rel="canonical" href="https://horse-and-rider.de/de" />
     <meta name="author" content="Horse & Rider Luhmühlen" />
 
-    
-    
+    <!--
+      WICHTIG: KEIN statischer <link rel="canonical"> hier!
+      Der Canonical wird pro Route dynamisch von src/hooks/usePageMeta.ts gesetzt.
+      Ein statischer Canonical würde Google fälschlich signalisieren, dass alle
+      Seiten Duplikate einer einzigen URL sind (Indexierungs-Killer für SPAs).
+
+      Fallback für Bots, die kein JS ausführen: wir setzen den Canonical inline
+      auf Basis der aktuellen Request-URL, damit niemals ein falscher Wert ausgeliefert wird.
+    -->
+    <script>
+      (function(){
+        try {
+          var origin = 'https://horse-and-rider.de';
+          var path = location.pathname || '/';
+          var canonical = origin + (path === '/' ? '/de' : path);
+          var link = document.createElement('link');
+          link.setAttribute('rel', 'canonical');
+          link.setAttribute('href', canonical);
+          document.head.appendChild(link);
+
+          var ogUrl = document.createElement('meta');
+          ogUrl.setAttribute('property', 'og:url');
+          ogUrl.setAttribute('content', canonical);
+          document.head.appendChild(ogUrl);
+        } catch(e) {}
+      })();
+    </script>
+
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/52810b40-f9f0-4dc1-9ba9-5078f2d53884/id-preview-f0f69fdf--add53e30-ccfb-46be-8dec-8c7d10749009.lovable.app-1771889069297.png">
+    <meta property="og:site_name" content="Horse & Rider Luhmühlen" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:title" content="Horse &amp; Rider Luhmühlen - Reitsport Online Shop" />
+    <meta property="og:description" content="Eventing Equipment & Reitsportausrüstung online kaufen. Hochwertige Marken für Vielseitigkeit, Jagdreiten & Training bei Horse & Rider Luhmühlen." />
+    <meta property="og:image" content="https://horse-and-rider.de/og-default.jpg" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/52810b40-f9f0-4dc1-9ba9-5078f2d53884/id-preview-f0f69fdf--add53e30-ccfb-46be-8dec-8c7d10749009.lovable.app-1771889069297.png">
-    <meta property="og:title" content="Horse &amp; Rider Luhmühlen - Reitsport Online Shop">
-  <meta name="twitter:title" content="Horse &amp; Rider Luhmühlen - Reitsport Online Shop">
-  <meta property="og:description" content="Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte für Reiter und Pferd.">
-  <meta name="twitter:description" content="Ihr kompetenter Partner rund um den Reitsport. Über 20.000 Produkte für Reiter und Pferd.">
+    <meta name="twitter:title" content="Horse &amp; Rider Luhmühlen - Reitsport Online Shop" />
+    <meta name="twitter:description" content="Eventing Equipment & Reitsportausrüstung online kaufen bei Horse & Rider Luhmühlen." />
+    <meta name="twitter:image" content="https://horse-and-rider.de/og-default.jpg" />
 </head>
 
   <body>
