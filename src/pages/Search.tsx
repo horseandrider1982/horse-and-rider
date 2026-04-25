@@ -66,6 +66,14 @@ const Search = () => {
     enabled: !!query,
   });
 
+  // Auto-Nachladen aller Seiten im Hintergrund (max 30), damit Filter-Counts vollständig sind
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      const loadedPages = data?.pages?.length || 0;
+      if (loadedPages < 30) fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, data?.pages?.length, fetchNextPage]);
+
   const allProducts = data?.pages.flatMap(p => p.products) || [];
   const filteredProducts = useListingFilters(allProducts, filters);
 
