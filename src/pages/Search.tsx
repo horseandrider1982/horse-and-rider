@@ -31,6 +31,17 @@ const Search = () => {
   const isMobile = useIsMobile();
   const [filters, setFilters] = useState<ListingFilters>(EMPTY_LISTING_FILTERS);
 
+  const { data: propertyConfigs } = useActivePropertyConfigs();
+  const xentralIds = useMemo(
+    () =>
+      (propertyConfigs || []).map((c) => ({
+        namespace: c.shopify_namespace,
+        key: c.shopify_key,
+      })),
+    [propertyConfigs],
+  );
+  const xentralIdsSig = xentralIds.map((i) => `${i.namespace}.${i.key}`).join(",");
+
   const {
     data,
     isLoading,
@@ -39,7 +50,7 @@ const Search = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['search-products', query, shopifyLanguage],
+    queryKey: ['search-products', query, shopifyLanguage, xentralIdsSig],
     queryFn: async ({ pageParam }) => {
       const queryParts: string[] = [];
       if (query) queryParts.push(query);
@@ -53,6 +64,7 @@ const Search = () => {
             language: shopifyLanguage,
             after: cursor || pageParam || null,
             query: combinedQuery,
+            xentralIds,
           });
           return {
             edges: (res?.data?.products?.edges || []) as ShopifyProduct[],
@@ -65,7 +77,7 @@ const Search = () => {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.pageInfo.hasNextPage ? (lastPage.pageInfo.endCursor ?? undefined) : undefined,
-    enabled: !!query,
+    enabled: !!query && propertyConfigs !== undefined,
   });
 
   // Auto-Nachladen aller Seiten im Hintergrund (max 30), damit Filter-Counts vollständig sind
