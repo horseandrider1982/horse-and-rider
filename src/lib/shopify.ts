@@ -121,7 +121,7 @@ export const STOREFRONT_QUERY = `
 `;
 
 export const STOREFRONT_PAGINATED_QUERY = `
-  query GetProductsPaginated($first: Int!, $query: String, $after: String, $language: LanguageCode) @inContext(language: $language) {
+  query GetProductsPaginated($first: Int!, $query: String, $after: String, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]!) @inContext(language: $language) {
     products(first: $first, query: $query, after: $after) {
       pageInfo {
         hasNextPage
@@ -157,6 +157,12 @@ export const STOREFRONT_PAGINATED_QUERY = `
             value
             type
           }
+          xentralMetafields: metafields(identifiers: $xentralIds) {
+            namespace
+            key
+            value
+            type
+          }
           variants(first: 10) {
             edges {
               node {
@@ -174,6 +180,12 @@ export const STOREFRONT_PAGINATED_QUERY = `
                   {namespace: "custom", key: "lieferantenbestand"},
                   {namespace: "custom", key: "ueberverkauf"}
                 ]) {
+                  namespace
+                  key
+                  value
+                  type
+                }
+                xentralMetafields: metafields(identifiers: $xentralIds) {
                   namespace
                   key
                   value
