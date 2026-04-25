@@ -73,32 +73,181 @@
       (function(){
         try {
           var origin = 'https://horse-and-rider.de';
+          var siteName = 'Horse & Rider Luhmühlen';
+          var defaultDesc = 'Eventing Equipment & Reitsportausrüstung online kaufen ✓ Hochwertige Marken für Vielseitigkeit, Jagdreiten & Training ✓ Schneller Versand & Top-Service bei Horse & Rider Luhmühlen';
           var path = location.pathname || '/';
           var canonical = origin + (path === '/' ? '/de' : path);
-          var link = document.createElement('link');
-          link.setAttribute('rel', 'canonical');
-          link.setAttribute('href', canonical);
-          document.head.appendChild(link);
 
-          var ogUrl = document.createElement('meta');
-          ogUrl.setAttribute('property', 'og:url');
-          ogUrl.setAttribute('content', canonical);
-          document.head.appendChild(ogUrl);
+          // ---------- Locale aus Pfad ableiten ----------
+          var localeMatch = path.match(/^\/([a-z]{2})(\/|$)/);
+          var locale = localeMatch ? localeMatch[1] : 'de';
+          var supportedLocales = ['de','en','es','nl','pl','da','sv'];
+          if (supportedLocales.indexOf(locale) === -1) locale = 'de';
+          var ogLocaleMap = { de:'de_DE', en:'en_US', es:'es_ES', nl:'nl_NL', pl:'pl_PL', da:'da_DK', sv:'sv_SE' };
+          document.documentElement.lang = locale;
+
+          // ---------- Pfad-Segmente ----------
+          var segments = path.split('/').filter(Boolean);
+          // Entferne führendes Locale-Segment
+          if (segments[0] && supportedLocales.indexOf(segments[0]) !== -1) segments.shift();
+
+          // ---------- Helper: Slug → lesbarer Titel ----------
+          function slugToTitle(slug) {
+            if (!slug) return '';
+            return decodeURIComponent(slug)
+              .replace(/[-_]+/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .split(' ')
+              .map(function(w){ return w.length ? w.charAt(0).toUpperCase() + w.slice(1) : w; })
+              .join(' ');
+          }
+
+          // ---------- Title, Description, og:type pro Pfad-Pattern ----------
+          var ogType = 'website';
+          var pageTitle = siteName + ' – Reitsport Online Shop';
+          var pageDesc = defaultDesc;
+
+          if (segments.length === 0) {
+            // Startseite – behält Defaults
+          } else if (segments[0] === 'product' && segments[1]) {
+            ogType = 'product';
+            var pName = slugToTitle(segments[1]);
+            pageTitle = pName + ' | ' + siteName;
+            pageDesc = pName + ' online kaufen bei ' + siteName + '. Hochwertige Reitsportausrüstung, schneller Versand und Fachberatung aus Luhmühlen.';
+          } else if (segments[0] === 'collections' && segments[1]) {
+            var cName = slugToTitle(segments[1]);
+            pageTitle = cName + ' | ' + siteName;
+            pageDesc = cName + ' online kaufen bei ' + siteName + '. Große Auswahl, Top-Marken und Fachberatung für Reiter und Pferd.';
+          } else if (segments[0] === 'marken' && segments[1]) {
+            var bName = slugToTitle(segments[1]);
+            pageTitle = bName + ' Reitsport | ' + siteName;
+            pageDesc = bName + ' bei ' + siteName + ' kaufen – original Markenware, schneller Versand und persönliche Beratung.';
+          } else if (segments[0] === 'news' && segments[1]) {
+            ogType = 'article';
+            var nName = slugToTitle(segments[1]);
+            pageTitle = nName + ' | ' + siteName;
+            pageDesc = nName + ' – News und Wissenswertes rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.';
+          } else if (segments[0] === 'news') {
+            pageTitle = 'News & Aktuelles | ' + siteName;
+            pageDesc = 'News, Tipps und Aktuelles rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.';
+          } else if (segments[0] === 'search') {
+            pageTitle = 'Suchergebnisse | ' + siteName;
+          } else {
+            // Generischer Fallback für statische Seiten (Kontakt, AGB, FAQ etc.)
+            var lastSeg = segments[segments.length - 1];
+            pageTitle = slugToTitle(lastSeg) + ' | ' + siteName;
+          }
+
+          // ---------- DOM schreiben ----------
+          document.title = pageTitle;
+
+          function setMeta(attr, name, content) {
+            var el = document.querySelector('meta[' + attr + '="' + name + '"]');
+            if (!el) {
+              el = document.createElement('meta');
+              el.setAttribute(attr, name);
+              document.head.appendChild(el);
+            }
+            el.setAttribute('content', content);
+          }
+          function setLink(rel, href, hreflang) {
+            var sel = hreflang
+              ? 'link[rel="' + rel + '"][hreflang="' + hreflang + '"]'
+              : 'link[rel="' + rel + '"]';
+            var el = document.querySelector(sel);
+            if (!el) {
+              el = document.createElement('link');
+              el.setAttribute('rel', rel);
+              if (hreflang) el.setAttribute('hreflang', hreflang);
+              document.head.appendChild(el);
+            }
+            el.setAttribute('href', href);
+          }
+
+          setMeta('name', 'description', pageDesc);
+          setLink('canonical', canonical);
+
+          // Open Graph
+          setMeta('property', 'og:url', canonical);
+          setMeta('property', 'og:type', ogType);
+          setMeta('property', 'og:site_name', siteName);
+          setMeta('property', 'og:locale', ogLocaleMap[locale] || 'de_DE');
+          setMeta('property', 'og:title', pageTitle);
+          setMeta('property', 'og:description', pageDesc);
+          setMeta('property', 'og:image', origin + '/og-default.jpg');
+
+          // Twitter
+          setMeta('name', 'twitter:card', 'summary_large_image');
+          setMeta('name', 'twitter:title', pageTitle);
+          setMeta('name', 'twitter:description', pageDesc);
+          setMeta('name', 'twitter:image', origin + '/og-default.jpg');
+
+          // ---------- Hreflang aus Pfad ableiten ----------
+          // WICHTIG: data-i18n-hreflang setzen, damit HreflangTags.tsx diese sauber ersetzen kann
+          var pathWithoutLocale = '/' + segments.join('/');
+          if (pathWithoutLocale === '/') pathWithoutLocale = '';
+          function addHreflang(loc, href) {
+            var l = document.createElement('link');
+            l.setAttribute('rel', 'alternate');
+            l.setAttribute('hreflang', loc);
+            l.setAttribute('href', href);
+            l.setAttribute('data-i18n-hreflang', 'true');
+            document.head.appendChild(l);
+          }
+          supportedLocales.forEach(function(loc){
+            addHreflang(loc, origin + '/' + loc + pathWithoutLocale);
+          });
+          addHreflang('x-default', origin + '/de' + pathWithoutLocale);
+
+          // ---------- Strukturierte Daten: Organization + WebSite (statisch, garantiert sichtbar) ----------
+          if (!document.getElementById('jsonld-organization')) {
+            var orgScript = document.createElement('script');
+            orgScript.type = 'application/ld+json';
+            orgScript.id = 'jsonld-organization';
+            orgScript.textContent = JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: siteName,
+              url: origin,
+              logo: origin + '/og-default.jpg',
+              contactPoint: {
+                '@type': 'ContactPoint',
+                telephone: '+49-4172-6403',
+                contactType: 'customer service',
+                areaServed: 'DE',
+                availableLanguage: ['German','English']
+              },
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: 'Alte Dorfstraße 8',
+                postalCode: '21376',
+                addressLocality: 'Salzhausen OT Luhmühlen',
+                addressCountry: 'DE'
+              }
+            });
+            document.head.appendChild(orgScript);
+          }
+          if (!document.getElementById('jsonld-website')) {
+            var siteScript = document.createElement('script');
+            siteScript.type = 'application/ld+json';
+            siteScript.id = 'jsonld-website';
+            siteScript.textContent = JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: siteName,
+              url: origin,
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: origin + '/de/search?q={search_term_string}',
+                'query-input': 'required name=search_term_string'
+              }
+            });
+            document.head.appendChild(siteScript);
+          }
         } catch(e) {}
       })();
     </script>
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Horse & Rider Luhmühlen" />
-    <meta property="og:locale" content="de_DE" />
-    <meta property="og:title" content="Horse &amp; Rider Luhmühlen - Reitsport Online Shop" />
-    <meta property="og:description" content="Eventing Equipment & Reitsportausrüstung online kaufen. Hochwertige Marken für Vielseitigkeit, Jagdreiten & Training bei Horse & Rider Luhmühlen." />
-    <meta property="og:image" content="https://horse-and-rider.de/og-default.jpg" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Horse &amp; Rider Luhmühlen - Reitsport Online Shop" />
-    <meta name="twitter:description" content="Eventing Equipment & Reitsportausrüstung online kaufen bei Horse & Rider Luhmühlen." />
-    <meta name="twitter:image" content="https://horse-and-rider.de/og-default.jpg" />
 </head>
 
   <body>
