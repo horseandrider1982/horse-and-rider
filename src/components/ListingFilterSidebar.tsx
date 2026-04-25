@@ -117,12 +117,20 @@ export const ListingFilterSidebar: React.FC<ListingFilterSidebarProps> = ({
   filters,
   onFilterChange,
   hideVendors,
+  cachedFacets,
 }) => {
   const { t } = useI18n();
   const { data: propertyConfigs } = useActivePropertyConfigs();
 
+  /** Use server cache wenn deutlich mehr Produkte versprochen als bisher live geladen.
+   *  Sobald Live-Set vollständig (oder größer) ist, wechseln wir auf Live-Counts. */
+  const useCache = !!cachedFacets && products.length < cachedFacets.productCount * 0.9;
+
   const vendorFacets = useMemo(() => {
     if (hideVendors) return [];
+    if (useCache && cachedFacets) {
+      return cachedFacets.vendors;
+    }
     const map = new Map<string, number>();
     for (const p of products) {
       const v = p.node.vendor;
@@ -131,11 +139,13 @@ export const ListingFilterSidebar: React.FC<ListingFilterSidebarProps> = ({
     return Array.from(map.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
-  }, [products, hideVendors]);
+  }, [products, hideVendors, useCache, cachedFacets]);
 
-  /** propertyFacets: per active config key, list of {value, count} present in collection.
-   *  Counts how many products have at least one variant/product-level value matching. */
+  /** propertyFacets: per active config key, list of {value, count} present in collection. */
   const propertyFacets = useMemo(() => {
+    if (useCache && cachedFacets) {
+      return cachedFacets.properties.filter((g) => g.values.length > 1);
+    }
     if (!propertyConfigs?.length) return [] as Array<{
       key: string;
       label: string;
@@ -166,9 +176,9 @@ export const ListingFilterSidebar: React.FC<ListingFilterSidebarProps> = ({
         return { key: cfg.shopify_key, label: cfg.label, values };
       })
       .filter((g): g is { key: string; label: string; values: Array<{ value: string; count: number }> } =>
-        g !== null && g.values.length > 1, // hide single-value (no filtering benefit)
+        g !== null && g.values.length > 1,
       );
-  }, [products, propertyConfigs]);
+  }, [products, propertyConfigs, useCache, cachedFacets]);
 
   const activePropertyCount = useMemo(
     () => Object.values(filters.properties).reduce((acc, set) => acc + (set?.size || 0), 0),
