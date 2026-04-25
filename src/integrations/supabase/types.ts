@@ -248,6 +248,42 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_facets_cache: {
+        Row: {
+          computed_at: string
+          created_at: string
+          handle: string
+          id: string
+          locale: string
+          product_count: number
+          properties: Json
+          updated_at: string
+          vendors: Json
+        }
+        Insert: {
+          computed_at?: string
+          created_at?: string
+          handle: string
+          id?: string
+          locale?: string
+          product_count?: number
+          properties?: Json
+          updated_at?: string
+          vendors?: Json
+        }
+        Update: {
+          computed_at?: string
+          created_at?: string
+          handle?: string
+          id?: string
+          locale?: string
+          product_count?: number
+          properties?: Json
+          updated_at?: string
+          vendors?: Json
+        }
+        Relationships: []
+      }
       collection_seo_texts: {
         Row: {
           body: string
