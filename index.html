@@ -99,16 +99,141 @@
           // Entferne führendes Locale-Segment
           if (segments[0] && supportedLocales.indexOf(segments[0]) !== -1) segments.shift();
 
-          // ---------- Helper: Slug → lesbarer Titel ----------
+          // ---------- Bekannte Marken (aus DB extrahiert, sortiert nach Slug-Länge DESC für Greedy-Matching) ----------
+          // Korrekt-Schreibweise als Display-Name. Multi-Word-Marken zuerst (z.B. "back-on-track" vor "back").
+          var KNOWN_BRANDS = {
+            'biofarmab-horsecare': 'Biofarmab Horsecare', 'hans-melzer-horse-equipment': 'Hans Melzer',
+            'kentucky-horsewear': 'Kentucky Horsewear', 'kentucky-dogwear': 'Kentucky Dogwear',
+            'waldhausen-health-care': 'Waldhausen Health Care', 'mark-todd-collection': 'Mark Todd',
+            'schockemoehle-sports': 'Schockemöhle Sports', 'horse-rider-luhmuehlen': 'Horse & Rider',
+            'new-equine-wear-ltd': 'New Equine Wear', 'christ-lammfelle': 'Christ Lammfelle',
+            'grooming-deluxe': 'Grooming Deluxe', 'premier-equine': 'Premier Equine',
+            'trust-equestrian': 'Trust Equestrian', 'carr-day-martin': 'Carr & Day & Martin',
+            'tech-stirrups': 'Tech Stirrups', 'mountain-horse': 'Mountain Horse',
+            'jhl-pro-steel': 'JHL Pro Steel', 'back-on-track': 'Back on Track',
+            'champion-hats': 'Champion', 'bense-eicke': 'Bense & Eicke',
+            'biemann-de-haas': 'Biemann & de Haas', 'alan-paine': 'Alan Paine',
+            'rob-van-boxtel': 'Rob van Boxtel', 'stapp-horse': 'Stapp Horse',
+            'horse-fitform': 'Horse Fitform', 'horse-jockey': 'Horse Jockey',
+            'jvh-eventing': 'JVH Eventing', 'lady-clare': 'Lady Clare',
+            'muck-boot': 'Muck Boot', 'optimum-time': 'Optimum Time',
+            'point-two': 'Point Two', 'stable-kit': 'Stable Kit',
+            'woof-wear': 'Woof Wear', 'five-fingers': 'Five Fingers',
+            'effol-med': 'Effol Med', 'equine-fusion': 'Equine Fusion',
+            'denirobootco': 'Deniro Bootco', 'equest': 'Equest',
+            'acavallo': 'Acavallo', 'airowear': 'Airowear', 'ariat': 'Ariat',
+            'ballistol': 'Ballistol', 'barbour': 'Barbour', 'beris': 'Beris',
+            'bitz': 'Bitz', 'bucas': 'Bucas', 'busse': 'Busse',
+            'cavalor': 'Cavalor', 'collonil': 'Collonil', 'coolex': 'Coolex',
+            'doebert': 'Döbert', 'dubarry': 'Dubarry', 'dyon': 'Dyon',
+            'effol': 'Effol', 'eggersmann': 'Eggersmann', 'ekkia': 'Ekkia',
+            'elt': 'ELT', 'equick': 'Equick', 'equilibrium': 'Equilibrium',
+            'equiline': 'Equiline', 'equitaly': 'Equitaly', 'eskadron': 'Eskadron',
+            'euroriding': 'Euroriding', 'flair': 'Flair', 'fleck': 'Fleck',
+            'freejump': 'Freejump', 'gatehouse': 'Gatehouse', 'gpa': 'GPA',
+            'happy-mouth': 'Happy Mouth', 'hauk': 'Hauk', 'heiniger': 'Heiniger',
+            'helite': 'Helite', 'hepp': 'Hepp', 'hestevard': 'Hestevard',
+            'hippobook': 'Hippobook', 'hobo-boots': 'Hobo Boots',
+            'horseware': 'Horseware', 'jacks': 'Jacks', 'jhl': 'JHL',
+            'jott': 'JOTT', 'kask': 'Kask', 'kavalkade': 'Kavalkade',
+            'kerbex': 'Kerbex', 'kerbl': 'Kerbl', 'keralit': 'Keralit',
+            'kieffer': 'Kieffer', 'kiwi': 'Kiwi', 'lehmann': 'Lehmann',
+            'leistner': 'Leistner', 'lemetex': 'Lemetex', 'lemieux': 'LeMieux',
+            'leovet': 'Leovet', 'likit': 'Likit', 'marstall': 'Marstall',
+            'mattes': 'Mattes', 'nathe': 'Nathe', 'noesenberger': 'Nösenberger',
+            'norton': 'Norton', 'passier': 'Passier', 'pharmakas': 'Pharmakas',
+            'pikeur': 'Pikeur', 'prestige': 'Prestige', 'racesafe': 'Racesafe',
+            'shires': 'Shires', 'solibel': 'Solibel', 'someh': 'Someh',
+            'soulhorse': 'Soulhorse', 'sprenger': 'Sprenger', 'stiefel': 'Stiefel',
+            'stuebben': 'Stübben', 'tana': 'Tana', 'thermatex': 'Thermatex',
+            'urkraft': 'Urkraft', 'uvex': 'Uvex', 'veredus': 'Veredus',
+            'waldhausen': 'Waldhausen', 'westgate': 'Westgate',
+            'wildhorn': 'Wildhorn', 'winderen': 'Winderen', 'wintec': 'Wintec',
+            'zandona': 'Zandona', 'bama-eri': 'Bama', 'charline': 'Charline',
+            'gera': 'Gera', 'st-zaum': 'ST Zaum', 'star': 'Star',
+            'style': 'Style', 'swing': 'Swing', 'charles-owen': 'Charles Owen'
+          };
+
+          // ---------- Kategorie-Suffixe (Slug-Endung → Kategorie-Hinweis) ----------
+          // Längere Suffixe zuerst für Greedy-Matching!
+          var CATEGORY_SUFFIXES = [
+            { match: ['streichkappen', 'streichkappe'], cat: 'Streichkappen' },
+            { match: ['gamaschen', 'gamasche'], cat: 'Gamaschen' },
+            { match: ['hufglocken', 'hufglocke', 'sprungglocken', 'sprungglocke'], cat: 'Hufglocken' },
+            { match: ['trensen', 'trense', 'zaeumung', 'zaeumungen'], cat: 'Trensen' },
+            { match: ['saettel', 'sattel'], cat: 'Sättel' },
+            { match: ['gurte', 'gurt', 'sattelgurt', 'sattelgurte'], cat: 'Sattelgurte' },
+            { match: ['schabracken', 'schabracke', 'satteldecken', 'satteldecke'], cat: 'Schabracken' },
+            { match: ['decken', 'decke', 'abschwitzdecke', 'regendecke', 'winterdecke'], cat: 'Decken' },
+            { match: ['halfter'], cat: 'Halfter' },
+            { match: ['stricke', 'strick', 'fuehrstrick'], cat: 'Stricke' },
+            { match: ['gerten', 'gerte', 'peitschen', 'peitsche'], cat: 'Gerten' },
+            { match: ['sporen', 'spornriemen'], cat: 'Sporen' },
+            { match: ['steigbuegel', 'steigbügel'], cat: 'Steigbügel' },
+            { match: ['reithose', 'reithosen', 'breeches'], cat: 'Reithosen' },
+            { match: ['reitstiefel', 'reitstiefelette', 'stiefeletten', 'reitschuhe'], cat: 'Reitstiefel' },
+            { match: ['handschuhe', 'reithandschuhe'], cat: 'Reithandschuhe' },
+            { match: ['helm', 'helme', 'reitkappe', 'reitkappen', 'reithelm'], cat: 'Reithelme' },
+            { match: ['weste', 'westen', 'sicherheitsweste'], cat: 'Westen' },
+            { match: ['jacke', 'jacken', 'reitjacke', 'turnierjacke'], cat: 'Reitjacken' },
+            { match: ['shirt', 'shirts', 'tshirt', 'poloshirt', 'turniershirt'], cat: 'Shirts' },
+            { match: ['buersten', 'buerste', 'striegel'], cat: 'Putzzeug' },
+            { match: ['shampoo', 'pflege', 'lederpflege', 'huffett'], cat: 'Pflege' },
+            { match: ['leckerli', 'leckerlies', 'snacks'], cat: 'Snacks' },
+            { match: ['mineralfutter', 'kraftfutter', 'muesli'], cat: 'Futter' }
+          ];
+
+          // ---------- Helper: Slug → lesbarer Titel (mit Marken-Erkennung) ----------
           function slugToTitle(slug) {
             if (!slug) return '';
-            return decodeURIComponent(slug)
+            var s = decodeURIComponent(slug).toLowerCase();
+            // Greedy: längste bekannte Marke am Anfang erkennen
+            var brandPrefix = '';
+            var brandKeys = Object.keys(KNOWN_BRANDS).sort(function(a,b){ return b.length - a.length; });
+            for (var i = 0; i < brandKeys.length; i++) {
+              var bk = brandKeys[i];
+              if (s === bk || s.indexOf(bk + '-') === 0) {
+                brandPrefix = KNOWN_BRANDS[bk];
+                s = s.substring(bk.length).replace(/^-+/, '');
+                break;
+              }
+            }
+            // Rest capitalizen
+            var rest = s
               .replace(/[-_]+/g, ' ')
               .replace(/\s+/g, ' ')
               .trim()
               .split(' ')
               .map(function(w){ return w.length ? w.charAt(0).toUpperCase() + w.slice(1) : w; })
               .join(' ');
+            return brandPrefix && rest ? brandPrefix + ' ' + rest
+                 : brandPrefix ? brandPrefix
+                 : rest;
+          }
+
+          // ---------- Helper: Kategorie-Suffix aus Slug ableiten ----------
+          function detectCategory(slug) {
+            if (!slug) return '';
+            var s = decodeURIComponent(slug).toLowerCase();
+            for (var i = 0; i < CATEGORY_SUFFIXES.length; i++) {
+              var entry = CATEGORY_SUFFIXES[i];
+              for (var j = 0; j < entry.match.length; j++) {
+                // Match nur wenn als ganzes Wort (umgeben von - oder Wortgrenze) vorkommt
+                var token = entry.match[j];
+                var re = new RegExp('(^|-)' + token + '(-|$)');
+                if (re.test(s)) return entry.cat;
+              }
+            }
+            return '';
+          }
+
+          // ---------- Helper: Truncation (Wort-genau, nicht mitten im Wort) ----------
+          function truncate(str, max) {
+            if (!str || str.length <= max) return str;
+            var cut = str.substring(0, max);
+            var lastSpace = cut.lastIndexOf(' ');
+            if (lastSpace > max * 0.6) cut = cut.substring(0, lastSpace);
+            return cut.replace(/[\s\-–|]+$/, '') + '…';
           }
 
           // ---------- Title, Description, og:type pro Pfad-Pattern ----------
@@ -121,21 +246,39 @@
           } else if (segments[0] === 'product' && segments[1]) {
             ogType = 'product';
             var pName = slugToTitle(segments[1]);
-            pageTitle = pName + ' | ' + siteName;
-            pageDesc = pName + ' online kaufen bei ' + siteName + '. Hochwertige Reitsportausrüstung, schneller Versand und Fachberatung aus Luhmühlen.';
+            var pCat = detectCategory(segments[1]);
+            // Kategorie nur anhängen wenn nicht schon im Namen (Singular/Plural-tolerant)
+            // z.B. wenn Name "Streichkappe" enthält und Kategorie "Streichkappen" wäre → nicht anhängen
+            // z.B. wenn Name "Decke" enthält und Kategorie "Decken" wäre → nicht anhängen
+            var nameLower = pName.toLowerCase();
+            var catLower = pCat.toLowerCase();
+            // Generiere mehrere Singular-Kandidaten aus Plural
+            var catVariants = [catLower];
+            if (catLower.length > 4) {
+              if (catLower.slice(-1) === 'n') catVariants.push(catLower.slice(0, -1));   // Decken → Decke, Streichkappen → Streichkappe
+              if (catLower.slice(-2) === 'en') catVariants.push(catLower.slice(0, -2));  // Reithosen → Reithos
+              if (catLower.slice(-1) === 'e') catVariants.push(catLower.slice(0, -1));   // Hufglocke → Hufglock
+              if (catLower.slice(-2) === 'el') catVariants.push(catLower.slice(0, -1));  // Sättel → Sätte
+            }
+            var alreadyContainsCat = pCat && catVariants.some(function(v){
+              return v.length > 3 && nameLower.indexOf(v) !== -1;
+            });
+            var pTitleCore = (pCat && !alreadyContainsCat) ? pName + ' ' + pCat : pName;
+            pageTitle = truncate(pTitleCore + ' | ' + siteName, 60);
+            pageDesc = truncate(pName + ' online kaufen bei ' + siteName + '. Hochwertige Reitsportausrüstung, schneller Versand und Fachberatung aus Luhmühlen.', 155);
           } else if (segments[0] === 'collections' && segments[1]) {
             var cName = slugToTitle(segments[1]);
-            pageTitle = cName + ' | ' + siteName;
-            pageDesc = cName + ' online kaufen bei ' + siteName + '. Große Auswahl, Top-Marken und Fachberatung für Reiter und Pferd.';
+            pageTitle = truncate(cName + ' | ' + siteName, 60);
+            pageDesc = truncate(cName + ' online kaufen bei ' + siteName + '. Große Auswahl, Top-Marken und Fachberatung für Reiter und Pferd.', 155);
           } else if (segments[0] === 'marken' && segments[1]) {
             var bName = slugToTitle(segments[1]);
-            pageTitle = bName + ' Reitsport | ' + siteName;
-            pageDesc = bName + ' bei ' + siteName + ' kaufen – original Markenware, schneller Versand und persönliche Beratung.';
+            pageTitle = truncate(bName + ' Reitsport | ' + siteName, 60);
+            pageDesc = truncate(bName + ' bei ' + siteName + ' kaufen – original Markenware, schneller Versand und persönliche Beratung.', 155);
           } else if (segments[0] === 'news' && segments[1]) {
             ogType = 'article';
             var nName = slugToTitle(segments[1]);
-            pageTitle = nName + ' | ' + siteName;
-            pageDesc = nName + ' – News und Wissenswertes rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.';
+            pageTitle = truncate(nName + ' | ' + siteName, 60);
+            pageDesc = truncate(nName + ' – News und Wissenswertes rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.', 155);
           } else if (segments[0] === 'news') {
             pageTitle = 'News & Aktuelles | ' + siteName;
             pageDesc = 'News, Tipps und Aktuelles rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.';
