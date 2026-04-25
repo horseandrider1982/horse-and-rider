@@ -117,6 +117,8 @@ const COLLECTION_QUERY = `
   }
 `;
 
+const PAGE_SIZE = 100;
+
 async function fetchCollectionPage(
   handle: string,
   locale: string,
@@ -134,7 +136,7 @@ async function fetchCollectionPage(
         query: COLLECTION_QUERY,
         variables: {
           handle,
-          first: 24,
+          first: PAGE_SIZE,
           after: innerCursor || cursor || null,
           language: locale.toUpperCase(),
           xentralIds,
@@ -156,7 +158,7 @@ async function fetchCollectionPage(
       if (!collectionMeta && r._collection) collectionMeta = r._collection;
       return { edges: r.edges, pageInfo: r.pageInfo };
     },
-    24,
+    PAGE_SIZE,
   );
 
   return { ...result, collection: collectionMeta };
