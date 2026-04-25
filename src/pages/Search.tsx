@@ -168,7 +168,7 @@ const Search = () => {
               {filteredProducts.length === 0 && allProducts.length > 0 && (
                 <p className="text-muted-foreground py-8 text-center">{t("search.no_results").replace("{query}", query)}</p>
               )}
-              {hasNextPage && filters.vendors.size === 0 && (
+              {hasNextPage && filters.vendors.size === 0 && Object.keys(filters.properties).length === 0 && (
                 <div className="flex justify-center mt-8">
                   <Button variant="outline" size="lg" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
                     {isFetchingNextPage ? (
