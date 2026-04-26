@@ -357,7 +357,7 @@ export default function CollectionDetail() {
                   {/* Desktop filter sidebar */}
                   {!isMobile && (
                     <div className="w-56 xl:w-64 flex-shrink-0 hidden lg:block">
-                      <div className="sticky top-4">
+                      <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto pr-1">
                         <ListingFilterSidebar
                           products={allProducts}
                           filters={filters}
