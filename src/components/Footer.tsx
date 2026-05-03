@@ -10,7 +10,7 @@ import { usePublicCmsMenus } from "@/hooks/usePublicCmsMenus";
 import { CmsMenuItemRenderer } from "@/components/CmsMenuItemRenderer";
 import { LocaleLink } from "@/components/LocaleLink";
 import { useI18n } from "@/i18n";
-import logo from "@/assets/logo-2x.png";
+import logo from "@/assets/logo-2x.webp";
 
 
 function NewsletterSignup() {
