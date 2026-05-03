@@ -38,9 +38,10 @@ export const CookieBanner = () => {
     // Defer initial render until after LCP to avoid the banner being identified as LCP element
     if (!consent) {
       const show = () => setVisible(true);
-      const idleId = "requestIdleCallback" in window
-        ? (window as any).requestIdleCallback(show, { timeout: 2500 })
-        : window.setTimeout(show, 1500);
+      const w = window as Window & typeof globalThis;
+      const idleId = "requestIdleCallback" in w
+        ? (w as any).requestIdleCallback(show, { timeout: 2500 })
+        : w.setTimeout(show, 1500);
       const handleReopen = () => setVisible(true);
       window.addEventListener(REOPEN_EVENT, handleReopen);
       return () => {
