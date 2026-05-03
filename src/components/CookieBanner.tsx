@@ -34,25 +34,28 @@ export const CookieBanner = () => {
   }
 
   useEffect(() => {
-    const consent = localStorage.getItem(CONSENT_KEY);
-    // Defer initial render until after LCP to avoid the banner being identified as LCP element
-    if (!consent) {
-      const show = () => setVisible(true);
-      const w = window as Window & typeof globalThis;
-      const idleId = "requestIdleCallback" in w
-        ? (w as any).requestIdleCallback(show, { timeout: 2500 })
-        : w.setTimeout(show, 1500);
-      const handleReopen = () => setVisible(true);
-      window.addEventListener(REOPEN_EVENT, handleReopen);
-      return () => {
-        window.removeEventListener(REOPEN_EVENT, handleReopen);
-        if ("cancelIdleCallback" in window) (window as any).cancelIdleCallback(idleId);
-        else clearTimeout(idleId as number);
-      };
-    }
     const handleReopen = () => setVisible(true);
     window.addEventListener(REOPEN_EVENT, handleReopen);
-    return () => window.removeEventListener(REOPEN_EVENT, handleReopen);
+
+    const consent = localStorage.getItem(CONSENT_KEY);
+    let timerId: number | undefined;
+    let idleId: number | undefined;
+    if (!consent) {
+      const show = () => setVisible(true);
+      const ric = (window as any).requestIdleCallback;
+      if (typeof ric === "function") {
+        idleId = ric(show, { timeout: 2500 });
+      } else {
+        timerId = window.setTimeout(show, 1500);
+      }
+    }
+    return () => {
+      window.removeEventListener(REOPEN_EVENT, handleReopen);
+      if (timerId !== undefined) window.clearTimeout(timerId);
+      if (idleId !== undefined && (window as any).cancelIdleCallback) {
+        (window as any).cancelIdleCallback(idleId);
+      }
+    };
   }, []);
 
   const accept = (value: "all" | "essential") => {
