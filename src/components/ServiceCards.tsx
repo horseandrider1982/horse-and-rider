@@ -20,8 +20,8 @@ export const ServiceCards = () => {
   ];
 
   return (
-    // min-h reserves space to prevent CLS while images/fonts load
-    <section className="py-14 bg-muted/30 min-h-[820px] md:min-h-[480px]">
+    // aspect-ratio on image containers reserves space; explicit content-visibility hint
+    <section className="py-14 bg-muted/30" style={{ contain: 'layout' }}>
       <div className="container mx-auto px-4">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest text-center mb-2">
           {t("services.subtitle") || "Das macht uns aus"}
