@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2, ChevronLeft } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -34,6 +35,16 @@ export default function MarkenDetail() {
   const vendorName = brand?.name || "";
   const { data: productsData, isLoading: productsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useBrandProducts(vendorName, !!vendorName);
   const products = productsData?.pages.flatMap(p => p.products) || [];
+
+  // GA4 view_item_list — fire once per brand
+  const listName = `brand: ${slug ?? ""}`;
+  const trackedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!slug || products.length === 0) return;
+    if (trackedRef.current === slug) return;
+    trackedRef.current = slug;
+    import("@/lib/ga4").then(({ trackViewItemList }) => trackViewItemList(products, listName));
+  }, [slug, products.length]);
 
   const bottomMenuHandle = slug ? BRAND_BOTTOM_MENUS[slug] : undefined;
   const { data: bottomMenuItems } = useShopifyMenu(bottomMenuHandle || 'main-menu');
@@ -92,7 +103,7 @@ export default function MarkenDetail() {
             : products.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                  {products.map(p => <ListingProductCard key={p.node.id} product={p} />)}
+                  {products.map((p, idx) => <ListingProductCard key={p.node.id} product={p} listName={listName} index={idx} />)}
                 </div>
                 {hasNextPage && (
                   <div className="flex justify-center mt-8">
