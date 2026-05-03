@@ -51,6 +51,7 @@ export function useActivePropertyConfigs() {
         >
       >;
     },
-    staleTime: 5 * 60 * 1000, // cache 5 minutes
+    staleTime: Infinity, // configs change rarely, avoid refetch
+    gcTime: 60 * 60 * 1000,
   });
 }

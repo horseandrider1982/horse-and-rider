@@ -118,7 +118,7 @@ const COLLECTION_QUERY = `
   }
 `;
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 24;
 
 async function fetchCollectionPage(
   handle: string,

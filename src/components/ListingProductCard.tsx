@@ -18,6 +18,35 @@ export function ListingProductCard({ product, listName, index }: ListingProductC
     if (listName) trackSelectItem(product, listName, index);
   };
 
+  // Shopify CDN image transform: deliver right-sized WebP to cut payload
+  const optimizedSrc = image
+    ? (() => {
+        try {
+          const u = new URL(image.url);
+          u.searchParams.set("width", "400");
+          return u.toString();
+        } catch {
+          return image.url;
+        }
+      })()
+    : "";
+  const srcSet = image
+    ? (() => {
+        try {
+          const make = (w: number) => {
+            const u = new URL(image.url);
+            u.searchParams.set("width", String(w));
+            return `${u.toString()} ${w}w`;
+          };
+          return [make(300), make(400), make(600), make(800)].join(", ");
+        } catch {
+          return undefined;
+        }
+      })()
+    : undefined;
+
+  const isAboveFold = typeof index === "number" && index < 8;
+
   return (
     <LocaleLink
       to={`/product/${product.node.handle}`}
@@ -27,12 +56,16 @@ export function ListingProductCard({ product, listName, index }: ListingProductC
       <div className="aspect-square bg-white overflow-hidden">
         {image ? (
           <img
-            src={image.url}
+            src={optimizedSrc}
+            srcSet={srcSet}
+            sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
             alt={image.altText || product.node.title}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             width={400}
             height={400}
-            loading="lazy"
+            loading={isAboveFold ? "eager" : "lazy"}
+            // @ts-expect-error fetchpriority is a valid HTML attribute
+            fetchpriority={isAboveFold ? "high" : "auto"}
             decoding="async"
           />
         ) : (
