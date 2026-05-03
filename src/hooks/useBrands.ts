@@ -44,7 +44,8 @@ export function useBrands() {
         gpsrHomepage: b.gpsr_homepage,
       }));
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
   });
 }
 

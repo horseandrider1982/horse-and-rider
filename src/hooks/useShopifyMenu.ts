@@ -44,7 +44,8 @@ export function useShopifyMenu(handle: string = 'main-menu') {
         .filter(item => !EXCLUDED_HANDLES.includes(item.handle || ''))
         .map(normalizeItem);
     },
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 30, // 30 min — menu rarely changes
+    gcTime: 1000 * 60 * 60,
   });
 }
 

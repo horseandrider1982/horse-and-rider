@@ -1,4 +1,4 @@
-import heroImage from "@/assets/hero-equestrian.jpg";
+import heroImage from "@/assets/hero-equestrian.webp";
 import { useI18n } from "@/i18n";
 
 export const HeroSection = () => {
@@ -11,7 +11,9 @@ export const HeroSection = () => {
           alt="Horse & Rider - Reitsport"
           width={1600}
           height={600}
-          fetchPriority="high"
+          // @ts-expect-error fetchpriority is a valid HTML attribute (lowercase)
+          fetchpriority="high"
+          loading="eager"
           decoding="async"
           className="w-full h-full object-cover"
         />
