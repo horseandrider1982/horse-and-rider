@@ -14,7 +14,7 @@ import { User, Search, LogIn, LogOut, UserCircle, CreditCard, PawPrint, Shopping
 import { SearchOverlay } from "@/components/SmartSearch";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-2x.png";
 
 export const Header = () => {
   const { user, isAdmin } = useAuth();
