@@ -1,22 +1,22 @@
 import { useI18n } from "@/i18n";
 import { Store, Globe, Wrench, Scissors } from "lucide-react";
-import ladenImg from "@/assets/laden-start.webp";
+import ladenImgMd from "@/assets/laden-start-md.webp";
 import ladenImgSm from "@/assets/laden-start-sm.webp";
-import sattlereiImg from "@/assets/sattlerei-start.webp";
+import sattlereiImgMd from "@/assets/sattlerei-start-md.webp";
 import sattlereiImgSm from "@/assets/sattlerei-start-sm.webp";
-import stickImg from "@/assets/stickerei-start.webp";
+import stickImgMd from "@/assets/stickerei-start-md.webp";
 import stickImgSm from "@/assets/stickerei-start-sm.webp";
-import onlineImg from "@/assets/online-start.webp";
+import onlineImgMd from "@/assets/online-start-md.webp";
 import onlineImgSm from "@/assets/online-start-sm.webp";
 
 export const ServiceCards = () => {
   const { t } = useI18n();
 
   const services = [
-    { titleKey: "services.store.title", descKey: "services.store.desc", image: ladenImg, imageSm: ladenImgSm, icon: Store },
-    { titleKey: "services.online.title", descKey: "services.online.desc", image: onlineImg, imageSm: onlineImgSm, icon: Globe },
-    { titleKey: "services.saddle.title", descKey: "services.saddle.desc", image: sattlereiImg, imageSm: sattlereiImgSm, icon: Wrench },
-    { titleKey: "services.embroidery.title", descKey: "services.embroidery.desc", image: stickImg, imageSm: stickImgSm, icon: Scissors },
+    { titleKey: "services.store.title", descKey: "services.store.desc", image: ladenImgMd, imageSm: ladenImgSm, icon: Store },
+    { titleKey: "services.online.title", descKey: "services.online.desc", image: onlineImgMd, imageSm: onlineImgSm, icon: Globe },
+    { titleKey: "services.saddle.title", descKey: "services.saddle.desc", image: sattlereiImgMd, imageSm: sattlereiImgSm, icon: Wrench },
+    { titleKey: "services.embroidery.title", descKey: "services.embroidery.desc", image: stickImgMd, imageSm: stickImgSm, icon: Scissors },
   ];
 
   return (
@@ -40,13 +40,13 @@ export const ServiceCards = () => {
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
                     src={s.imageSm}
-                    srcSet={`${s.imageSm} 240w, ${s.image} 400w`}
+                    srcSet={`${s.imageSm} 240w, ${s.image} 360w`}
                     sizes="(min-width: 1024px) 240px, (min-width: 640px) 22vw, 50vw"
                     alt={t(s.titleKey)}
                     loading="lazy"
                     decoding="async"
-                    width={400}
-                    height={300}
+                    width={360}
+                    height={270}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
