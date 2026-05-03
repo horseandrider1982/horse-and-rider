@@ -1,19 +1,27 @@
 import { LocaleLink } from "./LocaleLink";
 import { useI18n } from "@/i18n";
 import type { ShopifyProduct } from "@/lib/shopify";
+import { trackSelectItem } from "@/lib/ga4";
 
 interface ListingProductCardProps {
   product: ShopifyProduct;
+  listName?: string;
+  index?: number;
 }
 
-export function ListingProductCard({ product }: ListingProductCardProps) {
+export function ListingProductCard({ product, listName, index }: ListingProductCardProps) {
   const { locale } = useI18n();
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
 
+  const handleClick = () => {
+    if (listName) trackSelectItem(product, listName, index);
+  };
+
   return (
     <LocaleLink
       to={`/product/${product.node.handle}`}
+      onClick={handleClick}
       className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow block"
     >
       <div className="aspect-square bg-white overflow-hidden">
