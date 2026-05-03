@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useCartSync } from "@/hooks/useCartSync";
+import { useGA4PageView } from "@/hooks/useGA4PageView";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { RedirectGuard } from "@/components/RedirectGuard";
 import { I18nLayout, DEFAULT_LOCALE } from "@/i18n";
@@ -58,6 +59,7 @@ const PageLoader = () => (
 
 const AppContent = () => {
   useCartSync();
+  useGA4PageView();
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ScrollToTop />
