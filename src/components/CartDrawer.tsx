@@ -24,12 +24,29 @@ export const CartDrawer = () => {
 
   const handleCheckout = () => {
     let checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      checkoutUrl = getAuthenticatedCheckoutUrl(checkoutUrl);
-      trackBeginCheckout(items);
-      window.open(checkoutUrl, '_blank');
+    if (!checkoutUrl) return;
+    checkoutUrl = getAuthenticatedCheckoutUrl(checkoutUrl);
+    trackBeginCheckout(items);
+
+    // GA4 Cross-Domain: Linker-Param manuell anhängen, da window.open() kein Auto-Linker triggert
+    const openWithLinker = (url: string) => {
+      window.open(url, '_blank');
       setIsOpen(false);
+    };
+    const w = window as any;
+    if (typeof w.gtag === 'function') {
+      try {
+        w.gtag('get', 'G-LCBKZ4Y0LE', 'client_id', (clientId: string) => {
+          try {
+            const u = new URL(checkoutUrl!);
+            if (clientId) u.searchParams.set('_gl', `1*1*_ga*${clientId}`);
+            openWithLinker(u.toString());
+          } catch { openWithLinker(checkoutUrl!); }
+        });
+        return;
+      } catch { /* fallthrough */ }
     }
+    openWithLinker(checkoutUrl);
   };
 
   const handleRemoveItem = (variantId: string) => {
