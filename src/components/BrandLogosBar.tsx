@@ -1,6 +1,7 @@
 import { useFeaturedBrands } from "@/hooks/useFeaturedBrands";
 import { LocaleLink } from "./LocaleLink";
 import { useI18n } from "@/i18n";
+import { resolveBrandLogo } from "@/lib/brandLogos";
 
 export const BrandLogosBar = () => {
   const { data: featured = [], isLoading } = useFeaturedBrands();
@@ -30,7 +31,7 @@ export const BrandLogosBar = () => {
               className="opacity-60 hover:opacity-100 transition-all duration-300"
             >
               <img
-                src={brand.logoUrl!}
+                src={resolveBrandLogo(brand.slug, brand.logoUrl)!}
                 alt={brand.name}
                 loading="lazy"
                 decoding="async"
