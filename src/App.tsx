@@ -42,7 +42,19 @@ const ShopifyLogin = lazy(() => import("./pages/ShopifyLogin"));
 const CookieBanner = lazy(() => import("./components/CookieBanner").then(m => ({ default: m.CookieBanner })));
 const SitemapPage = lazy(() => import("./pages/SitemapPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Mehr Defaults für Read-Heavy Public Site:
+      // weniger Re-Fetches beim Tab-Wechsel/Reconnect, längere Frische
+      staleTime: 5 * 60 * 1000, // 5 min
+      gcTime: 30 * 60 * 1000, // 30 min im Cache
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 /** Redirect /products/:handle → /product/:handle */
 function ProductsRedirect() {
