@@ -37,6 +37,7 @@ export const BrandLogosBar = () => {
                 decoding="async"
                 width={120}
                 height={40}
+                style={{ aspectRatio: '3 / 1' }}
                 className="h-8 md:h-10 w-auto max-w-[120px] object-contain brightness-0 grayscale hover:grayscale-0 hover:brightness-100 transition-all duration-300"
               />
             </LocaleLink>

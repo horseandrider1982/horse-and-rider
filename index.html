@@ -67,16 +67,14 @@
     <!-- Async Font-Load: kein render-blocking, ~900ms LCP-Einsparung. display=swap verhindert FOIT. -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@400;700&display=swap" /></noscript>
-    <!-- Preconnect to Shopify CDN, Storefront API and Supabase for faster loading -->
+    <!-- Preconnect: max 4 origins per Lighthouse guidance. Most critical first. -->
+    <link rel="preconnect" href="https://ehiemefjuylqfkrkfqgs.supabase.co" />
+    <link rel="preconnect" href="https://bpjvam-c1.myshopify.com" />
     <link rel="preconnect" href="https://cdn.shopify.com" crossorigin />
-    <link rel="dns-prefetch" href="https://cdn.shopify.com" />
-    <link rel="preconnect" href="https://bpjvam-c1.myshopify.com" crossorigin />
-    <link rel="dns-prefetch" href="https://bpjvam-c1.myshopify.com" />
-    <link rel="preconnect" href="https://ehiemefjuylqfkrkfqgs.supabase.co" crossorigin />
-    <link rel="dns-prefetch" href="https://ehiemefjuylqfkrkfqgs.supabase.co" />
-    <!-- Preconnect zu Trusted Shops Widgets (nicht-kritisch, aber spart Roundtrip) -->
+    <!-- DNS-prefetch only for non-critical 3rd parties -->
     <link rel="dns-prefetch" href="https://widgets.trustedshops.com" />
     <link rel="dns-prefetch" href="https://integrations.etrusted.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <!--
       Title und Description werden vom Inline-Script unten dynamisch pro Route gesetzt.
       Der hier hinterlegte Default dient nur als Fallback für den unwahrscheinlichen Fall,

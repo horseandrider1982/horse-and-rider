@@ -15,7 +15,7 @@ const ProductCard = ({ product }: { product: ShopifyProduct }) => {
     <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
       <div className="aspect-square overflow-hidden bg-white">
         {image ? (
-          <img src={shopifyImageUrl(image.url, 400)} alt={image.altText || product.node.title} width={400} height={400} loading="lazy" decoding="async" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+          <img src={shopifyImageUrl(image.url, 360)} srcSet={`${shopifyImageUrl(image.url, 360)} 1x, ${shopifyImageUrl(image.url, 540)} 1.5x`} alt={image.altText || product.node.title} width={360} height={360} loading="lazy" decoding="async" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground"><ShoppingCart className="h-12 w-12" /></div>
         )}
