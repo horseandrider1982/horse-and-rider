@@ -35,8 +35,20 @@ export const CookieBanner = () => {
 
   useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
-    if (!consent) setVisible(true);
-
+    // Defer initial render until after LCP to avoid the banner being identified as LCP element
+    if (!consent) {
+      const show = () => setVisible(true);
+      const idleId = "requestIdleCallback" in window
+        ? (window as any).requestIdleCallback(show, { timeout: 2500 })
+        : window.setTimeout(show, 1500);
+      const handleReopen = () => setVisible(true);
+      window.addEventListener(REOPEN_EVENT, handleReopen);
+      return () => {
+        window.removeEventListener(REOPEN_EVENT, handleReopen);
+        if ("cancelIdleCallback" in window) (window as any).cancelIdleCallback(idleId);
+        else clearTimeout(idleId as number);
+      };
+    }
     const handleReopen = () => setVisible(true);
     window.addEventListener(REOPEN_EVENT, handleReopen);
     return () => window.removeEventListener(REOPEN_EVENT, handleReopen);
