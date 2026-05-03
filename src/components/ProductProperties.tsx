@@ -1,56 +1,31 @@
-import { useEffect } from "react";
 import { useActivePropertyConfigs } from "@/hooks/usePropertyConfig";
-import { useProductProperties } from "@/hooks/useProductProperties";
 import { Tag } from "lucide-react";
+import type { ShopifyMetafield, ShopifyProduct } from "@/lib/shopify";
 
 interface ProductPropertiesProps {
-  handle: string;
+  product: ShopifyProduct["node"];
   selectedVariantId?: string;
 }
 
 /**
  * Renders active xentral_props properties on the product detail page.
- * Variant value beats product value. Empty values are skipped. The whole
- * block is hidden when no values are present.
+ * Reads metafields directly from the already-loaded product (no extra fetch).
+ * Variant value beats product value. Empty values are skipped.
  */
-export function ProductProperties({ handle, selectedVariantId }: ProductPropertiesProps) {
-  const { data: configs, isLoading: configsLoading, error: configsError } = useActivePropertyConfigs();
-  const identifiers = (configs ?? []).map((c) => ({
-    namespace: c.shopify_namespace,
-    key: c.shopify_key,
-  }));
-  const { data: props, isLoading: propsLoading, error: propsError } = useProductProperties(handle, identifiers);
+export function ProductProperties({ product, selectedVariantId }: ProductPropertiesProps) {
+  const { data: configs, isLoading: configsLoading } = useActivePropertyConfigs();
 
-  // Debug logging
-  useEffect(() => {
-    console.log("[ProductProperties] Debug:", {
-      handle,
-      selectedVariantId,
-      configsLoading,
-      configsError,
-      configsCount: configs?.length ?? 0,
-      propsLoading,
-      propsError,
-      hasProps: !!props,
-      productKeys: props ? Object.keys(props.product) : [],
-      variantKeys: props ? Object.keys(props.variants) : [],
-    });
-  }, [handle, selectedVariantId, configs, configsLoading, configsError, props, propsLoading, propsError]);
+  if (configsLoading || !configs || configs.length === 0) return null;
 
-  if (configsLoading || propsLoading) return null;
-  if (!configs || configs.length === 0 || !props) {
-    console.log("[ProductProperties] Returning null - configs:", configs?.length, "props:", props);
-    return null;
-  }
+  const productMfMap = mfsToMap(product.xentralMetafields);
+  const selectedVariant = selectedVariantId
+    ? product.variants?.edges?.find(e => e.node.id === selectedVariantId)?.node
+    : undefined;
+  const variantMfMap = selectedVariant ? mfsToMap(selectedVariant.xentralMetafields) : {};
 
   const rows = configs
     .map((c) => {
-      const variantVal =
-        selectedVariantId && props.variants[selectedVariantId]
-          ? props.variants[selectedVariantId][c.shopify_key]
-          : undefined;
-      const productVal = props.product[c.shopify_key];
-      const value = variantVal ?? productVal;
+      const value = variantMfMap[c.shopify_key] ?? productMfMap[c.shopify_key];
       if (!value || value.trim() === "") return null;
       return { config: c, value };
     })
@@ -88,13 +63,14 @@ export function ProductProperties({ handle, selectedVariantId }: ProductProperti
   );
 }
 
-/**
- * Format Shopify metafield raw values for display:
- * - JSON list values like '["A","B"]' → "A, B"
- * - Number/measurement JSON like '{"value":10000,"unit":"MILLIMETERS"}' → "10000 mm"
- * - Booleans → Ja/Nein
- * - Otherwise: raw string
- */
+function mfsToMap(mfs: (ShopifyMetafield | null)[] | undefined): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const mf of mfs ?? []) {
+    if (mf && mf.value) map[mf.key] = mf.value;
+  }
+  return map;
+}
+
 function formatValue(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return raw;

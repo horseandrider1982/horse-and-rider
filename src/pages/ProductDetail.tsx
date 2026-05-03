@@ -796,7 +796,7 @@ const ProductDetail = () => {
 
               <PaymentIcons />
 
-              <ProductProperties handle={handle || ""} selectedVariantId={selectedVariant?.id} />
+              <ProductProperties product={product.node} selectedVariantId={selectedVariant?.id} />
 
               {/* Beratungs-Strip */}
               <div className="mt-6 pt-6 border-t border-border">
