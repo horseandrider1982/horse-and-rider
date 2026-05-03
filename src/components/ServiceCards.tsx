@@ -41,7 +41,7 @@ export const ServiceCards = () => {
                   <img
                     src={s.imageSm}
                     srcSet={`${s.imageSm} 240w, ${s.image} 400w`}
-                    sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 50vw"
+                    sizes="(min-width: 1024px) 240px, (min-width: 640px) 22vw, 50vw"
                     alt={t(s.titleKey)}
                     loading="lazy"
                     decoding="async"
