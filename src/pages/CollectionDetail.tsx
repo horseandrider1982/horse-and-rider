@@ -109,6 +109,79 @@ const COLLECTION_QUERY = `
 `;
 
 const PAGE_SIZE = 24;
+const VARIANT_REFETCH_LIMIT = 5;
+
+// Re-fetch up to 5 variants for products where the initial 3 variants were
+// all unavailable — avoids hiding products that have stock on variant #4 or #5.
+const VARIANT_REFETCH_QUERY = `
+  query RefetchVariants($ids: [ID!]!, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]! = []) @inContext(language: $language) {
+    nodes(ids: $ids) {
+      ... on Product {
+        id
+        variants(first: ${VARIANT_REFETCH_LIMIT}) {
+          edges {
+            node {
+              availableForSale
+              currentlyNotInStock
+              metafields(identifiers: [
+                {namespace: "custom", key: "lieferantenbestand"},
+                {namespace: "custom", key: "ueberverkauf"}
+              ]) { namespace key value type }
+              xentralMetafields: metafields(identifiers: $xentralIds) {
+                namespace key value type
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+async function refetchVariantsForCandidates(
+  edges: ShopifyProduct[],
+  locale: string,
+  xentralIds: Array<{ namespace: string; key: string }>,
+): Promise<ShopifyProduct[]> {
+  // Candidates: NOT visible after first pass AND fetched exactly 3 variants
+  // (= variant list might be truncated, deeper variants could still be in stock)
+  const candidateIds: string[] = [];
+  edges.forEach((p) => {
+    const variants = p.node.variants?.edges || [];
+    if (variants.length < 3) return; // had fewer than 3 → no truncation possible
+    if (isProductVisibleInListing(p.node)) return; // already visible → no need
+    candidateIds.push(p.node.id);
+  });
+
+  if (candidateIds.length === 0) return edges;
+
+  try {
+    const res = await fetch(SHOPIFY_STOREFRONT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({
+        query: VARIANT_REFETCH_QUERY,
+        variables: { ids: candidateIds, language: locale.toUpperCase(), xentralIds },
+      }),
+    });
+    const json = await res.json();
+    const nodes: any[] = json?.data?.nodes || [];
+    const byId = new Map<string, any>();
+    nodes.forEach((n) => { if (n?.id) byId.set(n.id, n); });
+
+    return edges.map((p) => {
+      const refreshed = byId.get(p.node.id);
+      if (!refreshed?.variants?.edges) return p;
+      return { node: { ...p.node, variants: refreshed.variants } };
+    });
+  } catch (err) {
+    console.warn("[CollectionDetail] variant refetch failed", err);
+    return edges;
+  }
+}
 
 async function fetchCollectionPage(
   handle: string,
@@ -137,8 +210,10 @@ async function fetchCollectionPage(
     const json = await res.json();
     const collection = json?.data?.collection;
     if (!collection) return { edges: [] as ShopifyProduct[], pageInfo: { hasNextPage: false, endCursor: null }, _collection: null };
-    const edges = (collection.products?.edges || []).map((e: any) => ({ node: e.node })) as ShopifyProduct[];
+    let edges = (collection.products?.edges || []).map((e: any) => ({ node: e.node })) as ShopifyProduct[];
     const pageInfo = collection.products?.pageInfo || { hasNextPage: false, endCursor: null };
+    // Re-fetch variants for products that look hidden but might have stock beyond variant #3
+    edges = await refetchVariantsForCandidates(edges, locale, xentralIds);
     return { edges, pageInfo, _collection: collection };
   };
 
