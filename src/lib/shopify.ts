@@ -273,7 +273,7 @@ export const SHOPIFY_MENU_QUERY = `
 `;
 
 export const PRODUCT_BY_HANDLE_QUERY = `
-  query GetProductByHandle($handle: String!, $language: LanguageCode) @inContext(language: $language) {
+  query GetProductByHandle($handle: String!, $language: LanguageCode, $xentralIds: [HasMetafieldsIdentifier!]! = []) @inContext(language: $language) {
     productByHandle(handle: $handle) {
       id
       title
@@ -306,7 +306,13 @@ export const PRODUCT_BY_HANDLE_QUERY = `
         value
         type
       }
-      variants(first: 100) {
+      xentralMetafields: metafields(identifiers: $xentralIds) {
+        namespace
+        key
+        value
+        type
+      }
+      variants(first: 50) {
         edges {
           node {
             id
@@ -324,6 +330,12 @@ export const PRODUCT_BY_HANDLE_QUERY = `
               {namespace: "custom", key: "lieferantenbestand"},
               {namespace: "custom", key: "ueberverkauf"}
             ]) {
+              namespace
+              key
+              value
+              type
+            }
+            xentralMetafields: metafields(identifiers: $xentralIds) {
               namespace
               key
               value
