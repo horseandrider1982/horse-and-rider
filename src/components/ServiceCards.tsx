@@ -1,22 +1,27 @@
 import { useI18n } from "@/i18n";
 import { Store, Globe, Wrench, Scissors } from "lucide-react";
 import ladenImg from "@/assets/laden-start.webp";
+import ladenImgSm from "@/assets/laden-start-sm.webp";
 import sattlereiImg from "@/assets/sattlerei-start.webp";
+import sattlereiImgSm from "@/assets/sattlerei-start-sm.webp";
 import stickImg from "@/assets/stickerei-start.webp";
+import stickImgSm from "@/assets/stickerei-start-sm.webp";
 import onlineImg from "@/assets/online-start.webp";
+import onlineImgSm from "@/assets/online-start-sm.webp";
 
 export const ServiceCards = () => {
   const { t } = useI18n();
 
   const services = [
-    { titleKey: "services.store.title", descKey: "services.store.desc", image: ladenImg, icon: Store },
-    { titleKey: "services.online.title", descKey: "services.online.desc", image: onlineImg, icon: Globe },
-    { titleKey: "services.saddle.title", descKey: "services.saddle.desc", image: sattlereiImg, icon: Wrench },
-    { titleKey: "services.embroidery.title", descKey: "services.embroidery.desc", image: stickImg, icon: Scissors },
+    { titleKey: "services.store.title", descKey: "services.store.desc", image: ladenImg, imageSm: ladenImgSm, icon: Store },
+    { titleKey: "services.online.title", descKey: "services.online.desc", image: onlineImg, imageSm: onlineImgSm, icon: Globe },
+    { titleKey: "services.saddle.title", descKey: "services.saddle.desc", image: sattlereiImg, imageSm: sattlereiImgSm, icon: Wrench },
+    { titleKey: "services.embroidery.title", descKey: "services.embroidery.desc", image: stickImg, imageSm: stickImgSm, icon: Scissors },
   ];
 
   return (
-    <section className="py-14 bg-muted/30">
+    // min-h reserves space to prevent CLS while images/fonts load
+    <section className="py-14 bg-muted/30 min-h-[820px] md:min-h-[480px]">
       <div className="container mx-auto px-4">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest text-center mb-2">
           {t("services.subtitle") || "Das macht uns aus"}
@@ -34,7 +39,9 @@ export const ServiceCards = () => {
               >
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
-                    src={s.image}
+                    src={s.imageSm}
+                    srcSet={`${s.imageSm} 240w, ${s.image} 400w`}
+                    sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 50vw"
                     alt={t(s.titleKey)}
                     loading="lazy"
                     decoding="async"
