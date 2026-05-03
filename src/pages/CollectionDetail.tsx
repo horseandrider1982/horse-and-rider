@@ -118,7 +118,7 @@ const COLLECTION_QUERY = `
   }
 `;
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 24;
 
 async function fetchCollectionPage(
   handle: string,
@@ -239,17 +239,25 @@ export default function CollectionDetail() {
     gcTime: 30 * 60 * 1000,
   });
 
-  // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
-  // (Vendor-Counts) die GESAMTE Kollektion widerspiegeln, nicht nur die
-  // initial geladenen Produkte. Mit PAGE_SIZE=100 reichen wenige Iterationen.
+  // Scroll-basiertes Nachladen via IntersectionObserver (statt aggressivem Prefetch).
+  // Das Sentinel-Element wird unten am Grid platziert und triggert fetchNextPage,
+  // sobald es in die Nähe des Viewports kommt.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      const loadedPages = data?.pages?.length || 0;
-      if (loadedPages < 10) {
-        fetchNextPage();
-      }
-    }
-  }, [hasNextPage, isFetchingNextPage, data?.pages?.length, fetchNextPage]);
+    if (!hasNextPage || isFetchingNextPage) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, data?.pages?.length]);
 
   const collection = data?.pages?.[0]?.collection || null;
   const allProducts = useMemo(() => {
@@ -389,23 +397,26 @@ export default function CollectionDetail() {
                       <p className="text-muted-foreground py-8 text-center">{t("search.no_results").replace("{query}", "")}</p>
                     )}
                     {hasNextPage && filters.vendors.size === 0 && Object.keys(filters.properties).length === 0 && (
-                      <div className="flex justify-center mt-8">
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          onClick={() => fetchNextPage()}
-                          disabled={isFetchingNextPage}
-                        >
-                          {isFetchingNextPage ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              {t("products.loading")}
-                            </>
-                          ) : (
-                            t("products.load_more")
-                          )}
-                        </Button>
-                      </div>
+                      <>
+                        <div ref={loadMoreRef} aria-hidden className="h-1 w-full" />
+                        <div className="flex justify-center mt-8">
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={() => fetchNextPage()}
+                            disabled={isFetchingNextPage}
+                          >
+                            {isFetchingNextPage ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                {t("products.loading")}
+                              </>
+                            ) : (
+                              t("products.load_more")
+                            )}
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
