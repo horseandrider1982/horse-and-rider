@@ -57,12 +57,17 @@ const PageLoader = () => (
   </div>
 );
 
+const RouterEffects = () => {
+  useGA4PageView();
+  return null;
+};
+
 const AppContent = () => {
   useCartSync();
-  useGA4PageView();
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ScrollToTop />
+      <RouterEffects />
       <RedirectGuard />
       <Suspense fallback={<PageLoader />}>
       <Routes>
