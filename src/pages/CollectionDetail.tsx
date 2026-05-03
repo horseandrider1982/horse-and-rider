@@ -239,17 +239,25 @@ export default function CollectionDetail() {
     gcTime: 30 * 60 * 1000,
   });
 
-  // Auto-Nachladen aller Seiten im Hintergrund, damit Filter-Facetten
-  // (Vendor-Counts) die GESAMTE Kollektion widerspiegeln, nicht nur die
-  // initial geladenen Produkte. Mit PAGE_SIZE=100 reichen wenige Iterationen.
+  // Scroll-basiertes Nachladen via IntersectionObserver (statt aggressivem Prefetch).
+  // Das Sentinel-Element wird unten am Grid platziert und triggert fetchNextPage,
+  // sobald es in die Nähe des Viewports kommt.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      const loadedPages = data?.pages?.length || 0;
-      if (loadedPages < 10) {
-        fetchNextPage();
-      }
-    }
-  }, [hasNextPage, isFetchingNextPage, data?.pages?.length, fetchNextPage]);
+    if (!hasNextPage || isFetchingNextPage) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, data?.pages?.length]);
 
   const collection = data?.pages?.[0]?.collection || null;
   const allProducts = useMemo(() => {
