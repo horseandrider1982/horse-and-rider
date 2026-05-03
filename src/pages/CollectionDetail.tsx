@@ -397,23 +397,26 @@ export default function CollectionDetail() {
                       <p className="text-muted-foreground py-8 text-center">{t("search.no_results").replace("{query}", "")}</p>
                     )}
                     {hasNextPage && filters.vendors.size === 0 && Object.keys(filters.properties).length === 0 && (
-                      <div className="flex justify-center mt-8">
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          onClick={() => fetchNextPage()}
-                          disabled={isFetchingNextPage}
-                        >
-                          {isFetchingNextPage ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              {t("products.loading")}
-                            </>
-                          ) : (
-                            t("products.load_more")
-                          )}
-                        </Button>
-                      </div>
+                      <>
+                        <div ref={loadMoreRef} aria-hidden className="h-1 w-full" />
+                        <div className="flex justify-center mt-8">
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={() => fetchNextPage()}
+                            disabled={isFetchingNextPage}
+                          >
+                            {isFetchingNextPage ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                {t("products.loading")}
+                              </>
+                            ) : (
+                              t("products.load_more")
+                            )}
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
