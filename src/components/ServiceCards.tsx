@@ -13,10 +13,10 @@ export const ServiceCards = () => {
   const { t } = useI18n();
 
   const services = [
-    { titleKey: "services.store.title", descKey: "services.store.desc", image: ladenImg, imageSm: ladenImgSm, icon: Store },
-    { titleKey: "services.online.title", descKey: "services.online.desc", image: onlineImg, imageSm: onlineImgSm, icon: Globe },
-    { titleKey: "services.saddle.title", descKey: "services.saddle.desc", image: sattlereiImg, imageSm: sattlereiImgSm, icon: Wrench },
-    { titleKey: "services.embroidery.title", descKey: "services.embroidery.desc", image: stickImg, imageSm: stickImgSm, icon: Scissors },
+    { titleKey: "services.store.title", descKey: "services.store.desc", image: ladenImgMd, imageSm: ladenImgSm, icon: Store },
+    { titleKey: "services.online.title", descKey: "services.online.desc", image: onlineImgMd, imageSm: onlineImgSm, icon: Globe },
+    { titleKey: "services.saddle.title", descKey: "services.saddle.desc", image: sattlereiImgMd, imageSm: sattlereiImgSm, icon: Wrench },
+    { titleKey: "services.embroidery.title", descKey: "services.embroidery.desc", image: stickImgMd, imageSm: stickImgSm, icon: Scissors },
   ];
 
   return (
