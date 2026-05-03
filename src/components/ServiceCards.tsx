@@ -40,13 +40,13 @@ export const ServiceCards = () => {
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
                     src={s.imageSm}
-                    srcSet={`${s.imageSm} 240w, ${s.image} 400w`}
+                    srcSet={`${s.imageSm} 240w, ${s.image} 360w`}
                     sizes="(min-width: 1024px) 240px, (min-width: 640px) 22vw, 50vw"
                     alt={t(s.titleKey)}
                     loading="lazy"
                     decoding="async"
-                    width={400}
-                    height={300}
+                    width={360}
+                    height={270}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
