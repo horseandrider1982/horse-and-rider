@@ -459,7 +459,7 @@ const ProductDetail = () => {
       ...(attributes.length > 0 ? { attributes } : {}),
     });
     if (success) {
-      trackAddToCart(product, selectedVariant.id, quantity);
+      trackAddToCart(product, selectedVariant.id, quantity, totalPrice);
       toast.success(
         quantity > 1 ? `${quantity} Artikel zum Warenkorb hinzugefügt` : t("products.added_to_cart"),
         { description: product.node.title, position: "top-center" },

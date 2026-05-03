@@ -24,12 +24,23 @@ export const CartDrawer = () => {
 
   const handleCheckout = () => {
     let checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      checkoutUrl = getAuthenticatedCheckoutUrl(checkoutUrl);
-      trackBeginCheckout(items);
-      window.open(checkoutUrl, '_blank');
-      setIsOpen(false);
-    }
+    if (!checkoutUrl) return;
+    checkoutUrl = getAuthenticatedCheckoutUrl(checkoutUrl);
+    trackBeginCheckout(items);
+
+    // GA4 Cross-Domain: _ga Cookie an Checkout-Domain anhängen, da window.open() kein Auto-Linker triggert.
+    // Cross-Domain in GA4 Admin → Datastream zwingend für beide Domains aktivieren.
+    try {
+      const gaCookie = document.cookie.split('; ').find(c => c.startsWith('_ga='));
+      if (gaCookie) {
+        const u = new URL(checkoutUrl);
+        u.searchParams.set('_ga', gaCookie.split('=')[1]);
+        checkoutUrl = u.toString();
+      }
+    } catch { /* noop */ }
+
+    window.open(checkoutUrl, '_blank');
+    setIsOpen(false);
   };
 
   const handleRemoveItem = (variantId: string) => {

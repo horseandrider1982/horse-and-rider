@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,16 @@ const Search = () => {
   const allProducts = data?.pages.flatMap(p => p.products) || [];
   const filteredProducts = useListingFilters(allProducts, filters);
 
+  // GA4 view_item_list — fire once per query when results arrive
+  const listName = `search: ${query}`;
+  const trackedQueryRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!query || allProducts.length === 0) return;
+    if (trackedQueryRef.current === query) return;
+    trackedQueryRef.current = query;
+    import("@/lib/ga4").then(({ trackViewItemList }) => trackViewItemList(allProducts, listName));
+  }, [query, allProducts.length]);
+
   usePageMeta({
     title: query ? `${t("search.search")}: ${query}` : t("search.search"),
     description: query
@@ -163,8 +173,8 @@ const Search = () => {
             {/* Product grid */}
             <div className="flex-1 min-w-0">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {filteredProducts.map((product) => (
-                  <ListingProductCard key={product.node.id} product={product} />
+                {filteredProducts.map((product, idx) => (
+                  <ListingProductCard key={product.node.id} product={product} listName={listName} index={idx} />
                 ))}
               </div>
               {filteredProducts.length === 0 && allProducts.length > 0 && (

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { BackToTop } from "@/components/BackToTop";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/i18n";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -259,6 +259,16 @@ export default function CollectionDetail() {
 
   const filteredProducts = useListingFilters(allProducts, filters);
 
+  // GA4 view_item_list — fire when collection products first arrive
+  const listName = `collection: ${handle ?? ""}`;
+  const trackedListRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!handle || allProducts.length === 0) return;
+    if (trackedListRef.current === handle) return;
+    trackedListRef.current = handle;
+    import("@/lib/ga4").then(({ trackViewItemList }) => trackViewItemList(allProducts, listName));
+  }, [handle, allProducts.length]);
+
   const collectionMetaDesc = collection
     ? collection.description?.slice(0, 120)
       ? `${collection.title} – ${collection.description.replace(/\s+/g, ' ').trim().slice(0, 120)}. Jetzt bei Horse & Rider kaufen.`.slice(0, 160)
@@ -371,8 +381,8 @@ export default function CollectionDetail() {
                   {/* Product grid */}
                   <div className="flex-1 min-w-0">
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                      {filteredProducts.map((product) => (
-                        <ListingProductCard key={product.node.id} product={product} />
+                      {filteredProducts.map((product, idx) => (
+                        <ListingProductCard key={product.node.id} product={product} listName={listName} index={idx} />
                       ))}
                     </div>
                     {filteredProducts.length === 0 && allProducts.length > 0 && (

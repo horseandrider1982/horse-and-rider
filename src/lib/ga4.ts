@@ -97,14 +97,26 @@ export function trackBeginCheckout(items: Array<{ product: ShopifyProduct; varia
   });
 }
 
-/** Fired on product listing / collection pages */
+/** Fired on product listing / collection pages (limit items to keep payload small) */
 export function trackViewItemList(products: ShopifyProduct[], listName: string) {
-  const mapped = products.map((p, idx) => ({ ...mapItem(p), index: idx, item_list_name: listName }));
+  const mapped = products.slice(0, 24).map((p, idx) => ({ ...mapItem(p), index: idx, item_list_name: listName }));
   push({
     event: 'view_item_list',
     ecommerce: {
       item_list_name: listName,
       items: mapped,
+    },
+  });
+}
+
+/** Fired when user clicks a product in a listing */
+export function trackSelectItem(product: ShopifyProduct, listName: string, index?: number) {
+  const item = { ...mapItem(product), item_list_name: listName, ...(index !== undefined ? { index } : {}) };
+  push({
+    event: 'select_item',
+    ecommerce: {
+      item_list_name: listName,
+      items: [item],
     },
   });
 }
