@@ -78,15 +78,9 @@ const COLLECTION_QUERY = `
               value
               type
             }
-            variants(first: 10) {
+            variants(first: 3) {
               edges {
                 node {
-                  id
-                  title
-                  price {
-                    amount
-                    currencyCode
-                  }
                   availableForSale
                   currentlyNotInStock
                   metafields(identifiers: [
@@ -103,10 +97,6 @@ const COLLECTION_QUERY = `
                     key
                     value
                     type
-                  }
-                  selectedOptions {
-                    name
-                    value
                   }
                 }
               }
