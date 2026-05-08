@@ -272,7 +272,7 @@ const ProductDetail = () => {
         product?.node?.tags,
       ).canOrder;
     };
-  }, [variants, product?.node?.metafields, isSingleVariant]);
+  }, [variants, product?.node?.metafields, isSingleVariant, product?.node?.tags]);
 
   // Find the variant matching all selected options
   const selectedVariant = useMemo(() => {
@@ -386,7 +386,7 @@ const ProductDetail = () => {
       }
     }
     return { canOrder: false, deliveryTime: null, isSupplierStock: false };
-  }, [selectedVariant, variants, product?.node?.metafields, isSingleVariant]);
+  }, [selectedVariant, variants, product?.node?.metafields, isSingleVariant, product?.node?.tags]);
 
   useEffect(() => {
     if (shopifyProductId) {
