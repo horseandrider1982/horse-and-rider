@@ -80,8 +80,8 @@ export const SearchEmptyState: React.FC<SearchEmptyStateProps> = ({ onChipClick,
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {trending.map(p => (
               <button key={p.handle} onClick={() => onProductClick(p.handle)} className="group text-left rounded-xl border border-border bg-background hover:shadow-md transition-all overflow-hidden">
-                <div className="aspect-square bg-muted overflow-hidden">
-                  {p.imageUrl ? <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl">🛍️</div>}
+                <div className="aspect-square bg-white overflow-hidden">
+                  {p.imageUrl ? <img src={p.imageUrl} alt={p.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl">🛍️</div>}
                 </div>
                 <div className="p-3">
                   {p.vendor && <p className="text-xs text-muted-foreground mb-0.5 truncate">{p.vendor}</p>}
