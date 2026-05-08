@@ -130,13 +130,27 @@ function formatSupplierDeliveryTime(raw: string | null | undefined): string {
   return trimmed;
 }
 
+function isGiftCard(productTags?: string[]): boolean {
+  if (!productTags || productTags.length === 0) return false;
+  const giftCardTags = ['gutschein', 'gift card', 'gift_card', 'giftcard', 'geschenkgutschein'];
+  return productTags.some(tag =>
+    giftCardTags.some(gc => tag.toLowerCase().trim() === gc),
+  );
+}
+
 function computeAvailability(
   variantAvailableForSale: boolean,
   variantCurrentlyNotInStock?: boolean,
   variantMetafields?: (ShopifyMetafield | null)[],
   productMetafields?: (ShopifyMetafield | null)[],
   isSingleVariant?: boolean,
+  productTags?: string[],
 ): AvailabilityInfo {
+  // Gift cards / digital vouchers are always instantly available
+  if (isGiftCard(productTags)) {
+    return { canOrder: true, deliveryTime: 'Sofort verfügbar', isSupplierStock: false };
+  }
+
   // Check metafields: for single-variant products, fall back to product-level metafields
   const mf = isSingleVariant ? productMetafields : variantMetafields;
   const lieferantenbestand = getMetafieldValue(mf, 'lieferantenbestand');
@@ -233,6 +247,7 @@ const ProductDetail = () => {
           v.node.metafields,
           product?.node?.metafields,
           isSingleVariant,
+          product?.node?.tags,
         ).canOrder
       );
       const chosen = (orderable ?? variants[0]).node;
@@ -254,9 +269,10 @@ const ProductDetail = () => {
         variant.metafields,
         product?.node?.metafields,
         isSingleVariant,
+        product?.node?.tags,
       ).canOrder;
     };
-  }, [variants, product?.node?.metafields, isSingleVariant]);
+  }, [variants, product?.node?.metafields, isSingleVariant, product?.node?.tags]);
 
   // Find the variant matching all selected options
   const selectedVariant = useMemo(() => {
@@ -352,6 +368,7 @@ const ProductDetail = () => {
         selectedVariant.metafields,
         product?.node?.metafields,
         isSingleVariant,
+        product?.node?.tags,
       );
     }
     // No variant selected (parent view): check if ANY variant is orderable
@@ -363,12 +380,13 @@ const ProductDetail = () => {
           v.metafields,
           product?.node?.metafields,
           isSingleVariant,
+          product?.node?.tags,
         );
         if (va.canOrder) return { canOrder: true, deliveryTime: null, isSupplierStock: false };
       }
     }
     return { canOrder: false, deliveryTime: null, isSupplierStock: false };
-  }, [selectedVariant, variants, product?.node?.metafields, isSingleVariant]);
+  }, [selectedVariant, variants, product?.node?.metafields, isSingleVariant, product?.node?.tags]);
 
   useEffect(() => {
     if (shopifyProductId) {

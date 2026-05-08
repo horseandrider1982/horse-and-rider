@@ -21,6 +21,7 @@ export interface ShopifyProduct {
     handle: string;
     vendor: string;
     productType?: string;
+    tags?: string[];
     priceRange: {
       minVariantPrice: {
         amount: string;
@@ -266,6 +267,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
       handle
       vendor
       productType
+      tags
       priceRange {
         minVariantPrice {
           amount
