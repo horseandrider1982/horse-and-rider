@@ -133,9 +133,11 @@ function formatSupplierDeliveryTime(raw: string | null | undefined): string {
 function isGiftCard(productTags?: string[]): boolean {
   if (!productTags || productTags.length === 0) return false;
   const giftCardTags = ['gutschein', 'gift card', 'gift_card', 'giftcard', 'geschenkgutschein'];
-  return productTags.some(tag =>
+  const result = productTags.some(tag =>
     giftCardTags.some(gc => tag.toLowerCase().trim() === gc),
   );
+  console.log('[isGiftCard]', { productTags, result });
+  return result;
 }
 
 function computeAvailability(
