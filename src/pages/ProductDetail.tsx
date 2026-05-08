@@ -130,12 +130,21 @@ function formatSupplierDeliveryTime(raw: string | null | undefined): string {
   return trimmed;
 }
 
+function isGiftCard(productTags?: string[]): boolean {
+  if (!productTags || productTags.length === 0) return false;
+  const giftCardTags = ['gutschein', 'gift card', 'gift_card', 'giftcard', 'geschenkgutschein'];
+  return productTags.some(tag =>
+    giftCardTags.some(gc => tag.toLowerCase().trim() === gc),
+  );
+}
+
 function computeAvailability(
   variantAvailableForSale: boolean,
   variantCurrentlyNotInStock?: boolean,
   variantMetafields?: (ShopifyMetafield | null)[],
   productMetafields?: (ShopifyMetafield | null)[],
   isSingleVariant?: boolean,
+  productTags?: string[],
 ): AvailabilityInfo {
   // Check metafields: for single-variant products, fall back to product-level metafields
   const mf = isSingleVariant ? productMetafields : variantMetafields;
