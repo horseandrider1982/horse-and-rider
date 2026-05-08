@@ -97,7 +97,9 @@ function isVariantVisible(
   productMfs: (MetafieldNode | null)[] | undefined,
   isSingleVariant: boolean,
 ): boolean {
-  if (variant.availableForSale && !variant.currentlyNotInStock) return true;
+  // Trust Shopify: any variant marked availableForSale is purchasable
+  // (covers normal stock AND inventory_policy=CONTINUE / untracked inventory)
+  if (variant.availableForSale) return true;
 
   const checkSupplier = (mfs: (MetafieldNode | null)[] | undefined) => {
     const stock = parseInt(getMf(mfs, 'lieferantenbestand')) || 0;
