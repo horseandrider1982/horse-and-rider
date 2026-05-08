@@ -10,6 +10,7 @@ const SHOPIFY_STORE = "bpjvam-c1.myshopify.com";
 const SHOPIFY_API_VERSION = "2025-07";
 
 // Query variants with their metafields and inventory item info
+// Metafields ueberverkauf/lieferantenbestand live on the PRODUCT, not the variant.
 const VARIANTS_QUERY = `
   query ($cursor: String) {
     productVariants(first: 100, after: $cursor) {
@@ -19,8 +20,10 @@ const VARIANTS_QUERY = `
           id
           inventoryPolicy
           inventoryItem { id }
-          ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
-          lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
+          product {
+            ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
+            lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
+          }
         }
       }
     }
@@ -40,8 +43,10 @@ interface VariantNode {
   id: string;
   inventoryPolicy: string;
   inventoryItem: { id: string };
-  ueberverkauf: { value: string } | null;
-  lieferantenbestand: { value: string } | null;
+  product: {
+    ueberverkauf: { value: string } | null;
+    lieferantenbestand: { value: string } | null;
+  };
 }
 
 async function shopifyAdmin(token: string, query: string, variables: Record<string, unknown> = {}) {
@@ -90,8 +95,8 @@ Deno.serve(async (req) => {
         const variant: VariantNode = edge.node;
         stats.checked++;
 
-        const ueberverkauf = variant.ueberverkauf?.value;
-        const lieferantenbestand = parseInt(variant.lieferantenbestand?.value || "0") || 0;
+        const ueberverkauf = variant.product?.ueberverkauf?.value;
+        const lieferantenbestand = parseInt(variant.product?.lieferantenbestand?.value || "0") || 0;
 
         // Desired policy: CONTINUE if oversell enabled AND supplier stock > 0
         const shouldContinue = ueberverkauf === "1" && lieferantenbestand > 0;
