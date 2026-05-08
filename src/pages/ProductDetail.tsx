@@ -377,6 +377,8 @@ const ProductDetail = () => {
         product?.node?.metafields,
         isSingleVariant,
         product?.node?.tags,
+        product?.node?.productType,
+        product?.node?.title,
       );
     }
     // No variant selected (parent view): check if ANY variant is orderable
@@ -389,6 +391,8 @@ const ProductDetail = () => {
           product?.node?.metafields,
           isSingleVariant,
           product?.node?.tags,
+          product?.node?.productType,
+          product?.node?.title,
         );
         if (va.canOrder) return { canOrder: true, deliveryTime: null, isSupplierStock: false };
       }
