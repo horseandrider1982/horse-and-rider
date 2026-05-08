@@ -10,7 +10,8 @@ const SHOPIFY_STORE = "bpjvam-c1.myshopify.com";
 const SHOPIFY_API_VERSION = "2025-07";
 
 // Query variants with their metafields and inventory item info
-// Metafields ueberverkauf/lieferantenbestand live on the PRODUCT, not the variant.
+// Metafields ueberverkauf/lieferantenbestand may live on the variant OR on the product.
+// We check variant first, then fall back to product.
 const VARIANTS_QUERY = `
   query ($cursor: String) {
     productVariants(first: 100, after: $cursor) {
@@ -20,6 +21,8 @@ const VARIANTS_QUERY = `
           id
           inventoryPolicy
           inventoryItem { id }
+          ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
+          lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
           product {
             ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
             lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
@@ -43,6 +46,8 @@ interface VariantNode {
   id: string;
   inventoryPolicy: string;
   inventoryItem: { id: string };
+  ueberverkauf: { value: string } | null;
+  lieferantenbestand: { value: string } | null;
   product: {
     ueberverkauf: { value: string } | null;
     lieferantenbestand: { value: string } | null;
@@ -95,8 +100,11 @@ Deno.serve(async (req) => {
         const variant: VariantNode = edge.node;
         stats.checked++;
 
-        const ueberverkauf = variant.product?.ueberverkauf?.value;
-        const lieferantenbestand = parseInt(variant.product?.lieferantenbestand?.value || "0") || 0;
+        // Variant-level metafield wins; fall back to product-level
+        const ueberverkauf = variant.ueberverkauf?.value ?? variant.product?.ueberverkauf?.value;
+        const lieferantenbestandRaw =
+          variant.lieferantenbestand?.value ?? variant.product?.lieferantenbestand?.value ?? "0";
+        const lieferantenbestand = parseInt(lieferantenbestandRaw) || 0;
 
         // Desired policy: CONTINUE if oversell enabled AND supplier stock > 0
         const shouldContinue = ueberverkauf === "1" && lieferantenbestand > 0;
