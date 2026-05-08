@@ -65,16 +65,37 @@ function sortOptionValues(optionName: string, values: string[]): string[] {
   return [...values].sort(naturalCompare);
 }
 
+/** Parse a number that may use German (1.000,50) or English (1,000.50) formatting */
+function parseLocalizedNumber(s: string): number {
+  if (!s) return NaN;
+  let n = s.trim();
+  if (n.includes('.') && n.includes(',')) {
+    // Both present – the LAST one is the decimal separator
+    if (n.lastIndexOf(',') > n.lastIndexOf('.')) {
+      n = n.replace(/\./g, '').replace(',', '.'); // German: 1.000,50
+    } else {
+      n = n.replace(/,/g, ''); // English: 1,000.50
+    }
+  } else if (n.includes(',')) {
+    n = n.replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(n)) {
+    // Pure thousand-grouped, e.g. "1.000" or "1.000.000"
+    n = n.replace(/\./g, '');
+  }
+  return parseFloat(n);
+}
+
 /** Natural compare: numeric parts compared as numbers, rest case-insensitive */
 function naturalCompare(a: string, b: string): number {
-  const re = /(\d+(?:[.,]\d+)?)/;
+  // Match full localized numbers (incl. thousand separators), e.g. 1.000,50
+  const re = /(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?|\d+(?:[.,]\d+)?)/;
   const pa = a.split(re);
   const pb = b.split(re);
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const sa = pa[i] ?? '';
     const sb = pb[i] ?? '';
-    const na = parseFloat(sa.replace(',', '.'));
-    const nb = parseFloat(sb.replace(',', '.'));
+    const na = parseLocalizedNumber(sa);
+    const nb = parseLocalizedNumber(sb);
     if (!isNaN(na) && !isNaN(nb)) {
       if (na !== nb) return na - nb;
     } else {
