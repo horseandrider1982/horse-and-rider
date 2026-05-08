@@ -252,6 +252,8 @@ const ProductDetail = () => {
           product?.node?.metafields,
           isSingleVariant,
           product?.node?.tags,
+          product?.node?.productType,
+          product?.node?.title,
         ).canOrder
       );
       const chosen = (orderable ?? variants[0]).node;
@@ -274,6 +276,8 @@ const ProductDetail = () => {
         product?.node?.metafields,
         isSingleVariant,
         product?.node?.tags,
+        product?.node?.productType,
+        product?.node?.title,
       ).canOrder;
     };
   }, [variants, product?.node?.metafields, isSingleVariant, product?.node?.tags]);
