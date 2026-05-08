@@ -10,7 +10,8 @@ const SHOPIFY_STORE = "bpjvam-c1.myshopify.com";
 const SHOPIFY_API_VERSION = "2025-07";
 
 // Query variants with their metafields and inventory item info
-// Metafields ueberverkauf/lieferantenbestand live on the PRODUCT, not the variant.
+// Metafields ueberverkauf/lieferantenbestand may live on the variant OR on the product.
+// We check variant first, then fall back to product.
 const VARIANTS_QUERY = `
   query ($cursor: String) {
     productVariants(first: 100, after: $cursor) {
@@ -20,6 +21,8 @@ const VARIANTS_QUERY = `
           id
           inventoryPolicy
           inventoryItem { id }
+          ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
+          lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
           product {
             ueberverkauf: metafield(namespace: "custom", key: "ueberverkauf") { value }
             lieferantenbestand: metafield(namespace: "custom", key: "lieferantenbestand") { value }
