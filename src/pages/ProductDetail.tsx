@@ -147,9 +147,11 @@ function computeAvailability(
   productMetafields?: (ShopifyMetafield | null)[],
   isSingleVariant?: boolean,
   productTags?: string[],
+  productType?: string,
+  productTitle?: string,
 ): AvailabilityInfo {
   // Gift cards / digital vouchers are always instantly available
-  if (isGiftCard(productTags)) {
+  if (isGiftCard(productTags, productType, productTitle)) {
     return { canOrder: true, deliveryTime: 'Sofort verfügbar', isSupplierStock: false };
   }
 
