@@ -146,6 +146,11 @@ function computeAvailability(
   isSingleVariant?: boolean,
   productTags?: string[],
 ): AvailabilityInfo {
+  // Gift cards / digital vouchers are always instantly available
+  if (isGiftCard(productTags)) {
+    return { canOrder: true, deliveryTime: 'Sofort verfügbar', isSupplierStock: false };
+  }
+
   // Check metafields: for single-variant products, fall back to product-level metafields
   const mf = isSingleVariant ? productMetafields : variantMetafields;
   const lieferantenbestand = getMetafieldValue(mf, 'lieferantenbestand');
