@@ -154,7 +154,10 @@ function computeAvailability(
 
   const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
   const allowOversell = bestUeberverkauf === '1';
-  const hasOwnStock = variantAvailableForSale && !variantCurrentlyNotInStock;
+  // Trust Shopify: availableForSale=true means purchasable, including
+  // inventory_policy=CONTINUE and untracked-inventory variants where
+  // currentlyNotInStock may still be true.
+  const hasOwnStock = variantAvailableForSale;
 
   // Own stock always wins and gets the standard delivery time.
   if (hasOwnStock) {
