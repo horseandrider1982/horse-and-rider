@@ -100,8 +100,11 @@ Deno.serve(async (req) => {
         const variant: VariantNode = edge.node;
         stats.checked++;
 
-        const ueberverkauf = variant.product?.ueberverkauf?.value;
-        const lieferantenbestand = parseInt(variant.product?.lieferantenbestand?.value || "0") || 0;
+        // Variant-level metafield wins; fall back to product-level
+        const ueberverkauf = variant.ueberverkauf?.value ?? variant.product?.ueberverkauf?.value;
+        const lieferantenbestandRaw =
+          variant.lieferantenbestand?.value ?? variant.product?.lieferantenbestand?.value ?? "0";
+        const lieferantenbestand = parseInt(lieferantenbestandRaw) || 0;
 
         // Desired policy: CONTINUE if oversell enabled AND supplier stock > 0
         const shouldContinue = ueberverkauf === "1" && lieferantenbestand > 0;
