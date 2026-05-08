@@ -217,30 +217,14 @@ export function isProductVisibleInListing(product: ShopifyProduct['node']): bool
 
   const isSingleVariant = variants.length <= 1;
 
-  // Check if at least one variant has real availability
+  // Any variant marked availableForSale by Shopify is purchasable
+  // (covers normal stock AND inventory_policy=CONTINUE / untracked inventory)
   for (const { node: v } of variants) {
-    if (!v.availableForSale) continue;
-
-    // Has local stock (availableForSale + NOT currentlyNotInStock)
-    if (!v.currentlyNotInStock) return true;
-
-    // currentlyNotInStock = true → only visible with supplier stock
-    // For single-variant products, check product-level metafields
-    if (isSingleVariant) {
-      const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
-      const oversell = getMf(product.metafields, 'ueberverkauf');
-      if (supplierStock > 0 && oversell === '1') return true;
-    }
-
-    // Check variant-level metafields
-    const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
-    const oversell = getMf(v.metafields, 'ueberverkauf');
-    if (supplierStock > 0 && oversell === '1') return true;
+    if (v.availableForSale) return true;
   }
 
-  // Also check non-availableForSale variants with supplier stock
+  // Fallback: non-availableForSale variants may still be purchasable via supplier stock
   for (const { node: v } of variants) {
-    if (v.availableForSale) continue;
     if (isSingleVariant) {
       const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
       const oversell = getMf(product.metafields, 'ueberverkauf');
