@@ -130,13 +130,13 @@ function formatSupplierDeliveryTime(raw: string | null | undefined): string {
   return trimmed;
 }
 
-function isGiftCard(productTags?: string[]): boolean {
-  if (!productTags || productTags.length === 0) return false;
-  const giftCardTags = ['gutschein', 'gift card', 'gift_card', 'giftcard', 'geschenkgutschein'];
-  const result = productTags.some(tag =>
-    giftCardTags.some(gc => tag.toLowerCase().trim() === gc),
-  );
-  console.log('[isGiftCard]', { productTags, result });
+function isGiftCard(productTags?: string[], productType?: string, productTitle?: string): boolean {
+  const giftCardTokens = ['gutschein', 'gift card', 'gift_card', 'giftcard', 'geschenkgutschein', 'geschenkgutscheine'];
+  const matches = (s?: string) =>
+    !!s && giftCardTokens.some(gc => s.toLowerCase().includes(gc));
+  const tagMatch = (productTags ?? []).some(tag => matches(tag));
+  const result = tagMatch || matches(productType) || matches(productTitle);
+  console.log('[isGiftCard]', { productTags, productType, productTitle, result });
   return result;
 }
 
