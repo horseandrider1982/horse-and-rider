@@ -267,6 +267,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
       handle
       vendor
       productType
+      tags
       priceRange {
         minVariantPrice {
           amount
