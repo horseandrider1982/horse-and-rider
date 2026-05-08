@@ -43,8 +43,10 @@ interface VariantNode {
   id: string;
   inventoryPolicy: string;
   inventoryItem: { id: string };
-  ueberverkauf: { value: string } | null;
-  lieferantenbestand: { value: string } | null;
+  product: {
+    ueberverkauf: { value: string } | null;
+    lieferantenbestand: { value: string } | null;
+  };
 }
 
 async function shopifyAdmin(token: string, query: string, variables: Record<string, unknown> = {}) {
