@@ -263,23 +263,10 @@ function isProductVisible(product: ShopifyEdge["node"]): boolean {
   const variants = product.variants?.edges || [];
   const isSingleVariant = variants.length <= 1;
 
-  // Check variants that are availableForSale
+  // Any variant that Shopify marks as availableForSale is purchasable
+  // (covers normal stock AND inventory_policy=CONTINUE configurator products)
   for (const { node: v } of variants) {
-    if (!v.availableForSale) continue;
-
-    // Has local stock (availableForSale + NOT currentlyNotInStock)
-    if (!v.currentlyNotInStock) return true;
-
-    // currentlyNotInStock = true → only visible with supplier stock
-    if (isSingleVariant) {
-      const supplierStock = parseInt(getMf(product.metafields, 'lieferantenbestand')) || 0;
-      const oversell = getMf(product.metafields, 'ueberverkauf');
-      if (supplierStock > 0 && oversell === '1') return true;
-    }
-
-    const supplierStock = parseInt(getMf(v.metafields, 'lieferantenbestand')) || 0;
-    const oversell = getMf(v.metafields, 'ueberverkauf');
-    if (supplierStock > 0 && oversell === '1') return true;
+    if (v.availableForSale) return true;
   }
 
   // Also check non-availableForSale variants with supplier stock
