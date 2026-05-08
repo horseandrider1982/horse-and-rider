@@ -247,6 +247,7 @@ const ProductDetail = () => {
           v.node.metafields,
           product?.node?.metafields,
           isSingleVariant,
+          product?.node?.tags,
         ).canOrder
       );
       const chosen = (orderable ?? variants[0]).node;
@@ -268,6 +269,7 @@ const ProductDetail = () => {
         variant.metafields,
         product?.node?.metafields,
         isSingleVariant,
+        product?.node?.tags,
       ).canOrder;
     };
   }, [variants, product?.node?.metafields, isSingleVariant]);
@@ -366,6 +368,7 @@ const ProductDetail = () => {
         selectedVariant.metafields,
         product?.node?.metafields,
         isSingleVariant,
+        product?.node?.tags,
       );
     }
     // No variant selected (parent view): check if ANY variant is orderable
@@ -377,6 +380,7 @@ const ProductDetail = () => {
           v.metafields,
           product?.node?.metafields,
           isSingleVariant,
+          product?.node?.tags,
         );
         if (va.canOrder) return { canOrder: true, deliveryTime: null, isSupplierStock: false };
       }
