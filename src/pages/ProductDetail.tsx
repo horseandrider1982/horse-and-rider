@@ -158,9 +158,24 @@ function computeAvailability(
   // inventory_policy=CONTINUE and untracked-inventory variants where
   // currentlyNotInStock may still be true.
   const hasOwnStock = variantAvailableForSale;
+  // Echter eigener Lagerbestand = availableForSale + nicht "currentlyNotInStock".
+  // currentlyNotInStock=true bei availableForSale=true bedeutet: Inventar nicht
+  // verfolgt ODER inventory_policy=CONTINUE → Lieferzeit kommt vom Lieferanten.
+  const hasRealLocalStock = variantAvailableForSale && !variantCurrentlyNotInStock;
 
-  // Own stock always wins and gets the standard delivery time.
   if (hasOwnStock) {
+    if (hasRealLocalStock) {
+      return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
+    }
+    // Untracked / CONTINUE: Lieferzeit aus Lieferanten-Feld, sonst Standard
+    const supplierTime = bestLieferzeit?.trim();
+    if (supplierTime) {
+      return {
+        canOrder: true,
+        deliveryTime: formatSupplierDeliveryTime(supplierTime),
+        isSupplierStock: true,
+      };
+    }
     return { canOrder: true, deliveryTime: '1 - 3 Werktage', isSupplierStock: false };
   }
 
