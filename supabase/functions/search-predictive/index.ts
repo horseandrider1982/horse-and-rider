@@ -385,7 +385,9 @@ Deno.serve(async (req) => {
 
     // Fetch more than needed to account for deduplication + availability filtering
     const fetchSize = 48;
-    const shopifyQuery = `(${expandedQuery}) available_for_sale:true`;
+    // Do not add available_for_sale:true here: products with supplier stock + oversell
+    // may be purchasable by our custom logic even when Shopify marks them unavailable.
+    const shopifyQuery = `(${expandedQuery})`;
     const variables: Record<string, unknown> = { query: shopifyQuery, first: fetchSize };
     if (after) variables.after = after;
 
