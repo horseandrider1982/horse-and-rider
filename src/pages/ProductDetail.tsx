@@ -154,7 +154,10 @@ function computeAvailability(
 
   const hasSupplierStock = bestLieferantenbestand !== null && parseInt(bestLieferantenbestand, 10) > 0;
   const allowOversell = bestUeberverkauf === '1';
-  const hasOwnStock = variantAvailableForSale && !variantCurrentlyNotInStock;
+  // Trust Shopify: availableForSale=true means purchasable, including
+  // inventory_policy=CONTINUE and untracked-inventory variants where
+  // currentlyNotInStock may still be true.
+  const hasOwnStock = variantAvailableForSale;
 
   // Own stock always wins and gets the standard delivery time.
   if (hasOwnStock) {
@@ -203,12 +206,23 @@ const ProductDetail = () => {
   const options = product?.node?.options?.filter(o => o.name !== 'Title') ?? [];
   const isSingleVariant = variants ? variants.length === 1 && (variants[0]?.node?.title === 'Default Title' || !options.length) : false;
 
-  // Initialize selectedOptions from first variant on product load
+  // Initialize selectedOptions: prefer the first ORDERABLE variant so
+  // unavailable variants (e.g. Carbon when only Webflex/GRP are in stock)
+  // aren't pre-selected.
   useEffect(() => {
     if (variants?.length && options.length > 0) {
-      const firstVariant = variants[0].node;
+      const orderable = variants.find(v =>
+        computeAvailability(
+          v.node.availableForSale,
+          v.node.currentlyNotInStock,
+          v.node.metafields,
+          product?.node?.metafields,
+          isSingleVariant,
+        ).canOrder
+      );
+      const chosen = (orderable ?? variants[0]).node;
       const initial: Record<string, string> = {};
-      firstVariant.selectedOptions.forEach(o => {
+      chosen.selectedOptions.forEach(o => {
         if (o.name !== 'Title') initial[o.name] = o.value;
       });
       setSelectedOptions(initial);
