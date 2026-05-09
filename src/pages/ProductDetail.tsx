@@ -965,6 +965,7 @@ const ProductDetail = () => {
             productType={product.node.productType}
             currentProductId={product.node.id}
           />
+          <RecentlyViewed excludeHandle={handle} />
 
           {/* Bottom spacer for sticky mobile bar */}
           <div className="h-20 md:hidden" />
