@@ -186,6 +186,16 @@ export default function Admin() {
               <PropertyConfigManager />
             </>
           )}
+          {activeSection === "downloads" && (
+            <>
+              <h1 className="text-2xl font-heading font-bold mb-6">Produkt-Downloads</h1>
+              <p className="text-sm text-muted-foreground mb-6">
+                PDFs (Sicherheitsdatenblätter, Bedienungsanleitungen, Größentabellen, …) je Kategorie hochladen.
+                Die <strong>Artikelnummer im Dateinamen</strong> ordnet die Datei dem passenden Produkt zu.
+              </p>
+              <DownloadsManager />
+            </>
+          )}
           {activeSection === "calendly" && <CalendlySettings />}
           {activeSection === "search" && <SearchSettings />}
           {activeSection === "search-logs" && <SearchLogs />}
