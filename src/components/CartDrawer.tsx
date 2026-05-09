@@ -126,3 +126,23 @@ export const CartDrawer = () => {
     </Sheet>
   );
 };
+
+/**
+ * Renders the user's recently viewed products inside the empty cart drawer.
+ * Lazy-imports RecentlyViewed so we don't bloat the initial bundle.
+ */
+import { lazy, Suspense } from "react";
+const RecentlyViewedLazy = lazy(() =>
+  import("./RecentlyViewed").then(m => ({ default: m.RecentlyViewed }))
+);
+
+function CartRecentlyViewed() {
+  return (
+    <Suspense fallback={null}>
+      <div className="-mx-6">
+        <RecentlyViewedLazy title="Zuletzt angesehen" limit={4} />
+      </div>
+    </Suspense>
+  );
+}
+
