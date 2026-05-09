@@ -505,6 +505,36 @@ export type Database = {
         }
         Relationships: []
       }
+      download_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       entity_paths: {
         Row: {
           canonical_key: string
@@ -665,6 +695,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      product_downloads: {
+        Row: {
+          category_key: string
+          created_at: string
+          display_filename: string
+          file_size_bytes: number | null
+          id: string
+          original_filename: string
+          public_url: string
+          sku: string
+          sort_order: number
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          category_key: string
+          created_at?: string
+          display_filename: string
+          file_size_bytes?: number | null
+          id?: string
+          original_filename: string
+          public_url: string
+          sku: string
+          sort_order?: number
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          category_key?: string
+          created_at?: string
+          display_filename?: string
+          file_size_bytes?: number | null
+          id?: string
+          original_filename?: string
+          public_url?: string
+          sku?: string
+          sort_order?: number
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_downloads_category_key_fkey"
+            columns: ["category_key"]
+            isOneToOne: false
+            referencedRelation: "download_categories"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       product_property_display_config: {
         Row: {

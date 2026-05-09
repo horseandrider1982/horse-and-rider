@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, BarChart3, Settings, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home, ClipboardList, Sparkles } from "lucide-react";
+import { Loader2, BarChart3, Settings, ArrowLeft, Package, Layers, Newspaper, Tag, ArrowRightLeft, FileText, Calendar, SearchIcon, Home, ClipboardList, Sparkles, Download } from "lucide-react";
 import ConfiguratorProducts from "@/pages/admin/ConfiguratorProducts";
 import ConfiguratorGroups from "@/pages/admin/ConfiguratorGroups";
 import NewsArticles from "@/pages/admin/NewsArticles";
@@ -21,6 +21,7 @@ import SearchSettings from "@/pages/admin/SearchSettings";
 import SearchLogs from "@/pages/admin/SearchLogs";
 import HomepageProducts from "@/pages/admin/HomepageProducts";
 import PropertyConfigManager from "@/pages/admin/PropertyConfigManager";
+import DownloadsManager from "@/pages/admin/DownloadsManager";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   
   { key: "configurator", label: "Konfigurator", icon: Settings },
   { key: "properties", label: "Eigenschaften", icon: Sparkles },
+  { key: "downloads", label: "Downloads", icon: Download },
   { key: "calendly", label: "Calendly", icon: Calendar },
   { key: "search", label: "Suche", icon: SearchIcon },
   { key: "search-logs", label: "Suchprotokoll", icon: ClipboardList },
@@ -182,6 +184,16 @@ export default function Admin() {
             <>
               <h1 className="text-2xl font-heading font-bold mb-6">Produkt-Eigenschaften</h1>
               <PropertyConfigManager />
+            </>
+          )}
+          {activeSection === "downloads" && (
+            <>
+              <h1 className="text-2xl font-heading font-bold mb-6">Produkt-Downloads</h1>
+              <p className="text-sm text-muted-foreground mb-6">
+                PDFs (Sicherheitsdatenblätter, Bedienungsanleitungen, Größentabellen, …) je Kategorie hochladen.
+                Die <strong>Artikelnummer im Dateinamen</strong> ordnet die Datei dem passenden Produkt zu.
+              </p>
+              <DownloadsManager />
             </>
           )}
           {activeSection === "calendly" && <CalendlySettings />}

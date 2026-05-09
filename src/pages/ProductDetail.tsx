@@ -28,6 +28,7 @@ import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 import { SimilarProducts } from "@/components/SimilarProducts";
 import { ProductProperties } from "@/components/ProductProperties";
+import { ProductDownloads } from "@/components/ProductDownloads";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
@@ -938,6 +939,10 @@ const ProductDetail = () => {
               </div>
             </div>
           )}
+
+          <ProductDownloads
+            skus={(variants ?? []).map((v) => v.node.sku).filter((s): s is string => !!s)}
+          />
 
           {brand && (brand.gpsrStreet || brand.gpsrCity || brand.gpsrEmail) && (
             <div className="mt-6 pt-4 border-t border-border">
