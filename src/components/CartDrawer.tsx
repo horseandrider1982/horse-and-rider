@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -72,11 +72,12 @@ export const CartDrawer = () => {
         </SheetHeader>
         <div className="flex flex-col flex-1 pt-6 min-h-0">
           {items.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
+            <div className="flex-1 overflow-y-auto -mx-6 px-6">
+              <div className="text-center py-8">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">{t("cart.empty")}</p>
               </div>
+              <CartRecentlyViewed />
             </div>
           ) : (
             <>
@@ -125,3 +126,22 @@ export const CartDrawer = () => {
     </Sheet>
   );
 };
+
+/**
+ * Renders the user's recently viewed products inside the empty cart drawer.
+ * Lazy-imports RecentlyViewed so we don't bloat the initial bundle.
+ */
+const RecentlyViewedLazy = lazy(() =>
+  import("./RecentlyViewed").then(m => ({ default: m.RecentlyViewed }))
+);
+
+function CartRecentlyViewed() {
+  return (
+    <Suspense fallback={null}>
+      <div className="-mx-6">
+        <RecentlyViewedLazy title="Zuletzt angesehen" limit={4} />
+      </div>
+    </Suspense>
+  );
+}
+

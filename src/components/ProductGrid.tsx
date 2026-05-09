@@ -4,18 +4,36 @@ import { useProducts, useProductByHandle } from "@/hooks/useProducts";
 import { useHomepageProductHandles } from "@/hooks/useHomepageProducts";
 import { useI18n } from "@/i18n";
 import type { ShopifyProduct } from "@/lib/shopify";
-import { shopifyImageUrl } from "@/lib/shopifyImage";
+import { shopifyImageUrl, shopifyImageSrcSet } from "@/lib/shopifyImage";
+import { usePrefetchProduct } from "@/hooks/usePrefetchProduct";
 
 const ProductCard = ({ product }: { product: ShopifyProduct }) => {
   const { t } = useI18n();
+  const prefetch = usePrefetchProduct();
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
+  const handlePrefetch = () => prefetch(product.node.handle);
 
   return (
-    <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
+    <LocaleLink
+      to={`/product/${product.node.handle}`}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+      className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block"
+    >
       <div className="aspect-square overflow-hidden bg-white">
         {image ? (
-          <img src={shopifyImageUrl(image.url, 300)} srcSet={`${shopifyImageUrl(image.url, 300)} 1x, ${shopifyImageUrl(image.url, 450)} 1.5x`} alt={image.altText || product.node.title} width={300} height={300} loading="lazy" decoding="async" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+          <img
+            src={shopifyImageUrl(image.url, 400)}
+            srcSet={shopifyImageSrcSet(image.url, [200, 300, 400, 600])}
+            sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
+            alt={image.altText || product.node.title}
+            width={400}
+            height={400}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground"><ShoppingCart className="h-12 w-12" /></div>
         )}
