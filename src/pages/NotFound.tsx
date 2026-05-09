@@ -76,6 +76,12 @@ const NotFound = () => {
       if (!cancelled) {
         setChecking(false);
         console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+        // Log 404 for spike monitoring (fire & forget)
+        supabase.from("not_found_log").insert({
+          path: location.pathname,
+          referrer: document.referrer || null,
+          user_agent: navigator.userAgent || null,
+        }).then(() => {}, () => {});
       }
     };
 
