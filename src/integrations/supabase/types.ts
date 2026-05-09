@@ -613,6 +613,21 @@ export type Database = {
         }
         Relationships: []
       }
+      monitor_404_state: {
+        Row: {
+          id: number
+          last_alert_at: string | null
+        }
+        Insert: {
+          id?: number
+          last_alert_at?: string | null
+        }
+        Update: {
+          id?: number
+          last_alert_at?: string | null
+        }
+        Relationships: []
+      }
       news_article_products: {
         Row: {
           article_id: string
@@ -693,6 +708,30 @@ export type Database = {
           status?: Database["public"]["Enums"]["news_status"]
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      not_found_log: {
+        Row: {
+          created_at: string
+          id: string
+          path: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path?: string
+          referrer?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
