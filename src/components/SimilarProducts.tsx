@@ -6,6 +6,8 @@ import { LocaleLink } from "./LocaleLink";
 import { useCartStore } from "@/stores/cartStore";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
+import { shopifyImageUrl, shopifyImageSrcSet } from "@/lib/shopifyImage";
+import { usePrefetchProduct } from "@/hooks/usePrefetchProduct";
 import { trackAddToCart } from "@/lib/ga4";
 import { isProductVisibleInListing } from "@/lib/shopify";
 
@@ -102,9 +104,11 @@ function SimilarProductCard({ product }: { product: ShopifyProduct }) {
   const addItem = useCartStore(s => s.addItem);
   const isLoading = useCartStore(s => s.isLoading);
   const { t } = useI18n();
+  const prefetch = usePrefetchProduct();
   const variant = product.node.variants.edges[0]?.node;
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
+  const handlePrefetch = () => prefetch(product.node.handle);
 
   const handleAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -119,10 +123,20 @@ function SimilarProductCard({ product }: { product: ShopifyProduct }) {
   };
 
   return (
-    <LocaleLink to={`/product/${product.node.handle}`} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
+    <LocaleLink to={`/product/${product.node.handle}`} onMouseEnter={handlePrefetch} onFocus={handlePrefetch} className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group block">
       <div className="aspect-square overflow-hidden bg-white">
         {image ? (
-          <img src={image.url} alt={image.altText || product.node.title} loading="lazy" decoding="async" width={300} height={300} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+          <img
+            src={shopifyImageUrl(image.url, 400)}
+            srcSet={shopifyImageSrcSet(image.url, [200, 300, 400, 600])}
+            sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
+            alt={image.altText || product.node.title}
+            loading="lazy"
+            decoding="async"
+            width={400}
+            height={400}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground"><ShoppingCart className="h-12 w-12" /></div>
         )}
