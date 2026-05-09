@@ -348,6 +348,9 @@ export const PRODUCT_BY_HANDLE_QUERY = `
 
 export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}, retries = 2) {
   let lastError: Error | null = null;
+  const requestVariables = query.includes('$xentralIds') && variables.xentralIds == null
+    ? { ...variables, xentralIds: [] }
+    : variables;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -357,7 +360,7 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
           'Content-Type': 'application/json',
           'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
         },
-        body: JSON.stringify({ query, variables }),
+        body: JSON.stringify({ query, variables: requestVariables }),
       });
 
       if (response.status === 402) {
