@@ -14,6 +14,7 @@ const CategoryHighlights = lazy(() => import("@/components/CategoryHighlights").
 const NewsletterSection = lazy(() => import("@/components/NewsletterSection").then(m => ({ default: m.NewsletterSection })));
 const TrustedShopsSection = lazy(() => import("@/components/TrustedShopsSection").then(m => ({ default: m.TrustedShopsSection })));
 const AboutTeamSection = lazy(() => import("@/components/AboutTeamSection").then(m => ({ default: m.AboutTeamSection })));
+const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed").then(m => ({ default: m.RecentlyViewed })));
 const Footer = lazy(() => import("@/components/Footer").then(m => ({ default: m.Footer })));
 const BackToTop = lazy(() => import("@/components/BackToTop").then(m => ({ default: m.BackToTop })));
 
@@ -37,6 +38,9 @@ const Index = () => {
         <BrandLogosBar />
         <ServiceCards />
         <ProductGrid />
+        <Suspense fallback={null}>
+          <RecentlyViewed />
+        </Suspense>
         <Suspense fallback={<div style={{ minHeight: 300 }} />}>
           <CategoryHighlights />
         </Suspense>
