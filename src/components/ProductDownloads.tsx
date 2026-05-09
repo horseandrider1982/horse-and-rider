@@ -43,11 +43,11 @@ export function ProductDownloads({ skus }: ProductDownloadsProps) {
                     href={d.public_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    download={d.display_filename}
+                    download={d.title || d.display_filename}
                     className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
                   >
                     <FileText className="h-4 w-4 shrink-0" />
-                    <span>{d.display_filename}</span>
+                    <span>{d.title || d.display_filename}</span>
                     <Download className="h-3.5 w-3.5 opacity-60" />
                   </a>
                 </li>

@@ -696,6 +696,35 @@ export type Database = {
         }
         Relationships: []
       }
+      product_download_skus: {
+        Row: {
+          created_at: string
+          download_id: string
+          id: string
+          sku: string
+        }
+        Insert: {
+          created_at?: string
+          download_id: string
+          id?: string
+          sku: string
+        }
+        Update: {
+          created_at?: string
+          download_id?: string
+          id?: string
+          sku?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_download_skus_download_id_fkey"
+            columns: ["download_id"]
+            isOneToOne: false
+            referencedRelation: "product_downloads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_downloads: {
         Row: {
           category_key: string
@@ -705,9 +734,10 @@ export type Database = {
           id: string
           original_filename: string
           public_url: string
-          sku: string
+          sku: string | null
           sort_order: number
           storage_path: string
+          title: string | null
           updated_at: string
         }
         Insert: {
@@ -718,9 +748,10 @@ export type Database = {
           id?: string
           original_filename: string
           public_url: string
-          sku: string
+          sku?: string | null
           sort_order?: number
           storage_path: string
+          title?: string | null
           updated_at?: string
         }
         Update: {
@@ -731,9 +762,10 @@ export type Database = {
           id?: string
           original_filename?: string
           public_url?: string
-          sku?: string
+          sku?: string | null
           sort_order?: number
           storage_path?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
