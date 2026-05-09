@@ -35,6 +35,7 @@ const NAV_ITEMS = [
   
   { key: "configurator", label: "Konfigurator", icon: Settings },
   { key: "properties", label: "Eigenschaften", icon: Sparkles },
+  { key: "downloads", label: "Downloads", icon: Download },
   { key: "calendly", label: "Calendly", icon: Calendar },
   { key: "search", label: "Suche", icon: SearchIcon },
   { key: "search-logs", label: "Suchprotokoll", icon: ClipboardList },
