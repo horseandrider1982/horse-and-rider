@@ -437,24 +437,7 @@ function AssignDialog({
   const { data: products, isFetching } = useQuery({
     queryKey: ["downloads-product-search", debounced, shopifyLanguage],
     enabled: debounced.length >= 2,
-    queryFn: async () => {
-      const all: ShopifyProduct[] = [];
-      let cursor: string | null = null;
-      let hasNext = true;
-      let pages = 0;
-      while (hasNext && pages < 3) {
-        const variables: Record<string, unknown> = { first: 50, language: shopifyLanguage, query: debounced };
-        if (cursor) variables.after = cursor;
-        const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
-        const p = data?.data?.products;
-        if (!p) break;
-        all.push(...(p.edges as ShopifyProduct[]));
-        hasNext = p.pageInfo.hasNextPage;
-        cursor = p.pageInfo.endCursor;
-        pages++;
-      }
-      return all;
-    },
+    queryFn: () => searchProductsForAssignments(debounced, shopifyLanguage),
     staleTime: 60_000,
   });
 
@@ -547,7 +530,7 @@ function AssignDialog({
             <div className="relative mb-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Produktname, Marke, Artikelnummer…"
+                placeholder="Mehrere Begriffe möglich, z. B. uvex helm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
