@@ -303,10 +303,114 @@
             pageDesc = 'News, Tipps und Aktuelles rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.';
           } else if (segments[0] === 'search') {
             pageTitle = 'Suchergebnisse | ' + siteName;
+            pageDesc = 'Finden Sie Reitsport-Artikel, Marken und Ausrüstung im Online-Shop von ' + siteName + '.';
           } else {
-            // Generischer Fallback für statische Seiten (Kontakt, AGB, FAQ etc.)
-            var lastSeg = segments[segments.length - 1];
-            pageTitle = slugToTitle(lastSeg) + ' | ' + siteName;
+            // ---------- Kuratierte Map: Statische Seiten mit handgeschriebenen Titles & Descriptions ----------
+            // Pfad (ohne Locale, ohne führenden Slash) → { title, desc }
+            var STATIC_PAGES = {
+              'impressum': {
+                title: 'Impressum | ' + siteName,
+                desc: 'Impressum und rechtliche Angaben von ' + siteName + ' – Reitsport Online Shop in Salzhausen / Luhmühlen.'
+              },
+              'datenschutz': {
+                title: 'Datenschutzerklärung | ' + siteName,
+                desc: 'Datenschutzerklärung gemäß DSGVO: Erfahren Sie, wie ' + siteName + ' personenbezogene Daten erhebt, verarbeitet und schützt.'
+              },
+              'agb': {
+                title: 'AGB – Allgemeine Geschäftsbedingungen | ' + siteName,
+                desc: 'Allgemeine Geschäftsbedingungen (AGB) für den Online-Einkauf bei ' + siteName + ' – Bestellung, Zahlung, Lieferung, Gewährleistung.'
+              },
+              'widerrufsrecht': {
+                title: 'Widerrufsrecht & Rückgabe | ' + siteName,
+                desc: '14 Tage Widerrufsrecht: Alle Informationen zur Rückgabe, Erstattung und zum Widerrufsformular bei ' + siteName + '.'
+              },
+              'kontakt': {
+                title: 'Kontakt & Beratung | ' + siteName,
+                desc: 'Kontaktieren Sie ' + siteName + ' – telefonisch, per E-Mail oder besuchen Sie uns vor Ort in Luhmühlen. Wir freuen uns auf Sie!'
+              },
+              'versand': {
+                title: 'Versand & Lieferung | ' + siteName,
+                desc: 'Versandkosten, Lieferzeiten und Versandländer im Überblick – schneller Versand bei ' + siteName + '.'
+              },
+              'service': {
+                title: 'Unser Service | ' + siteName,
+                desc: 'Stickerei, Gravur, Sattelservice, Deckenwäsche und mehr: Entdecken Sie alle Service-Leistungen von ' + siteName + '.'
+              },
+              'stickerei': {
+                title: 'Stickerei für Reitsport-Equipment | ' + siteName,
+                desc: 'Individuelle Stickerei für Schabracken, Decken & Reitkleidung. Logos, Namen und Pferdenamen professionell sticken lassen bei ' + siteName + '.'
+              },
+              'scherblaetter-schleifservice': {
+                title: 'Scherblätter-Schleifservice | ' + siteName,
+                desc: 'Professioneller Schleifservice für Scherblätter aller Marken. Schnelle Bearbeitung und faire Preise bei ' + siteName + '.'
+              },
+              'deckenwasche': {
+                title: 'Deckenwäsche & Imprägnierung | ' + siteName,
+                desc: 'Pferdedecken-Wäsche, Reparatur und Imprägnierung – professionelle Deckenwäsche durch ' + siteName + ' in Luhmühlen.'
+              },
+              'test-vor-kauf': {
+                title: 'Test vor Kauf – Probereiten | ' + siteName,
+                desc: 'Sättel, Trensen und Equipment vor dem Kauf testen. Erfahren Sie, wie das Test-vor-Kauf-Programm bei ' + siteName + ' funktioniert.'
+              },
+              'gravur': {
+                title: 'Gravur-Service für Trensen, Gebisse & Mehr | ' + siteName,
+                desc: 'Individuelle Gravur für Trensen, Sporen, Steigbügel und mehr. Persönlicher Gravur-Service direkt von ' + siteName + '.'
+              },
+              'faq': {
+                title: 'FAQ – Häufig gestellte Fragen | ' + siteName,
+                desc: 'Antworten auf die häufigsten Fragen zu Bestellung, Versand, Rückgabe und Service bei ' + siteName + '.'
+              },
+              'sitemap': {
+                title: 'Sitemap – Seitenübersicht | ' + siteName,
+                desc: 'Übersicht aller Seiten und Kategorien des Online-Shops von ' + siteName + '.'
+              },
+              'unsere-marken': {
+                title: 'Unsere Marken – Reitsport Markenübersicht | ' + siteName,
+                desc: 'Über 100 Top-Marken im Reitsport: Eskadron, Kentucky, LeMieux, Pikeur, Schockemöhle und mehr – alle Marken bei ' + siteName + '.'
+              },
+              'news': {
+                title: 'News & Aktuelles | ' + siteName,
+                desc: 'News, Tipps und Aktuelles rund um Reitsport, Pferd und Ausrüstung bei ' + siteName + '.'
+              },
+              'kundenkarte': {
+                title: 'Kundenkarte & Vorteile | ' + siteName,
+                desc: 'Kundenkarte, Treuepunkte und exklusive Vorteile für Stammkunden von ' + siteName + '.'
+              },
+              'account': {
+                title: 'Mein Konto | ' + siteName,
+                desc: 'Verwalten Sie Ihr Kundenkonto, Bestellungen und persönliche Daten bei ' + siteName + '.'
+              },
+              'login': {
+                title: 'Anmelden | ' + siteName,
+                desc: 'Melden Sie sich in Ihrem Kundenkonto bei ' + siteName + ' an.'
+              },
+              'pferde': {
+                title: 'Meine Pferde | ' + siteName,
+                desc: 'Verwalten Sie die Daten Ihrer Pferde im Kundenbereich von ' + siteName + '.'
+              },
+              'danke': {
+                title: 'Vielen Dank für Ihre Bestellung | ' + siteName,
+                desc: 'Vielen Dank für Ihre Bestellung bei ' + siteName + '. Ihre Bestellbestätigung erhalten Sie per E-Mail.'
+              },
+              'thank-you': {
+                title: 'Vielen Dank für Ihre Bestellung | ' + siteName,
+                desc: 'Vielen Dank für Ihre Bestellung bei ' + siteName + '. Ihre Bestellbestätigung erhalten Sie per E-Mail.'
+              }
+            };
+
+            var staticKey = segments.join('/');
+            // Auch erste Ebene matchen (z.B. /pferde/neu → 'pferde')
+            var staticEntry = STATIC_PAGES[staticKey] || STATIC_PAGES[segments[0]];
+
+            if (staticEntry) {
+              pageTitle = truncate(staticEntry.title, 60);
+              pageDesc = truncate(staticEntry.desc, 155);
+            } else {
+              // Generischer Fallback für unbekannte Seiten (z.B. CMS /pages/:slug)
+              var lastSeg = segments[segments.length - 1];
+              pageTitle = truncate(slugToTitle(lastSeg) + ' | ' + siteName, 60);
+              pageDesc = truncate(slugToTitle(lastSeg) + ' bei ' + siteName + ' – Reitsport, Service und Beratung aus Luhmühlen.', 155);
+            }
           }
 
           // ---------- DOM schreiben ----------
