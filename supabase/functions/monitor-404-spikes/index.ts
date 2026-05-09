@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `Horse & Rider Monitor <${FROM_EMAIL}>`,
+        from: `Horse & Rider 404-Monitor <${FROM_EMAIL}>`,
         to: [ALERT_EMAIL],
         subject: `⚠️ 404-Spike: ${hourly} Fehler/Stunde (${(hourly/baseline).toFixed(1)}× Baseline)`,
         html,
