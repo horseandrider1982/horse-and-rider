@@ -355,6 +355,58 @@ function prettyCategory(label: string): string {
   return label.replace(/[^a-zA-Z0-9]+/g, "");
 }
 
+function parseProductSearchTerms(input: string): string[] {
+  return input
+    .toLowerCase()
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length > 0 && !/^(and|or|not|und|oder)$/i.test(term));
+}
+
+function productMatchesSearchTerms(product: ShopifyProduct, terms: string[]): boolean {
+  if (terms.length === 0) return true;
+
+  const searchable = [
+    product.node.title,
+    product.node.vendor,
+    product.node.productType,
+    ...(product.node.tags ?? []),
+    ...((product.node.variants?.edges ?? []).flatMap((variant) => [variant.node.title, variant.node.sku, variant.node.barcode])),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return terms.every((term) => searchable.includes(term));
+}
+
+async function searchProductsForAssignments(query: string, language: string): Promise<ShopifyProduct[]> {
+  const terms = parseProductSearchTerms(query);
+  const candidates = Array.from(new Set([query.trim(), ...terms])).filter(Boolean);
+  const byHandle = new Map<string, ShopifyProduct>();
+
+  for (const candidate of candidates) {
+    let cursor: string | null = null;
+    let hasNext = true;
+    let pages = 0;
+    while (hasNext && pages < 3) {
+      const variables: Record<string, unknown> = { first: 100, language, query: candidate };
+      if (cursor) variables.after = cursor;
+      const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
+      const products = data?.data?.products;
+      if (!products) break;
+      for (const product of products.edges as ShopifyProduct[]) {
+        byHandle.set(product.node.handle, product);
+      }
+      hasNext = products.pageInfo.hasNextPage;
+      cursor = products.pageInfo.endCursor;
+      pages++;
+    }
+  }
+
+  return Array.from(byHandle.values()).filter((product) => productMatchesSearchTerms(product, terms));
+}
+
 // =====================================================================
 // Assignment dialog: search Shopify products, multi-select → variant SKUs
 // =====================================================================
