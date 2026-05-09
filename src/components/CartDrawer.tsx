@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -131,7 +131,6 @@ export const CartDrawer = () => {
  * Renders the user's recently viewed products inside the empty cart drawer.
  * Lazy-imports RecentlyViewed so we don't bloat the initial bundle.
  */
-import { lazy, Suspense } from "react";
 const RecentlyViewedLazy = lazy(() =>
   import("./RecentlyViewed").then(m => ({ default: m.RecentlyViewed }))
 );
