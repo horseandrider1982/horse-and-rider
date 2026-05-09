@@ -16,6 +16,34 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    const url = new URL(req.url);
+    const isTest = url.searchParams.get("test") === "1";
+
+    if (isTest) {
+      const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+      if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY missing");
+      const resp = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `Horse & Rider 404-Monitor <${FROM_EMAIL}>`,
+          to: [ALERT_EMAIL],
+          subject: "✅ Test-Mail: 404-Monitor funktioniert",
+          html: `<h2 style="color:#1c471e;font-family:Georgia,serif">✅ Test erfolgreich</h2>
+                 <p>Diese Test-Mail bestätigt, dass der 404-Spike-Monitor E-Mails über Resend versenden kann.</p>
+                 <p style="color:#666;font-size:12px">Absender: ${FROM_EMAIL}<br>Empfänger: ${ALERT_EMAIL}<br>Zeit: ${new Date().toISOString()}</p>`,
+        }),
+      });
+      const result = await resp.json();
+      return new Response(JSON.stringify({ test: true, ok: resp.ok, status: resp.status, result }), {
+        status: resp.ok ? 200 : 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
