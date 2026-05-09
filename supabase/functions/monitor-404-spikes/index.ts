@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const ALERT_EMAIL = "c.bolten@horse-and-rider.de";
-const FROM_EMAIL = "404-monitor@horse-and-rider.de";
+const FROM_EMAIL = "fehler@reitsportartikel24.de";
 const SPIKE_FACTOR = 3; // alert if last hour > 3x avg of last 24h
 const MIN_HITS = 10;     // ignore tiny absolute counts
 const ALERT_COOLDOWN_MIN = 60; // don't spam
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `Horse & Rider Monitor <${FROM_EMAIL}>`,
+        from: `Horse & Rider 404-Monitor <${FROM_EMAIL}>`,
         to: [ALERT_EMAIL],
         subject: `⚠️ 404-Spike: ${hourly} Fehler/Stunde (${(hourly/baseline).toFixed(1)}× Baseline)`,
         html,
