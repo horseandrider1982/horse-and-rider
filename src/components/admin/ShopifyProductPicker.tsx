@@ -18,27 +18,25 @@ function buildShopifyQuery(input: string): string | undefined {
   const trimmed = input.trim();
   if (!trimmed) return undefined;
 
-  // Extract quoted phrases first
   const tokens: string[] = [];
   const phraseRegex = /"([^"]+)"/g;
-  let rest = trimmed;
   let match: RegExpExecArray | null;
   while ((match = phraseRegex.exec(trimmed)) !== null) {
     tokens.push(`"${match[1]}"`);
   }
-  rest = trimmed.replace(phraseRegex, ' ');
+  const rest = trimmed.replace(phraseRegex, ' ');
 
-  // Remaining bare words
   for (const w of rest.split(/\s+/)) {
     const word = w.trim();
     if (!word) continue;
-    if (/^(AND|OR|NOT)$/i.test(word)) continue; // ignore explicit operators
-    // wildcard suffix for prefix-match across fields
-    tokens.push(`${word}*`);
+    if (/^(AND|OR|NOT)$/i.test(word)) continue;
+    // Shopify default search treats space as AND across title/vendor/type/tags/sku.
+    // Quote each term so it isn't parsed as a field qualifier and to keep special chars safe.
+    tokens.push(`"${word.replace(/"/g, '')}"`);
   }
 
   if (tokens.length === 0) return undefined;
-  return tokens.join(' AND ');
+  return tokens.join(' ');
 }
 
 /** Fetch ALL pages of products matching the query via cursor pagination */
