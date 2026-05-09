@@ -29,6 +29,8 @@ import type { ConfigurationState } from "@/types/configurator";
 import { SimilarProducts } from "@/components/SimilarProducts";
 import { ProductProperties } from "@/components/ProductProperties";
 import { ProductDownloads } from "@/components/ProductDownloads";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { trackProductView } from "@/hooks/useRecentlyViewed";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
@@ -453,6 +455,7 @@ const ProductDetail = () => {
   useEffect(() => {
     if (!product) return;
     trackViewItem(product);
+    if (handle) trackProductView(handle);
   }, [product?.node?.id]);
 
   if (isLoading) {
