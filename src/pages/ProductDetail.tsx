@@ -28,6 +28,7 @@ import type { EngravingResult } from "@/components/EngravingDialog";
 import type { ConfigurationState } from "@/types/configurator";
 import { SimilarProducts } from "@/components/SimilarProducts";
 import { ProductProperties } from "@/components/ProductProperties";
+import { ProductDownloads } from "@/components/ProductDownloads";
 
 const STORAGE_KEY = (id: string) => `cfg_${id}`;
 
