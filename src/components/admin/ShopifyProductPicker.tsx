@@ -7,15 +7,51 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, X, Plus, GripVertical, Loader2 } from 'lucide-react';
 
+/**
+ * Build a Shopify Storefront search query from free-text input.
+ * Splits on whitespace and AND-combines all terms with wildcards,
+ * so "uvex helm" matches products containing both "uvex" AND "helm"
+ * across title, vendor, product_type, tags, sku.
+ * Quoted phrases ("...") are preserved as exact phrases.
+ */
+function buildShopifyQuery(input: string): string | undefined {
+  const trimmed = input.trim();
+  if (!trimmed) return undefined;
+
+  // Extract quoted phrases first
+  const tokens: string[] = [];
+  const phraseRegex = /"([^"]+)"/g;
+  let rest = trimmed;
+  let match: RegExpExecArray | null;
+  while ((match = phraseRegex.exec(trimmed)) !== null) {
+    tokens.push(`"${match[1]}"`);
+  }
+  rest = trimmed.replace(phraseRegex, ' ');
+
+  // Remaining bare words
+  for (const w of rest.split(/\s+/)) {
+    const word = w.trim();
+    if (!word) continue;
+    if (/^(AND|OR|NOT)$/i.test(word)) continue; // ignore explicit operators
+    // wildcard suffix for prefix-match across fields
+    tokens.push(`${word}*`);
+  }
+
+  if (tokens.length === 0) return undefined;
+  return tokens.join(' AND ');
+}
+
 /** Fetch ALL pages of products matching the query via cursor pagination */
 async function fetchAllProducts(query: string | undefined, language: string): Promise<ShopifyProduct[]> {
   const all: ShopifyProduct[] = [];
   let cursor: string | null = null;
   let hasNext = true;
 
+  const shopifyQuery = query ? buildShopifyQuery(query) : undefined;
+
   while (hasNext) {
     const variables: Record<string, unknown> = { first: 250, language };
-    if (query) variables.query = query;
+    if (shopifyQuery) variables.query = shopifyQuery;
     if (cursor) variables.after = cursor;
 
     const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
