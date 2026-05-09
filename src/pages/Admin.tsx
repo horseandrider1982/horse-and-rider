@@ -21,6 +21,7 @@ import SearchSettings from "@/pages/admin/SearchSettings";
 import SearchLogs from "@/pages/admin/SearchLogs";
 import HomepageProducts from "@/pages/admin/HomepageProducts";
 import PropertyConfigManager from "@/pages/admin/PropertyConfigManager";
+import DownloadsManager from "@/pages/admin/DownloadsManager";
 import type { NewsArticle } from "@/hooks/useNewsArticles";
 import type { CmsPage } from "@/hooks/useCmsPages";
 
