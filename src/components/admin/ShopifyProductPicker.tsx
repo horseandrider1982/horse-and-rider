@@ -7,36 +7,29 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, X, Plus, GripVertical, Loader2 } from 'lucide-react';
 
-/**
- * Build a Shopify Storefront search query from free-text input.
- * Splits on whitespace and AND-combines all terms with wildcards,
- * so "uvex helm" matches products containing both "uvex" AND "helm"
- * across title, vendor, product_type, tags, sku.
- * Quoted phrases ("...") are preserved as exact phrases.
- */
-function buildShopifyQuery(input: string): string | undefined {
-  const trimmed = input.trim();
-  if (!trimmed) return undefined;
+function parseSearchTerms(input: string): string[] {
+  return input
+    .toLowerCase()
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length > 0 && !/^(and|or|not|und|oder)$/i.test(term));
+}
 
-  const tokens: string[] = [];
-  const phraseRegex = /"([^"]+)"/g;
-  let match: RegExpExecArray | null;
-  while ((match = phraseRegex.exec(trimmed)) !== null) {
-    tokens.push(`"${match[1]}"`);
-  }
-  const rest = trimmed.replace(phraseRegex, ' ');
+function productMatchesTerms(product: ShopifyProduct, terms: string[]): boolean {
+  if (terms.length === 0) return true;
 
-  for (const w of rest.split(/\s+/)) {
-    const word = w.trim();
-    if (!word) continue;
-    if (/^(AND|OR|NOT)$/i.test(word)) continue;
-    // Shopify default search treats space as AND across title/vendor/type/tags/sku.
-    // Quote each term so it isn't parsed as a field qualifier and to keep special chars safe.
-    tokens.push(`"${word.replace(/"/g, '')}"`);
-  }
+  const searchable = [
+    product.node.title,
+    product.node.vendor,
+    product.node.productType,
+    ...(product.node.tags ?? []),
+    ...((product.node.variants?.edges ?? []).flatMap((variant) => [variant.node.title, variant.node.sku, variant.node.barcode])),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
 
-  if (tokens.length === 0) return undefined;
-  return tokens.join(' ');
+  return terms.every((term) => searchable.includes(term));
 }
 
 /** Fetch ALL pages of products matching the query via cursor pagination */
@@ -45,11 +38,11 @@ async function fetchAllProducts(query: string | undefined, language: string): Pr
   let cursor: string | null = null;
   let hasNext = true;
 
-  const shopifyQuery = query ? buildShopifyQuery(query) : undefined;
+  const terms = parseSearchTerms(query ?? '');
 
   while (hasNext) {
     const variables: Record<string, unknown> = { first: 250, language };
-    if (shopifyQuery) variables.query = shopifyQuery;
+    if (query?.trim()) variables.query = query.trim();
     if (cursor) variables.after = cursor;
 
     const data = await storefrontApiRequest(STOREFRONT_PAGINATED_QUERY, variables);
@@ -60,7 +53,7 @@ async function fetchAllProducts(query: string | undefined, language: string): Pr
     hasNext = products.pageInfo.hasNextPage;
     cursor = products.pageInfo.endCursor;
   }
-  return all;
+  return all.filter((product) => productMatchesTerms(product, terms));
 }
 
 interface ShopifyProductPickerProps {
