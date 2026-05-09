@@ -77,6 +77,8 @@ export const STOREFRONT_QUERY = `
           description
           handle
           vendor
+          productType
+          tags
           priceRange {
             minVariantPrice {
               amount
@@ -135,6 +137,8 @@ export const STOREFRONT_PAGINATED_QUERY = `
           description
           handle
           vendor
+          productType
+          tags
           priceRange {
             minVariantPrice {
               amount
