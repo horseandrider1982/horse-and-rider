@@ -2,6 +2,8 @@ import { LocaleLink } from "./LocaleLink";
 import { useI18n } from "@/i18n";
 import type { ShopifyProduct } from "@/lib/shopify";
 import { trackSelectItem } from "@/lib/ga4";
+import { shopifyImageUrl, shopifyImageSrcSet } from "@/lib/shopifyImage";
+import { usePrefetchProduct } from "@/hooks/usePrefetchProduct";
 
 interface ListingProductCardProps {
   product: ShopifyProduct;
@@ -11,6 +13,7 @@ interface ListingProductCardProps {
 
 export function ListingProductCard({ product, listName, index }: ListingProductCardProps) {
   const { locale } = useI18n();
+  const prefetch = usePrefetchProduct();
   const image = product.node.images.edges[0]?.node;
   const price = product.node.priceRange.minVariantPrice;
 
@@ -18,39 +21,18 @@ export function ListingProductCard({ product, listName, index }: ListingProductC
     if (listName) trackSelectItem(product, listName, index);
   };
 
-  // Shopify CDN image transform: deliver right-sized WebP to cut payload
-  const optimizedSrc = image
-    ? (() => {
-        try {
-          const u = new URL(image.url);
-          u.searchParams.set("width", "400");
-          return u.toString();
-        } catch {
-          return image.url;
-        }
-      })()
-    : "";
-  const srcSet = image
-    ? (() => {
-        try {
-          const make = (w: number) => {
-            const u = new URL(image.url);
-            u.searchParams.set("width", String(w));
-            return `${u.toString()} ${w}w`;
-          };
-          return [make(300), make(400), make(600), make(800)].join(", ");
-        } catch {
-          return undefined;
-        }
-      })()
-    : undefined;
+  const optimizedSrc = image ? shopifyImageUrl(image.url, 400) : "";
+  const srcSet = image ? shopifyImageSrcSet(image.url, [200, 300, 400, 600, 800]) : undefined;
 
   const isAboveFold = typeof index === "number" && index < 8;
+  const handlePrefetch = () => prefetch(product.node.handle);
 
   return (
     <LocaleLink
       to={`/product/${product.node.handle}`}
       onClick={handleClick}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
       className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow block"
     >
       <div className="aspect-square bg-white overflow-hidden">
