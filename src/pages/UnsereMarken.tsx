@@ -73,7 +73,7 @@ export default function UnsereMarken() {
               const isActive = activeLetters.has(letter);
               return (
                 <button key={letter} onClick={() => isActive && scrollToLetter(letter)} disabled={!isActive}
-                  className={`w-8 h-8 text-sm font-semibold rounded transition-colors ${isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" : "bg-muted text-muted-foreground/40 cursor-default"}`}>
+                  className={`w-8 h-8 text-sm font-semibold rounded transition-colors ${isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" : "bg-muted text-muted-foreground cursor-default"}`}>
                   {letter}
                 </button>
               );
@@ -104,7 +104,7 @@ export default function UnsereMarken() {
                       {brand.logoUrl ? (
                         <img src={brand.logoUrl} alt={`${brand.name} Logo`} className="h-14 w-auto object-contain brightness-0" loading="lazy" />
                       ) : (
-                        <div className="h-14 flex items-center justify-center"><span className="text-2xl font-heading font-bold text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{brand.name.charAt(0)}</span></div>
+                        <div className="h-14 flex items-center justify-center"><span className="text-2xl font-heading font-bold text-muted-foreground group-hover:text-primary/60 transition-colors">{brand.name.charAt(0)}</span></div>
                       )}
                       <span className="text-sm font-medium text-center group-hover:text-primary transition-colors">{brand.name}</span>
                     </LocaleLink>
