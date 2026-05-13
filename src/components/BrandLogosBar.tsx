@@ -24,7 +24,7 @@ export const BrandLogosBar = () => {
           {t("brands_bar.title")}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-          {featured.slice(0, 8).map((brand) => (
+          {featured.slice(0, 8).map((brand, idx) => (
             <LocaleLink
               key={brand.slug}
               to={`/unsere-marken/${brand.slug}`}
@@ -33,7 +33,8 @@ export const BrandLogosBar = () => {
               <img
                 src={resolveBrandLogo(brand.slug, brand.logoUrl)!}
                 alt={brand.name}
-                loading="lazy"
+                loading={idx < 4 ? "eager" : "lazy"}
+                fetchPriority={idx < 4 ? "high" : "auto"}
                 decoding="async"
                 width={120}
                 height={40}

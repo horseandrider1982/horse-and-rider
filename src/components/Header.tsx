@@ -14,7 +14,7 @@ import { User, Search, LogIn, LogOut, UserCircle, CreditCard, PawPrint, Shopping
 import { SearchOverlay } from "@/components/SmartSearch";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
-import logo from "@/assets/logo-2x.webp";
+const logo = "/logo.webp";
 
 export const Header = () => {
   const { user, isAdmin } = useAuth();
@@ -41,7 +41,7 @@ export const Header = () => {
           <div className="flex items-center gap-2">
             <MobileMenu />
             <LocaleLink to="/" className="flex-shrink-0">
-              <img src={logo} alt="Horse & Rider Luhmühlen" width={146} height={40} className="h-9 md:h-11 w-auto" style={{ filter: "brightness(0) sepia(1) hue-rotate(90deg) saturate(1) brightness(0.3)" }} />
+              <img src={logo} alt="Horse & Rider Luhmühlen" width={146} height={40} loading="eager" fetchPriority="high" decoding="sync" className="h-9 md:h-11 w-auto" style={{ filter: "brightness(0) sepia(1) hue-rotate(90deg) saturate(1) brightness(0.3)" }} />
             </LocaleLink>
           </div>
 
