@@ -1,0 +1,31 @@
+# Horse & Rider Luhmühlen
+
+> Reitsport Online Shop seit 1982. Über 20.000 Produkte namhafter Marken für Reiter und Pferd, mit Fachberatung und Sattelservice aus Luhmühlen.
+
+Horse & Rider Luhmühlen ist ein deutscher Reitsportfachhändler mit Spezialisierung auf Vielseitigkeit, Jagdreiten und Training. Das Sortiment umfasst Sättel, Trensen, Reitbekleidung, Pferdedecken, Pflegeprodukte sowie Sicherheitsausrüstung führender Marken.
+
+## Pages
+
+- [Startseite](/de): Übersicht, Empfehlungen und Aktionen
+- [Unsere Marken](/de/unsere-marken): A–Z Markenverzeichnis mit Detailseiten
+- [News](/de/news): Aktuelles, Produkttests und Wissen rund um den Reitsport
+- [Kontakt](/de/kontakt): Kontaktformular, Telefon und Adresse
+- [FAQ](/de/faq): Häufig gestellte Fragen
+- [Versand](/de/versand): Versandkosten, Lieferzeiten und Länder
+
+## Brands
+
+- [Pikeur](/de/unsere-marken/pikeur)
+- [Eskadron](/de/unsere-marken/eskadron)
+- [Kentucky Horsewear](/de/unsere-marken/kentucky-horsewear)
+- [LeMieux](/de/unsere-marken/lemieux)
+- [Schockemöhle Sports](/de/unsere-marken/schockemoehle-sports)
+- [Uvex](/de/unsere-marken/uvex)
+- [Ariat](/de/unsere-marken/ariat)
+
+## Optional
+
+- [Impressum](/de/impressum)
+- [Datenschutz](/de/datenschutz)
+- [AGB](/de/agb)
+- [Widerrufsrecht](/de/widerrufsrecht)
