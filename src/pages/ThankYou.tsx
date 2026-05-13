@@ -31,9 +31,12 @@ const ThankYou = () => {
 
   const { customer } = useShopifyCustomer();
 
+  const isEnglish = typeof window !== "undefined" && window.location.pathname.includes("/thank-you");
   usePageMeta({
-    title: "Vielen Dank für Ihre Bestellung",
-    description: "Ihre Bestellung bei Horse & Rider Luhmühlen wurde erfolgreich aufgegeben.",
+    title: isEnglish ? "Thank you for your order" : "Vielen Dank für Ihre Bestellung",
+    description: isEnglish
+      ? "Your order at Horse & Rider Luhmühlen has been placed successfully."
+      : "Ihre Bestellung bei Horse & Rider Luhmühlen wurde erfolgreich aufgegeben.",
     noIndex: true,
   });
 
