@@ -22,7 +22,7 @@ const Index = () => {
   const { locale } = useI18n();
   usePageMeta({
     title: "Reitsport Online Shop",
-    description: "Eventing Equipment & Reitsportausrüstung online kaufen ✓ Hochwertige Marken für Vielseitigkeit, Jagdreiten & Training ✓ Schneller Versand & Top-Service bei Horse & Rider Luhmühlen",
+    description: "Eventing Equipment & Reitsportausrüstung online kaufen ✓ Top-Marken, Fachberatung & schneller Versand bei Horse & Rider Luhmühlen",
     canonicalPath: `/${locale}`,
   });
 

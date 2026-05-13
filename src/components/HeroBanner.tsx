@@ -28,7 +28,7 @@ export const HeroBanner = () => {
               {t("hero.title")}{" "}
               <span className="text-primary-foreground/80">{t("hero.title_highlight")}</span>
             </h1>
-            <p className="text-primary-foreground/75 text-sm sm:text-lg max-w-xl mx-auto mb-4 sm:mb-8 hidden sm:block">
+            <p className="text-primary-foreground/90 text-sm sm:text-lg max-w-xl mx-auto mb-4 sm:mb-8 hidden sm:block">
               {t("hero.subtitle")}
             </p>
             <button
